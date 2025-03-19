@@ -37,7 +37,7 @@ const ProgressBarBackground = styled.div`
 
 const ProgressBarFill = styled.div`
   height: 100%;
-  background: #ffcc00;
+  background: #ffae00;
   width: ${({ fillPercent }) => fillPercent}%;
   transition: width 0.3s ease;
 `;

@@ -8,22 +8,18 @@ import CharacterCard from '../components/CharacterCard';
 const ConfirmInfoScreen = () => {
   const userInfo = useRecoilValue(userInfoState);
   const { name, age, gender, job, trait } = userInfo;
+  const [questionIndex, setQuestionIndex] = useState(0);
 
   // "녹음 중" 상태
   const [isRecording, setIsRecording] = useState(false);
   // STT 결과(추가 수정사항) 저장
   const [transcript, setTranscript] = useState('');
 
-  // "눌러서 말하기" 클릭 -> 녹음 모드
-  const handleMicClick = () => {
-    setIsRecording(true);
-    // 실제 STT 시작 로직 or just UI
-  };
-
   // "기록 완료" -> 녹음 모드 해제, 정보 카드 표시
   const handleComplete = () => {
     setIsRecording(false);
     setTranscript('');
+    setQuestionIndex((prev) => prev + 1);
   };
 
   return (
@@ -41,7 +37,7 @@ const ConfirmInfoScreen = () => {
         <>
           {/* 마이크 버튼 */}
           <div style={{ marginBottom: '20px' }}>
-            <MicSpeakButton label="눌러서 말하기" onClick={handleMicClick} />
+            <MicSpeakButton key={questionIndex} onClick={handleComplete} />
           </div>
 
           {/* 캐릭터 정보 카드 */}
@@ -52,49 +48,6 @@ const ConfirmInfoScreen = () => {
             job={job || '개백수'}
             trait={trait || '아침에일어나서 저녁에잠'}
           />
-        </>
-      )}
-
-      {/* 녹음 중 => 노란 안내문 + STT 박스 + "기록 완료" 버튼 */}
-      {isRecording && (
-        <>
-          <div style={{ color: '#ffcc00', marginBottom: '10px' }}>
-            주인공에 대해 입력 중...
-          </div>
-
-          {/* STT 박스 */}
-          <div
-            style={{
-              minHeight: '120px',
-              border: '2px solid #ccc',
-              borderRadius: '8px',
-              backgroundColor: 'rgba(255,255,255,0.8)',
-              padding: '10px',
-              textAlign: 'left',
-              fontSize: '16px',
-              marginBottom: '20px',
-            }}
-          >
-            {transcript || '말하면 여기에 표시됩니다.'}
-          </div>
-
-          {/* 기록 완료 버튼 */}
-          <button
-            onClick={handleComplete}
-            style={{
-              padding: '12px 20px',
-              borderRadius: '30px',
-              backgroundColor: '#fff',
-              color: '#000',
-              fontWeight: 'bold',
-              fontSize: '16px',
-              cursor: 'pointer',
-              border: '2px solid #fff',
-              width: '100%',
-            }}
-          >
-            기록 완료
-          </button>
         </>
       )}
     </BaseScreenLayout>

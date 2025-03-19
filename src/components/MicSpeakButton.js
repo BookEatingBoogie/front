@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
+import Lottie from 'react-lottie-player';
 import { IoMic } from 'react-icons/io5';
+import micAnimationData from '../assets/micAnimation.json';
 
 const Container = styled.div`
   display: flex;
@@ -9,14 +11,12 @@ const Container = styled.div`
   cursor: pointer;
 `;
 
-/* 위쪽 텍스트 (예: "눌러서 말하기") */
 const Label = styled.div`
-  color: #fff;     /* 글자색 (배경이 어두우면 흰색이 가독성 좋음) */
+  color: #fff;
   font-size: 14px;
   margin-bottom: 8px;
 `;
 
-/* 원형 배경 (흰색) 안에 마이크 아이콘 */
 const Circle = styled.div`
   width: 60px;
   height: 60px;
@@ -27,13 +27,51 @@ const Circle = styled.div`
   justify-content: center;
 `;
 
-const MicSpeakButton = ({ label = '눌러서 말하기', onClick }) => {
+const LottieWrapper = styled.div`
+  width: 60px;
+  height: 60px;
+  transform: scale(2.5);
+`;
+
+const MicSpeakButton = ({ label = '눌러서 말하기', onComplete }) => {
+  // clickCount: 0 = 초기 흰색 버튼, 1 = 녹음 중(노란 애니메이션)
+  const [clickCount, setClickCount] = useState(0);
+
+  const handleClick = () => {
+    if (clickCount === 0) {
+      // 첫 클릭: 노란 애니메이션 표시
+      setClickCount(1);
+    } else if (clickCount === 1) {
+      // 두 번째 클릭: onComplete 호출 (다음 질문) 후 local state 초기화
+      if (onComplete) {
+        onComplete();
+      }
+      setClickCount(0);
+    }
+  };
+
   return (
-    <Container onClick={onClick}>
-      <Label>{label}</Label>
-      <Circle>
-        <IoMic size={24} color="#000" />
-      </Circle>
+    <Container onClick={handleClick}>
+      {clickCount === 0 ? (
+        <>
+          <Label>{label}</Label>
+          <Circle>
+            <IoMic size={24} color="#000" />
+          </Circle>
+        </>
+      ) : (
+        <>
+          <Label>녹음 중...</Label>
+          <LottieWrapper>
+            <Lottie
+              loop
+              animationData={micAnimationData}
+              play
+              style={{ width: '100%', height: '100%' }}
+            />
+          </LottieWrapper>
+        </>
+      )}
     </Container>
   );
 };
