@@ -72,7 +72,7 @@ const navItems = [
   },
   {
     label: '내 책장',
-    path: '/storage',
+    path: '/book-storage',
     activeIcon: <IoFolderOpen size={20} />,
     inactiveIcon: <IoFolderOpenOutline size={20} />,
   },

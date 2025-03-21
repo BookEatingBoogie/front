@@ -30,8 +30,8 @@ const Circle = styled.div`
 const LottieWrapper = styled.div`
   width: 60px;
   height: 60px;
-  transform: scale(2.5);
-`;
+  transform: scale(2.8);
+`; //Circle과 동일 픽셀일 때 scale 2.8배면 딱 맞음
 
 const MicSpeakButton = ({ label = '눌러서 말하기', onComplete }) => {
   // clickCount: 0 = 초기 흰색 버튼, 1 = 녹음 중(노란 애니메이션)

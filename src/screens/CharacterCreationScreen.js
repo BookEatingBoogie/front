@@ -45,13 +45,15 @@ const CharacterCreationScreen = () => {
 
   return (
     <BaseScreenLayout
-      progressText="2/6"
+      progressText='6/6'
+      progressCurrent={6}
+      progressTotal={6}
       title={`${characterName}은 어떻게 생겼나요?`}
       subTitle={"인물의 사진이 있다면 사진을 업로드 해주세요.\n사진이 없다면 인물의 생김새를 말해주세요."}
       imageSrc={null}
     >
       <div style={{ marginBottom: '20px' }}>
-        <MicSpeakButton label="눌러서 말하기" onClick={handleMicClick} />
+        <MicSpeakButton onComplete={handleMicClick} />
       </div>
 
       <GallerySelectButton onClick={handleSelectImage} />

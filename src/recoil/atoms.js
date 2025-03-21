@@ -6,22 +6,6 @@ export const currentStepState = atom({
   default: 0, // 0번 화면부터 시작
 });
 
-// 예시로, 사용자 정보(이름/선택사항 등)를 저장하는 atom
-/*export const userInfoState = atom({
-  key: 'userInfoState',
-  default: {
-    name: '',
-    age: '',
-    gender: '',
-    job: '',
-    trait: '',
-    avatar: '',
-    characterAnswers: [],
-    storyAnswers: [],
-  },
-});
-*/
-
 export const characterInfoState = atom({
   key: 'characterInfo',
   default: [{
@@ -47,12 +31,12 @@ export const characterInfoState = atom({
 ]
 });
 
-export const stoyrInfoState = atom({
+export const storyInfoState = atom({
   key:'storyInfo',
   default:{
-    id:'', //백에서 주는 스토리 번호
+    id:'0', //백에서 주는 스토리 번호
     conversation:'', //대화내용을 가리기키는 번호
-    title:'', // 동화 제목
+    title:'이야기 제목', // 동화 제목
     date:'',  //생성일
     favorite: '', //즐겨찾기 여부
     summary:'', //요약내용

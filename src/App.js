@@ -7,6 +7,8 @@ import QuestionScreen from './screens/QuestionScreen';
 import CharacterSelectScreen from './screens/CharacterSelectScreen';
 import ResultScreen from './screens/ResultScreen';
 import ConfirmInfoScreen from './screens/ConfirmInfoScreen';
+import ConfirmStoryScreen from './screens/ConfirmStoryScreen';
+import LoadingScreen from './screens/LoadingScreen';
 
 // Recoil 단계 분기 스크린
 import StepBasedScreens from './StepBasedScreens';
@@ -27,7 +29,7 @@ function App() {
       <Routes>
         <Route path="/" element={<StepBasedScreens />} />
         <Route path="/create-character" element={<CharacterCreationScreen />} />
-        <Route path="/bookshelve" element={<StorageScreen />} />
+        <Route path="/book-storage" element={<StorageScreen />} />
         <Route path="/settings" element={<SettingsScreen />} />
         <Route path="/question/character" element={<QuestionScreen questionType="character" />} />
         <Route path="/question/story" element={<QuestionScreen questionType="story" />} />
@@ -35,6 +37,8 @@ function App() {
         <Route path='/character-select' element={<CharacterSelectScreen />} />
         <Route path='/result' element={<ResultScreen />} />
         <Route path='/confirm-info' element={<ConfirmInfoScreen />} />
+        <Route path="/confirm-story" element={<ConfirmStoryScreen />} />
+        <Route path="/loading" element={<LoadingScreen />} />
         {/*<Route path="/favorites" element={<FavoritesScreen />} />*/}
         {/*<Route path="/character-storage" element={<CharacterSelectScreen />} /> 애네둘 위에 임포트도 넣어야함함*/}
       </Routes>

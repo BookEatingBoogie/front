@@ -38,18 +38,12 @@ const ConfirmCharacterScreen = () => {
 
       <RoundedButton
         onClick={handleMakeStory}
-        bgColor="#fff"
-        fontColor="black"
-        borderColor="#fff"
       >
         이야기를 만들래요!
       </RoundedButton>
 
       <RoundedButton
         onClick={handleChangeCharacter}
-        bgColor="#fff"
-        fontColor="black"
-        borderColor="#fff"
       >
         다른 인물로 바꿀래요.
       </RoundedButton>

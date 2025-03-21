@@ -54,8 +54,13 @@ const QuestionScreen = ({ questionType = 'character' }) => {
     if (questionIndex < questions.length - 1) {
       setQuestionIndex(questionIndex + 1);
     } else {
-      // 모든 질문 완료 -> 이동
-      navigate('/confirm-info');
+      if (questionType === 'character') {
+        // 캐릭터 질문 완료 -> /confirm-info
+        navigate('/confirm-info');
+      } else {
+        // 스토리 질문 완료 -> /confirm-story
+        navigate('/confirm-story');
+      }
     }  
   };
 
