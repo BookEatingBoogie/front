@@ -24,7 +24,9 @@ const ConfirmInfoScreen = () => {
 
   return (
     <BaseScreenLayout
-      progressText="1/6"
+      progressText='6/6'
+      progressCurrent={6}
+      progressTotal={6}
       title="정말 멋진 인물이네요!"
       subTitle="당신의 설명을 우리가 제대로 이해 했는지 확인해 주세요.
                 이대로 진행한다면 아래 캐릭터 카드를 클릭해 주시고.

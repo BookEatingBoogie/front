@@ -19,12 +19,12 @@ const ConfirmCharacterScreen = () => {
 
   return (
     <BaseScreenLayout
-      progressText="1/6"
+      progressText='6/6'
+      progressCurrent={6}
+      progressTotal={6}
       title={`${characterName}은 이렇게 생겼군요!`}
       subTitle="이 인물로 이야기를 만들어볼까요?"
     >
-      <div style={{ color: '#fff', marginBottom: '20px' }}>2/6</div>
-
       <img
         src={faceImg}
         alt="인물"

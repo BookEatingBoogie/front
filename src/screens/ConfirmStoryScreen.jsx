@@ -31,7 +31,7 @@ const ConfirmStoryScreen = () => {
       {/* 이야기 요약 박스 (예시) */}
       <div
         style={{
-          backgroundColor: '#fff',
+          backgroundColor: '#fbf9f4',
           color: '#000',
           borderRadius: '8px',
           padding: '20px',
