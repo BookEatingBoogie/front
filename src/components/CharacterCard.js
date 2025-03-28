@@ -31,7 +31,7 @@ const InfoLine = styled.p`
   font-size: 14px;
 `;
 
-function CharacterCard({ name, age, gender, job, trait }) {
+function CharacterCard({ name, age, gender, job, speciality }) {
   const navigate = useNavigate();
 
   // 카드 전체를 클릭하면 CharacterCreationScreen으로 이동
@@ -46,7 +46,7 @@ function CharacterCard({ name, age, gender, job, trait }) {
       <InfoLine>나이: {age}</InfoLine>
       <InfoLine>성별: {gender}</InfoLine>
       <InfoLine>직업: {job}</InfoLine>
-      <InfoLine>성격: {trait}</InfoLine>
+      <InfoLine>성격: {speciality}</InfoLine>
     </CardContainer>
   );
 }

@@ -1,4 +1,6 @@
 import React from 'react';
+import { useRecoilValue } from 'recoil';
+import { characterInfoState } from '../recoil/atoms';
 import { useNavigate } from 'react-router-dom';
 import BaseScreenLayout from '../components/BaseScreenLayout';
 import RoundedButton from '../components/RoundedButton';
@@ -6,6 +8,11 @@ import faceImg from '../assets/images/silhouette.png';
 
 const ConfirmCharacterScreen = () => {
   const navigate = useNavigate();
+  // Recoil atom에서 캐릭터 정보를 가져옵니다. (배열로 관리)
+  const characterInfo = useRecoilValue(characterInfoState);
+  const character = characterInfo[0] || {};
+  const { name, charImg } = character;
+  const characterName = name || '인물이름';
 
   const handleMakeStory = () => {
     navigate('/question/story');
@@ -15,18 +22,17 @@ const ConfirmCharacterScreen = () => {
     navigate('/character-select');
   };
 
-  const characterName = "인물이름";
-
   return (
     <BaseScreenLayout
-      progressText='6/6'
+      progressText="6/6"
       progressCurrent={6}
       progressTotal={6}
-      title={`${characterName}은 이렇게 생겼군요!`}
+      title={`${characterName}가 이렇게 생겼군요!`}
       subTitle="이 인물로 이야기를 만들어볼까요?"
+      imageSrc={null}
     >
       <img
-        src={faceImg}
+        src={charImg || faceImg}
         alt="인물"
         style={{
           width: '150px',

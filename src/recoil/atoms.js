@@ -15,8 +15,9 @@ export const characterInfoState = atom({
     gender: '몰라', //성별
     job: '다람쥐', //직업
     speciality: ' 돈을 잘 벌어', //특징
-    note: '사람이로 변했다.', //기타사항
-    img:'', //아이 사진 
+    note: '사람이로 변했다.', //기타사항, 글로 생긴거 설명할때 여기로
+    userImg:'', //아이 사진 보내는거
+    charImg: '', // 캐릭터 이미지 받는거
   },
   {
     id:'1', //백에서 주는 저장명
@@ -26,7 +27,8 @@ export const characterInfoState = atom({
     job: '마법사', //직업
     speciality: '마법을 잘 써', //특징
     note: '검은 고양이 네로와 모험을 떠났어', //기타사항
-    img:'', //아이 사진 
+    userImg:'', //아이 사진 보내는거
+    charImg: '', // 캐릭터 이미지 받는거
   },
 ]
 });
@@ -58,7 +60,7 @@ export const userInfoState = atom({
 export const conversationState = atom({
   key:'conversation',
   default:[{
-    conversationId:'',
+    conversationId:'',// 메세지 한줄한줄이 들어있는 대화 한 묶음
     userId:'',
     characterId:'',
     qType:'', //질문 종류 
