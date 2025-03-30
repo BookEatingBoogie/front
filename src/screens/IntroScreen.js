@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { useRecoilState } from 'recoil';
-import { currentStepState } from '../recoil/atoms';
+import { useNavigate } from 'react-router-dom';
 
 // 도깨비 전/후
 import mainCharacter from '../assets/images/mainCharactor.png';
@@ -68,12 +67,12 @@ const HammerHotspot = styled.div`
 `;
 
 const IntroScreen = () => {
-  const [currentStep, setCurrentStep] = useRecoilState(currentStepState);
+  const navigate = useNavigate();
   const [isHammered, setIsHammered] = useState(false);
 
   const handleHammerClick = () => {
     setIsHammered(true);
-    setCurrentStep(currentStep + 1);
+    navigate('character-select');
   };
 
   return (

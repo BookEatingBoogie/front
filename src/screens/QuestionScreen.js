@@ -74,7 +74,7 @@ const QuestionScreen = ({ questionType = 'character' }) => {
     });
 
     // 3. 상태 초기화
-    setTranscript('');
+    setTranscript('대화내용'); //message 초기화를 위해 진짜로 쓸때는 빈칸추천천.
     setIsRecording(false);
 
     // 4. 다음 질문으로 이동 (모든 질문이 끝나면 해당 confirm 화면으로 이동)

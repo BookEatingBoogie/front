@@ -1,11 +1,5 @@
 import { atom } from 'recoil';
 
-// 화면 전환용
-export const currentStepState = atom({
-  key: 'currentStepState',
-  default: 0, // 0번 화면부터 시작
-});
-
 export const characterInfoState = atom({
   key: 'characterInfo',
   default: [{
