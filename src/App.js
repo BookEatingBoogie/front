@@ -1,5 +1,6 @@
 import React from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
+import { RecoilRoot } from 'recoil';
 import GlobalStyle from './styles/GlobalStyle';
 import CharacterCreationScreen from './screens/CharacterCreationScreen';
 import ConfirmCharacterScreen from './screens/ConfirmCharacterScreen';
@@ -12,6 +13,8 @@ import LoadingScreen from './screens/LoadingScreen';
 import IntroScreen from './screens/IntroScreen';
 import StorageScreen from './screens/StorageScreen';
 import SettingsScreen from './screens/SettingsScreen';
+import LoginScreen from './screens/LoginScreen';
+import SignupScreen from './screens/SignupScreen';
 
 // 하단 고정 바
 import BottomNav from './components/BottomNav';
@@ -29,11 +32,13 @@ function App() {
     location.pathname === '/character-storage';
   
   return (
-    <>
+    <RecoilRoot>
       <GlobalStyle />
 
       {/* 라우트 설정 */}
       <Routes>
+        <Route path="/login" element={<LoginScreen />} />
+        <Route path="/signup" element={<SignupScreen />} />
         <Route path="/" element={<IntroScreen />} />
         <Route path="/create-character" element={<CharacterCreationScreen />} />
         <Route path="/book-storage" element={<StorageScreen />} />
@@ -52,7 +57,7 @@ function App() {
 
       {/* 모든 페이지에서 하단 고정 바 표시 */}
       {showNav && <BottomNav />}
-    </>
+    </RecoilRoot>
   );
 }
 
