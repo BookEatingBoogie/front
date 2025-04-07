@@ -94,6 +94,9 @@ align-self: stretch;
 border: 1px solid rgba(253, 252, 250, 0.50);
 background: rgba(253, 252, 250, 0.20);
 color: white;
+&::placeholder {
+    color: #aaa; /* 원하는 힌트글씨 색상으로 변경 */
+  }
 `;
 
 const LoginButton = styled.button`

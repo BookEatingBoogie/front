@@ -14,6 +14,8 @@ import {
   IoPerson,
   IoStarOutline,
   IoStar,
+  IoEllipsisHorizontalSharp,
+  IoEllipsisHorizontalOutline,
 } from 'react-icons/io5';
 
 /* 하단 네비게이션 바 스타일 */
@@ -89,10 +91,10 @@ const navItems = [
     inactiveIcon: <IoStarOutline size={20} />,
   },
   {
-    label: '설정',
+    label: '더보기',
     path: '/settings',
-    activeIcon: <IoSettings size={20} />,
-    inactiveIcon: <IoSettingsOutline size={20} />,
+    activeIcon: <IoEllipsisHorizontalSharp size={20} />,
+    inactiveIcon: <IoEllipsisHorizontalOutline size={20} />,
   },
 ];
 

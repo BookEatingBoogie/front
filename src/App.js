@@ -4,7 +4,7 @@ import { RecoilRoot } from 'recoil';
 import GlobalStyle from './styles/GlobalStyle';
 import CharacterCreationScreen from './screens/CharacterCreationScreen';
 import ConfirmCharacterScreen from './screens/ConfirmCharacterScreen';
-import QuestionScreen from './screens/QuestionScreen';
+import CharacterQuestionScreen from './screens/CharacterQuestionScreen.jsx';
 import CharacterSelectScreen from './screens/CharacterSelectScreen';
 import ResultScreen from './screens/ResultScreen';
 import ConfirmInfoScreen from './screens/ConfirmInfoScreen';
@@ -15,6 +15,7 @@ import StorageScreen from './screens/StorageScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import LoginScreen from './screens/LoginScreen';
 import SignupScreen from './screens/SignupScreen';
+import StoryQuestionScreen from './screens/StoryQuestionScreen.jsx';
 
 // 하단 고정 바
 import BottomNav from './components/BottomNav';
@@ -43,8 +44,8 @@ function App() {
         <Route path="/create-character" element={<CharacterCreationScreen />} />
         <Route path="/book-storage" element={<StorageScreen />} />
         <Route path="/settings" element={<SettingsScreen />} />
-        <Route path="/question/character" element={<QuestionScreen questionType="character" />} />
-        <Route path="/question/story" element={<QuestionScreen questionType="story" />} />
+        <Route path="/character-question" element={<CharacterQuestionScreen />} />
+        <Route path="/story-question" element={<StoryQuestionScreen />} />
         <Route path="/confirm" element={<ConfirmCharacterScreen />} />
         <Route path='/character-select' element={<CharacterSelectScreen />} />
         <Route path='/result' element={<ResultScreen />} />

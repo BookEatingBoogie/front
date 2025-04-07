@@ -15,7 +15,7 @@ const ConfirmCharacterScreen = () => {
   const characterName = name || '인물이름';
 
   const handleMakeStory = () => {
-    navigate('/question/story');
+    navigate('/story-question');
   };
 
   const handleChangeCharacter = () => {

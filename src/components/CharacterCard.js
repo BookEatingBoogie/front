@@ -45,8 +45,8 @@ function CharacterCard({ name, age, gender, job, speciality }) {
       <InfoLine>이름: {name}</InfoLine>
       <InfoLine>나이: {age}</InfoLine>
       <InfoLine>성별: {gender}</InfoLine>
-      <InfoLine>직업: {job}</InfoLine>
       <InfoLine>성격: {speciality}</InfoLine>
+      <InfoLine>직업: {job}</InfoLine>
     </CardContainer>
   );
 }
