@@ -172,6 +172,7 @@ export default function ReadingScreen() {
   const navigate = useNavigate();
   const stories = useRecoilValue(storyInfoState);
   const story = Array.isArray(stories) ? stories[0] : stories;
+
   const [currentPage, setCurrentPage] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [autoPlay, setAutoPlay] = useState(true);
@@ -179,42 +180,60 @@ export default function ReadingScreen() {
   const [showFinishPopup, setShowFinishPopup] = useState(false);
   const touchStartX = useRef(null);
   const autoStarted = useRef(false);
+  const audioRef = useRef(null);
+
   const totalPages = story?.img?.length || 0;
   const progress = ((currentPage + 1) / totalPages) * 100;
   const texts = story.text || Array(totalPages).fill(story.summary);
 
-  const speakText = (text) => {
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
+  const speakText = async (text) => {
+    try {
+      setIsSpeaking(true);
+      const res = await fetch("http://localhost:5001/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'ko-KR';
+      if (!res.ok) throw new Error("TTS 요청 실패");
 
-    utterance.onend = () => {
-      setIsSpeaking(false);
-      if (autoPlay && currentPage < totalPages - 1) {
-        setCurrentPage((prev) => prev + 1);
-      } else if (currentPage === totalPages - 1) {
-        setShowFinishPopup(true); // ✅ 끝났을 때 팝업
+      const blob = await res.blob();
+      const audioUrl = URL.createObjectURL(blob);
+
+      if (audioRef.current) {
+        audioRef.current.src = audioUrl;
+        audioRef.current.play();
       }
-    };
 
-    window.speechSynthesis.speak(utterance);
-    setIsSpeaking(true);
+      audioRef.current.onended = () => {
+        setIsSpeaking(false);
+        if (autoPlay && currentPage < totalPages - 1) {
+          setCurrentPage((prev) => prev + 1);
+        } else if (currentPage === totalPages - 1) {
+          setShowFinishPopup(true);
+        }
+      };
+    } catch (err) {
+      console.error("🛑 TTS 오류:", err);
+      setIsSpeaking(false);
+    }
   };
 
   const stopSpeaking = () => {
-    window.speechSynthesis.cancel();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
     setIsSpeaking(false);
   };
 
   const toggleTTS = () => {
     if (isSpeaking) {
-      window.speechSynthesis.pause();
+      audioRef.current?.pause();
       setIsSpeaking(false);
     } else {
-      if (window.speechSynthesis.paused) {
-        window.speechSynthesis.resume();
+      if (audioRef.current?.paused && audioRef.current?.currentTime > 0) {
+        audioRef.current.play();
         setIsSpeaking(true);
       } else {
         setAutoPlay(true);
@@ -250,10 +269,8 @@ export default function ReadingScreen() {
 
   return (
     <Container
-      onClick={() => setShowUI(prev => !prev)}
-      onTouchStart={(e) => {
-        touchStartX.current = e.changedTouches[0].screenX;
-      }}
+      onClick={() => setShowUI((prev) => !prev)}
+      onTouchStart={(e) => (touchStartX.current = e.changedTouches[0].screenX)}
       onTouchEnd={(e) => {
         const deltaX = e.changedTouches[0].screenX - touchStartX.current;
         if (deltaX > 50) handlePrev();
@@ -321,11 +338,13 @@ export default function ReadingScreen() {
             onNegativeClick={() => {
               setShowFinishPopup(false);
               stopSpeaking();
-              navigate(-1); // 또는 다른 경로
+              navigate(-1);
             }}
           />
         </div>
       )}
+
+      <audio ref={audioRef} hidden />
     </Container>
   );
 }
