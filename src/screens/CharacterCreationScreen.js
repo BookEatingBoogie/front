@@ -25,7 +25,7 @@ const CharacterCreationScreen = () => {
     }
   };
 
-  // 파일 선택 완료 -> 선택된 파일의 URL을 생성해서, 캐릭터 정보의 charImg 업데이트 후 confirm 화면으로 이동
+  // 파일 선택 완료 -> 선택된 파일의 URL을 생성해서, 캐릭터 정보의 img 업데이트 후 confirm 화면으로 이동
   const handleFileChange = (e) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
@@ -36,7 +36,7 @@ const CharacterCreationScreen = () => {
     // characterInfoState의 첫 번째 캐릭터 정보 업데이트 (함수형 업데이트 사용)
     setCharacterInfo(prev => {
       const updated = prev.length > 0
-        ? [{ ...prev[0], charImg: imageUrl }, ...prev.slice(1)]
+        ? [{ ...prev[0], img: imageUrl }, ...prev.slice(1)]
         : [{
             id: '0',
             name: characterName,
@@ -46,7 +46,7 @@ const CharacterCreationScreen = () => {
             speciality: '',
             note: '',
             userImg: imageUrl,
-            charImg: '',
+            img: '',
           }];
       console.log('업데이트된 characterInfo:', updated);
       return updated;

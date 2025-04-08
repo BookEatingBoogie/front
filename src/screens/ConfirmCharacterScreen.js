@@ -11,7 +11,7 @@ const ConfirmCharacterScreen = () => {
   // Recoil atom에서 캐릭터 정보를 가져옵니다. (배열로 관리)
   const characterInfo = useRecoilValue(characterInfoState);
   const character = characterInfo[0] || {};
-  const { name, charImg } = character;
+  const { name, img } = character;
   const characterName = name || '인물이름';
 
   const handleMakeStory = () => {
@@ -32,7 +32,7 @@ const ConfirmCharacterScreen = () => {
       imageSrc={null}
     >
       <img
-        src={charImg || faceImg}
+        src={img || faceImg}
         alt="인물"
         style={{
           width: '150px',
