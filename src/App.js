@@ -11,7 +11,6 @@ import ConfirmInfoScreen from './screens/ConfirmInfoScreen';
 import ConfirmStoryScreen from './screens/ConfirmStoryScreen';
 import LoadingScreen from './screens/LoadingScreen';
 import IntroScreen from './screens/IntroScreen';
-import StorageScreen from './screens/StorageScreen';
 import Bookshelf from './screens/Bookshelf';
 import Favorite from './screens/Favorite';
 import ReadingScreen from './screens/ReadingScreen';
