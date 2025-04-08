@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BaseScreenLayout from '../components/BaseScreenLayout';
 import styled from 'styled-components';
-import ChoiceButton from '../components/ChoiceButton'; // 선택 옵션 버튼 컴포넌트
+import ChoiceButton from '../components/ChoiceButton';
 
 // 스토리 질문과 각 질문에 대한 선택지 데이터 예시
 const storyQuestions = [
