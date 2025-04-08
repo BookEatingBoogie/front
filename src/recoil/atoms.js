@@ -1,55 +1,74 @@
 import { atom } from 'recoil';
+import testImg from '../assets/images/마법사 유원이.webp';
+import 서영이 from '../assets/images/서영이와 다람쥐.webp';
+import 유원이 from '../assets/images/마법사 유원이.webp';
+import 민지 from '../assets/images/민지와 눈내리는 마을.webp';
+
 
 export const characterInfoState = atom({
   key: 'characterInfo',
-  default: [{
-    id:'0', //백에서 주는 저장명
-    name: '서영이', //우리가 정해준 이름
-    age: '5', //나이
-    gender: '몰라', //성별
-    job: '다람쥐', //직업
-    speciality: ' 돈을 잘 벌어', //특징
-    note: '사람이로 변했다.', //기타사항, 글로 생긴거 설명할때 여기로
-    userImg:'', //아이 사진 보내는거
-    charImg: '', // 캐릭터 이미지 받는거
-  },
-  {
-    id:'1', //백에서 주는 저장명
-    name: '유원이', //우리가 정해준 이름
-    age: '7', //나이
-    gender: '여성', //성별
-    job: '마법사', //직업
-    speciality: '마법을 잘 써', //특징
-    note: '검은 고양이 네로와 모험을 떠났어', //기타사항
-    userImg:'', //아이 사진 보내는거
-    charImg: '', // 캐릭터 이미지 받는거
-  },
-]
+  default: [
+    {
+      id: '0',
+      name: '서영이',
+      age: '5',
+      gender: '몰라',
+      job: '다람쥐',
+      speciality: '돈을 잘 벌어',
+      note: '사람으로 변했다.',
+      img: 서영이,
+      userImg: '',
+    },
+    {
+      id: '1',
+      name: '유원이',
+      age: '7',
+      gender: '여성',
+      job: '마법사',
+      speciality: '마법을 잘 써',
+      note: '검은 고양이 네로와 모험을 떠났어',
+      img: 유원이,
+      userImg:'',
+    },
+    {
+      id: '2',
+      name: '민지',
+      age: '5',
+      gender: '여성',
+      job: '꼬마소녀',
+      speciality: '동물과 대화가 가능해',
+      note: '마음씨가 착해서 사람 뿐 아니라 동물에 대해서도 공감력이 좋다.',
+      img: 민지,
+      userImg:'',
+    },
+  ],
 });
 
 export const storyInfoState = atom({
-  key:'storyInfo',
-  default:{
-    id:'0', //백에서 주는 스토리 번호
-    conversation:'', //대화내용을 가리기키는 번호
-    title:'이야기 제목', // 동화 제목
-    date:'',  //생성일
-    favorite: '', //즐겨찾기 여부
-    summary:'', //요약내용
-    img: [], //삽화배열 ** 변경 가능**
-  },
-},
-);
+  key: 'storyInfo',
+  default: [
+    {
+      id: '1',
+      title: '마법사 유원이',
+      date: '2025.02.01',
+      favorite: 'false',
+      summary: '마법사 유원이의 네로와 함께하는 모험 이야기',
+      img: Array(10).fill(유원이),
+      cover: testImg,
+      characters: ['유원이'], // ✅ 필수
+    },
+  ],
+});
 
 export const userInfoState = atom({
-  key:'userInfo',
-  default:[{
-    id:'',
-    password:'',
-    nickname:'',
-    pNumber:'',
+  key: 'userInfo',
+  default: [{
+    id: '',
+    password: '',
+    nickname: '',
+    pNumber: '',
   }]
-})
+});
 
 export const conversationState = atom({
   key:'conversation',
@@ -59,14 +78,19 @@ export const conversationState = atom({
     characterId:'',
     qType:'', //질문 종류 
   }]
-})
+});
 
 export const messageState = atom({
-  key:'message',
-  default:[{
-    conversationId:'',
-    speaker:'', //user, bot 
-    message:'', // 각각의 메시지 한줄 
-    timestamp:'', // 사용한 시간대 
+  key: 'message',
+  default: [{
+    conversationId: '',
+    speaker: '',
+    message: '',
+    timestamp: '',
   }]
-})
+});
+
+export const favoriteStoryIdsState = atom({
+  key: 'favoriteStoryIdsState',
+  default: [],
+});

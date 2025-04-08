@@ -27,11 +27,14 @@ const NavBar = styled.nav`
   height: 60px;
 
   /* 사진처럼 어두운 바탕 + 흰색 아이콘/텍스트 */
-  background: #fff;
+  background: #FDFCFA;
   display: flex;
   justify-content: space-around;
   align-items: center;
   z-index: 10;
+
+  /* 상단 구분선  */
+  border-top: 0.3px solid #1A202B;
 `;
 
 /* 각 아이템(아이콘 + 라벨) */
@@ -74,7 +77,7 @@ const navItems = [
   },
   {
     label: '내 책장',
-    path: '/book-storage',
+    path: '/bookshelf',
     activeIcon: <IoFolderOpen size={20} />,
     inactiveIcon: <IoFolderOpenOutline size={20} />,
   },
@@ -86,7 +89,7 @@ const navItems = [
   },
   {
     label: '즐겨찾기',
-    path: '/favorites',
+    path: '/favorite',
     activeIcon: <IoStar size={20} />,
     inactiveIcon: <IoStarOutline size={20} />,
   },

@@ -12,13 +12,18 @@ import ConfirmStoryScreen from './screens/ConfirmStoryScreen';
 import LoadingScreen from './screens/LoadingScreen';
 import IntroScreen from './screens/IntroScreen';
 import StorageScreen from './screens/StorageScreen';
+import Bookshelf from './screens/Bookshelf';
+import Favorite from './screens/Favorite';
+import ReadingScreen from './screens/ReadingScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import LoginScreen from './screens/LoginScreen';
 import SignupScreen from './screens/SignupScreen';
 import StoryQuestionScreen from './screens/StoryQuestionScreen.jsx';
+import CharacterStore from './screens/CharacterStore';
 
 // 하단 고정 바
 import BottomNav from './components/BottomNav';
+
 
 function App() {
   const location = useLocation();
@@ -42,7 +47,7 @@ function App() {
         <Route path="/signup" element={<SignupScreen />} />
         <Route path="/" element={<IntroScreen />} />
         <Route path="/create-character" element={<CharacterCreationScreen />} />
-        <Route path="/book-storage" element={<StorageScreen />} />
+        <Route path="/bookshelf" element={<Bookshelf />} />
         <Route path="/settings" element={<SettingsScreen />} />
         <Route path="/character-question" element={<CharacterQuestionScreen />} />
         <Route path="/story-question" element={<StoryQuestionScreen />} />
@@ -52,8 +57,9 @@ function App() {
         <Route path='/confirm-info' element={<ConfirmInfoScreen />} />
         <Route path="/confirm-story" element={<ConfirmStoryScreen />} />
         <Route path="/loading" element={<LoadingScreen />} />
-        {/*<Route path="/favorites" element={<FavoritesScreen />} />*/}
-        {/*<Route path="/character-storage" element={<CharacterSelectScreen />} /> 애네둘 위에 임포트도 넣어야함함*/}
+        <Route path="/favorite" element={<Favorite/>} />
+        <Route path="/character-storage" element={<CharacterStore />} /> 
+        <Route path="/reading" element={<ReadingScreen />}/>
       </Routes>
 
       {/* 모든 페이지에서 하단 고정 바 표시 */}
