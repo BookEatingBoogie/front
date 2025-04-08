@@ -63,7 +63,7 @@ export const storyInfoState = atom({
 export const userInfoState = atom({
   key: 'userInfo',
   default: [{
-    id: '',
+    id: 'qwer',
     password: '',
     nickname: '',
     pNumber: '',
