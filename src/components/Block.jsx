@@ -1,48 +1,67 @@
-import styled from "styled-components"; 
+import styled from "styled-components";
+import FavoriteButton from './FavoriteButton';
 
 const BlockContainer = styled.div`
-display: flex;
-padding: 0.25rem;
-flex-direction: column;
-align-items: center;
-gap: 0.25rem;
-width"128px;
-height: 186px;
-`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  width: 128px;
+  cursor: pointer;
+`;
+
+const ImageWrapper = styled.div`
+  position: relative;
+  width: 7.5rem;
+  height: 9.375rem;
+`;
+
 const IMG = styled.img`
-width: 7.5rem;
-height: 9.375rem;
-border-radius: 0.3125rem;
-background: url(<path-to-image>) lightgray 50% / cover no-repeat;
-`
+  width: 100%;
+  height: 100%;
+  border-radius: 0.3125rem;
+  object-fit: cover;
+  background-color: lightgray;
+  position: relative;
+`;
+
 const Title = styled.div`
-color: #000;
-text-align: center;
-font-family: Roboto;
-font-size: 0.625rem;
-font-style: normal;
-font-weight: 400;
-line-height: normal;
-margin-bottom:-.3rem;
-`
+  color: #000;
+  text-align: center;
+  font-family: Roboto;
+  font-size: 0.625rem;
+  font-weight: 400;
+  margin-bottom: -0.3rem;
+`;
 
 const Date = styled.div`
-color: #000;
-text-align: center;
-font-family: Roboto;
-font-size: 0.625rem;
-font-style: normal;
-font-weight: 400;
-line-height: normal;
-`
-export default function Block({blockImg,blockName,creationDate}){
-    return(
-      <BlockContainer>
-      <IMG src={blockImg}></IMG>
-      <Title>{blockName}</Title>
-      <Date>{creationDate}</Date>
-    </BlockContainer>
-    )
+  color: #000;
+  text-align: center;
+  font-family: Roboto;
+  font-size: 0.625rem;
+  font-weight: 400;
+`;
 
-  
+export default function Block({
+  blockImg,
+  blockName,
+  creationDate,
+  onClick,
+  hideDate = false,
+  showFavorite = false,
+  storyId
+}) {
+  return (
+    <BlockContainer onClick={onClick}>
+      <ImageWrapper>
+        <IMG src={blockImg} alt={blockName || "story image"} />
+        {showFavorite && storyId && (
+          <FavoriteButton storyId={storyId} />
+        )}
+      </ImageWrapper>
+      <Title>{blockName}</Title>
+      {!hideDate && <Date>{creationDate}</Date>}
+    </BlockContainer>
+  );
 }
