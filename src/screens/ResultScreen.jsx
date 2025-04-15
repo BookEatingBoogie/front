@@ -14,7 +14,7 @@ const ResultScreen = () => {
 
   // "바로 읽어보기" 버튼 클릭
   const handleReadNow = () => {
-    navigate('/read');
+    navigate('/reading');
   };
 
   // "내 책장으로 가기" 버튼 클릭

@@ -12,7 +12,7 @@ const CharacterSelectScreen = () => {
   };
 
   const handleUseNew = () => {
-    navigate('/character-question');
+    navigate('/select-existing-character');
   };
 
   return (

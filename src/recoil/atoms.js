@@ -44,6 +44,18 @@ export const characterInfoState = atom({
   ],
 });
 
+export const storyCreationState = atom({
+  key: 'storyCreationState',
+  default: {
+    charID: null,         // 선택된 캐릭터의 ID
+    genre: '',            // 장르
+    place: '',            // 장소 (예: 우주, 왕국...)
+    mood: '',             // 날씨 (예: 맑음, 흐림...)
+    helper: false,        // 조력자 유무
+    villain: false        // 방해자 유무
+  },
+});
+
 export const storyInfoState = atom({
   key: 'storyInfo',
   default: [

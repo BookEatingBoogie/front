@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useRecoilValue } from 'recoil';
-import { messageState } from '../recoil/atoms';
+import { storyCreationState, characterInfoState } from '../recoil/atoms';
 import BaseScreenLayout from '../components/BaseScreenLayout';
 import RoundedButton from '../components/RoundedButton';
 import { useNavigate } from 'react-router-dom';
@@ -32,31 +32,32 @@ const TextArea = styled.textarea`
 
 const ConfirmStoryScreen = () => {
   const navigate = useNavigate();
-  const messages = useRecoilValue(messageState);
+  const storyInfo = useRecoilValue(storyCreationState);
+  const characterInfo = useRecoilValue(characterInfoState);
+  const character = characterInfo.find(c => c.id === String(storyInfo.charID)) || {};
 
-  // 사용자 메시지(대화 기록) 중 speaker가 'user'인 메시지들을 결합하여 초기 요약 텍스트로 사용
-  const userMessages = messages.filter(msg => msg.speaker === 'user');
-  const initialSummary = userMessages.length > 0
-    ? userMessages.map(msg => msg.message).join('\n')
-    : '아직 이야기가 없습니다.';
+  // 이야기 요약 구성
+  const autoSummary = `
+    주인공 이름: ${character.name || '이름 없음'}
+    나이: ${character.age || '미정'}, 성별: ${character.gender || '미정'}
+    직업: ${character.job || '없음'}, 성격: ${character.speciality || '없음'}
 
-  // 편집 모드 상태와 요약 텍스트 상태
+    장르: ${storyInfo.genre || '선택 안됨'}
+    장소: ${storyInfo.place || '선택 안됨'}
+    분위기: ${storyInfo.mood || '선택 안됨'}
+    조력자: ${storyInfo.helper ? '있음' : '없음'}
+    방해자: ${storyInfo.villain ? '있음' : '없음'}
+  `;
+
   const [editMode, setEditMode] = useState(false);
-  const [summaryText, setSummaryText] = useState(initialSummary);
+  const [summaryText, setSummaryText] = useState(autoSummary.trim());
 
-  // 상단의 "편집하기" 버튼 클릭 시 편집 모드 활성화
-  const handleToggleEdit = () => {
-    setEditMode(true);
-  };
-
-  // 편집 완료 버튼을 누르면 편집 모드를 해제하고, 수정된 내용 저장
+  const handleToggleEdit = () => setEditMode(true);
   const handleFinishEdit = () => {
     setEditMode(false);
-    console.log("편집 완료, 저장된 내용:", summaryText);
-    // 필요 시 여기서 백엔드에 수정된 내용을 전송하는 API 호출을 추가할 수 있습니다.
+    console.log('최종 요약:', summaryText);
   };
 
-  // 하단 버튼: 편집 모드인 경우 "편집 완료", 그렇지 않으면 "이야기 생성하러 가기"
   const handleButtonClick = () => {
     if (editMode) {
       handleFinishEdit();
@@ -72,7 +73,6 @@ const ConfirmStoryScreen = () => {
       subTitle="수정할 사항이 있다면 아래 내용을 변경해주세요."
       imageSrc={null}
     >
-      {/* 편집하기 버튼 (상단 우측, 작게) */}
       <EditContainer>
         {!editMode && (
           <RoundedButton
@@ -87,7 +87,6 @@ const ConfirmStoryScreen = () => {
         )}
       </EditContainer>
 
-      {/* 이야기 요약 박스 */}
       <SummaryContainer>
         <h3>이야기 내용</h3>
         {editMode ? (
@@ -100,10 +99,7 @@ const ConfirmStoryScreen = () => {
         )}
       </SummaryContainer>
 
-      {/* 하단 버튼: 편집 모드이면 "편집 완료", 아니면 "이야기 생성하러 가기" */}
-      <RoundedButton
-        onClick={handleButtonClick}
-      >
+      <RoundedButton onClick={handleButtonClick}>
         {editMode ? '편집 완료' : '이야기 생성하러 가기'}
       </RoundedButton>
     </BaseScreenLayout>
