@@ -1,4 +1,3 @@
-// Block.jsx
 import styled from "styled-components";
 import FavoriteButton from './FavoriteButton';
 
@@ -72,10 +71,7 @@ export default function Block({
           <FavoriteButton storyId={storyId} />
         )}
       </ImageWrapper>
-
       <Title>{blockName}</Title>
-
-      {/* 날짜도 명시적으로 조건 체크 */}
       {!hideDate && <Date>{creationDate}</Date>}
     </BlockContainer>
   );
