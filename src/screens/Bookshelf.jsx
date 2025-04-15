@@ -1,3 +1,4 @@
+// Bookshelf.jsx
 import React, { useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { storyInfoState, characterInfoState } from '../recoil/atoms';
@@ -77,7 +78,7 @@ const Separator = styled.hr`
 
 const WrapperBetweenCategoryAndTitle = styled.div`
   width: 100%;
-  
+
 `;
 
 const CharacterCategoryWrapper = styled.div`
@@ -184,7 +185,7 @@ export default function Bookshelf() {
   return (
     <BookshelfContainer>
       <TopHeaderRow>
-      <Header pageName="내 책장" />
+        <HeaderTitle>내 책장</HeaderTitle>
       </TopHeaderRow>
 
       <DIV>캐릭터 카테고리</DIV>

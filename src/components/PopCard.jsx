@@ -97,30 +97,31 @@ export default function PopCard({
   titleFontSize,
   subFontSize,
   descriptionFontSize,
+
+  // ✅ 추가된 props
   positiveBtnStyle = {},
   negativeBtnStyle = {},
-  useWarningIcon = false,
-  buttonDirection = 'row',
-  titleColor = '#FFF',
 }) {
   return (
     <CardContainer>
-      {useWarningIcon ? (
-        <BsExclamationTriangleFill size={imageSize || "150px"} color="#EE5555" />
-      ) : (
-        <IMG src={imageSrc} size={imageSize} cornerRadius={cornerRadius} />
-      )}
-      <Title fontSize={titleFontSize} color={titleColor}>{cardTitle}</Title>
+      <IMG src={imageSrc} size={imageSize} cornerRadius={cornerRadius} />
+      <Title fontSize={titleFontSize}>{cardTitle}</Title>
       <SubTitle fontSize={subFontSize}>{subTitle}</SubTitle>
       <DIV fontSize={descriptionFontSize}>{description}</DIV>
-      <ButtonContainer direction={buttonDirection}>
+      <ButtonContainer>
         {positiveBtnText && (
-          <PositiveButton onClick={onPositiveClick} {...positiveBtnStyle}>
+          <PositiveButton
+            onClick={onPositiveClick}
+            {...positiveBtnStyle}
+          >
             {positiveBtnText}
           </PositiveButton>
         )}
         {negativeBtnText && (
-          <NegativeButton onClick={onNegativeClick} {...negativeBtnStyle}>
+          <NegativeButton
+            onClick={onNegativeClick}
+            {...negativeBtnStyle}
+          >
             {negativeBtnText}
           </NegativeButton>
         )}

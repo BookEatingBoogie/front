@@ -71,8 +71,10 @@ export default function Block({
           <FavoriteButton storyId={storyId} />
         )}
       </ImageWrapper>
+
       <Title>{blockName}</Title>
       {!hideDate && <Date>{creationDate}</Date>}
     </BlockContainer>
   );
 }
+
