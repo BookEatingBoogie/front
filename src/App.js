@@ -20,6 +20,8 @@ import SignupScreen from './screens/SignupScreen';
 import StoryQuestionScreen from './screens/StoryQuestionScreen.jsx';
 import CharacterStore from './screens/CharacterStore';
 import EditBookshelf from './screens/EditBookshelf.jsx';
+import ParentReportScreen from './screens/ParentReportScreen.jsx';
+import SelectExistingCharacterScreen from './screens/SelectExistingCharacterScreen.jsx';
 // 하단 고정 바
 import BottomNav from './components/BottomNav';
 
@@ -46,12 +48,14 @@ function App() {
         <Route path="/signup" element={<SignupScreen />} />
         <Route path="/" element={<IntroScreen />} />
         <Route path="/create-character" element={<CharacterCreationScreen />} />
+        <Route path="/parent-report" element={<ParentReportScreen />} />
         <Route path="/bookshelf" element={<Bookshelf />} />
         <Route path="/settings" element={<SettingsScreen />} />
         <Route path="/character-question" element={<CharacterQuestionScreen />} />
         <Route path="/story-question" element={<StoryQuestionScreen />} />
         <Route path="/confirm" element={<ConfirmCharacterScreen />} />
         <Route path='/character-select' element={<CharacterSelectScreen />} />
+        <Route path="/select-existing-character" element={<SelectExistingCharacterScreen />} /> 
         <Route path='/result' element={<ResultScreen />} />
         <Route path='/confirm-info' element={<ConfirmInfoScreen />} />
         <Route path="/confirm-story" element={<ConfirmStoryScreen />} />

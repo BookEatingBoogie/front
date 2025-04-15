@@ -76,8 +76,8 @@ const StoryQuestionScreen = () => {
 
   const handleSelect = (text) => {
     if (current.key === 'role') {
-      const helper = text.includes('조력자');
-      const villain = text.includes('방해자');
+      const helper = text === '조력자 있음' || text === '둘 다 있음';
+      const villain = text === '방해자 있음' || text === '둘 다 있음';
       setStoryData(prev => ({
         ...prev,
         helper,

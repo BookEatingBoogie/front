@@ -8,11 +8,11 @@ const CharacterSelectScreen = () => {
   const navigate = useNavigate();
 
   const handleUseExisting = () => {
-    navigate('/confirm');
+    navigate('/select-existing-character');
   };
 
   const handleUseNew = () => {
-    navigate('/select-existing-character');
+    navigate('/character-question');
   };
 
   return (

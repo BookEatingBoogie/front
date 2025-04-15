@@ -8,7 +8,8 @@ app = Flask(__name__)
 CORS(app)
 
 API_KEY = "sk_5cda08065959ceec0d77987df2c82a3ed06b3f9a93cbadc9"
-VOICE_ID = "Mmepzv6cBqMI22R2YaXy"
+#VOICE_ID = "Mmepzv6cBqMI22R2YaXy"
+VOICE_ID = "Pl0as0xxDQN6MJj9LvVq"
 
 @app.route("/tts", methods=["POST"])
 def generate_tts():
