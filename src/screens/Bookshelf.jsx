@@ -1,3 +1,4 @@
+// Bookshelf.jsx
 import React, { useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { storyInfoState, characterInfoState } from '../recoil/atoms';
@@ -13,15 +14,77 @@ const BookshelfContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: ${(props) => (props.$highlighted ? '#FFF9EC' : '#fff')};
+  background: #fff;
   min-height: 100vh;
+  position: relative;
+`;
+
+const TopHeaderRow = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: #1A202B;
+`;
+
+const HeaderTitle = styled.div`
+  color: white;
+  font-size: 1.2rem;
+  font-weight: bold;
+`;
+
+const DIV = styled.div`
+  padding: 0.5rem 1.5rem 0rem 1.5rem;
+  color: #1A202B;
+  text-align: center;
+  font-family: Pretendard;
+  font-size: 1rem;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  letter-spacing: -0.02rem;
+  margin-top: 0.5rem;
+`;
+
+const EditButtonWrapper = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 1rem 0.5rem 1rem;
+`;
+
+const EditButton = styled.button`
+  border-radius: 6.25rem;
+  border: 1px solid rgba(57, 61, 64, 0.5);
+  background: rgba(243, 243, 243, 0.58);
+  color: #1A202B;
+  text-align: center;
+  font-family: Pretendard;
+  font-size: 1rem;
+  font-weight: 300;
+  display: flex;
+  padding: 0.25rem 1rem;
+  align-items: center;
+  gap: 0.25rem;
+`;
+
+const Separator = styled.hr`
+  width: 100%;
+  border: none;
+  border-top: 1px solid #e0e0e0;
+  margin: 0.25rem 0 0.25rem 0;
+`;
+
+const WrapperBetweenCategoryAndTitle = styled.div`
+  width: 100%;
+  
 `;
 
 const CharacterCategoryWrapper = styled.div`
   width: 100%;
   overflow-x: auto;
-  background-color: ${(props) => (props.$highlighted ? '#FFF9EC' : '#fff')};
-  position: relative;
+  background-color: #fff;
 `;
 
 const CharacterCategoryContainer = styled.div`
@@ -30,7 +93,6 @@ const CharacterCategoryContainer = styled.div`
   gap: 0.75rem;
   padding: 1rem;
   width: max-content;
-  border-bottom: none;
 `;
 
 const CharacterCircle = styled.div`
@@ -68,7 +130,7 @@ const CharacterSectionTitle = styled.div`
   font-size: 0.95rem;
   color: #1A202B;
   text-align: center;
-  background-color: #FFF9EC;
+  background-color: ${(props) => (props.$hasContent ? '#FFF9EC' : '#fff')};
   margin-top: -0.25rem;
 `;
 
@@ -79,7 +141,11 @@ const ContentContainer = styled.div`
   padding: 0.875rem 1rem 1.5rem 0.875rem;
   gap: 1rem;
   width: 100%;
-  background-color: #FFF9EC;
+`;
+
+const HighlightedWrapper = styled.div`
+  width: 100%;
+  background-color: ${(props) => (props.active ? '#FFF9EC' : '#fff')};
 `;
 
 const Overlay = styled.div`
@@ -114,16 +180,18 @@ export default function Bookshelf() {
     ? storyList.filter((story) => story.characters?.includes(selectedCharacter))
     : storyList;
 
-  return (
-    <BookshelfContainer $highlighted={!!selectedCharacter}>
-      <Header pageName="내 책장" />
+  const isActiveBg = selectedCharacter !== null && filteredStoryList.length > 0;
 
-      <CharacterCategoryWrapper $highlighted={!!selectedCharacter}>
+  return (
+    <BookshelfContainer>
+      <TopHeaderRow>
+      <Header pageName="내 책장" />
+      </TopHeaderRow>
+
+      <DIV>캐릭터 카테고리</DIV>
+      <CharacterCategoryWrapper>
         <CharacterCategoryContainer>
-          <CharacterCircle
-            onClick={() => setSelectedCharacter(null)}
-            selected={selectedCharacter === null}
-          >
+          <CharacterCircle onClick={() => setSelectedCharacter(null)} selected={selectedCharacter === null}>
             <div style={{ width: 48, height: 48 }}></div>
             <CharacterLabel selected={selectedCharacter === null}>ALL</CharacterLabel>
           </CharacterCircle>
@@ -141,34 +209,48 @@ export default function Bookshelf() {
         </CharacterCategoryContainer>
       </CharacterCategoryWrapper>
 
-      {selectedCharacter && (
-        <CharacterSectionTitle>
-          {selectedCharacter}가 나오는 동화들
-        </CharacterSectionTitle>
-      )}
+      <Separator />
 
-      <ContentContainer>
-        {filteredStoryList.length > 0 ? (
-          filteredStoryList.map((story) => (
-            <Block
-              key={story.id}
-              blockImg={story.img?.[0] || story.cover?.testImg}
-              blockName={story.title}
-              creationDate={story.date}
-              storyId={story.id}
-              showFavorite={true}
-              onClick={() => handleBlockClick(story)}
-            />
-          ))
-        ) : (
-          <Empty
-            title="선택한 캐릭터의 동화가 없어요."
-            description="다른 캐릭터를 선택해보세요!"
-            buttonText="전체 보기"
-            onButtonClick={() => setSelectedCharacter(null)}
-          />
+      <WrapperBetweenCategoryAndTitle>
+        {selectedCharacter === null && (
+          <EditButtonWrapper>
+            <EditButton onClick={() => navigate('/edit-bookshelf')}>편집하기</EditButton>
+          </EditButtonWrapper>
         )}
-      </ContentContainer>
+
+        {selectedCharacter && filteredStoryList.length > 0 && (
+          <CharacterSectionTitle $hasContent={true}>
+            {selectedCharacter}가 나오는 동화들
+          </CharacterSectionTitle>
+        )}
+      </WrapperBetweenCategoryAndTitle>
+
+      <HighlightedWrapper active={isActiveBg}>
+        <ContentContainer>
+          {filteredStoryList.length > 0 ? (
+            filteredStoryList.map((story) => (
+              <Block
+                key={story.id}
+                blockImg={story.img?.[0] || story.cover?.testImg}
+                blockName={story.title}
+                creationDate={story.date}
+                storyId={story.id}
+                showFavorite={true}
+                onClick={() => handleBlockClick(story)}
+              />
+            ))
+          ) : (
+            <div style={{ width: '100%', backgroundColor: '#fff' }}>
+              <Empty
+                title="선택한 캐릭터의 동화가 없어요."
+                description="다른 캐릭터를 선택해보세요!"
+                buttonText="전체 보기"
+                onButtonClick={() => setSelectedCharacter(null)}
+              />
+            </div>
+          )}
+        </ContentContainer>
+      </HighlightedWrapper>
 
       {selectedStory && (
         <Overlay onClick={handleClosePopup}>

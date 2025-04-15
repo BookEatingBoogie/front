@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { BsExclamationTriangleFill } from 'react-icons/bs';
 
 const CardContainer = styled.div`
   display: flex;
@@ -14,14 +15,14 @@ const CardContainer = styled.div`
 `;
 
 const IMG = styled.img`
-  width: ${(props) => props.size || '150px'}; /* 기본 사이즈 설정 */
+  width: ${(props) => props.size || '150px'};
   height: ${(props) => props.size || '150px'};
-  border-radius: ${(props) => props.cornerRadius || '10px'}; /* corner-radius 적용 */
+  border-radius: ${(props) => props.cornerRadius || '10px'};
   object-fit: cover;
 `;
 
 const Title = styled.div`
-  color: #FFF;
+  color: ${(props) => props.color || '#FFF'};
   text-align: center;
   font-family: Pretendard;
   font-size: ${(props) => props.fontSize || '1rem'};
@@ -42,10 +43,12 @@ const DIV = styled.div`
   font-family: Pretendard;
   font-size: ${(props) => props.fontSize || '0.8125rem'};
   font-weight: 400;
+  white-space: pre-line;
 `;
 
 const ButtonContainer = styled.div`
   display: flex;
+  flex-direction: ${(props) => props.direction || 'row'};
   justify-content: center;
   align-items: center;
   gap: 0.5rem;
@@ -54,63 +57,72 @@ const ButtonContainer = styled.div`
 
 const PositiveButton = styled.button`
   display: flex;
-  padding: 0.25rem 1rem;
+  padding: ${(props) => props.padding || '0.25rem 1rem'};
+  justify-content: center;
   align-items: center;
+  align-self: stretch;
   border-radius: 6.25rem;
-  background: #FFC75F;
-  border: none;
-  color: #000;
+  border: ${(props) => props.border || 'none'};
+  background: ${(props) => props.background || '#FFC75F'};
+  color: ${(props) => props.color || '#000'};
   font-weight: 600;
   cursor: pointer;
-
-  &:hover {
-    background: #ffb84d;
-  }
 `;
 
 const NegativeButton = styled.button`
   display: flex;
-  padding: 0.25rem 1rem;
+  padding: ${(props) => props.padding || '0.25rem 1rem'};
+  justify-content: center;
   align-items: center;
+  align-self: stretch;
   border-radius: 6.25rem;
-  background: #FFF;
-  border: 1px solid #ccc;
-  color: #000;
+  border: ${(props) => props.border || '1px solid #ccc'};
+  background: ${(props) => props.background || '#FFF'};
+  color: ${(props) => props.color || '#000'};
   font-weight: 600;
   cursor: pointer;
-
-  &:hover {
-    background: #f0f0f0;
-  }
 `;
 
 export default function PopCard({
-  imageSrc,          
-  imageSize,         
-  cornerRadius,      
-  cardTitle,         
-  subTitle,         
-  description,       
-  positiveBtnText,   
-  negativeBtnText,   
-  onPositiveClick,   
-  onNegativeClick,   
-  titleFontSize,     
+  imageSrc,
+  imageSize,
+  cornerRadius,
+  cardTitle,
+  subTitle,
+  description,
+  positiveBtnText,
+  negativeBtnText,
+  onPositiveClick,
+  onNegativeClick,
+  titleFontSize,
   subFontSize,
   descriptionFontSize,
+  positiveBtnStyle = {},
+  negativeBtnStyle = {},
+  useWarningIcon = false,
+  buttonDirection = 'row',
+  titleColor = '#FFF',
 }) {
   return (
     <CardContainer>
-      <IMG src={imageSrc} size={imageSize} cornerRadius={cornerRadius} />
-      <Title fontSize={titleFontSize}>{cardTitle}</Title>
+      {useWarningIcon ? (
+        <BsExclamationTriangleFill size={imageSize || "150px"} color="#EE5555" />
+      ) : (
+        <IMG src={imageSrc} size={imageSize} cornerRadius={cornerRadius} />
+      )}
+      <Title fontSize={titleFontSize} color={titleColor}>{cardTitle}</Title>
       <SubTitle fontSize={subFontSize}>{subTitle}</SubTitle>
       <DIV fontSize={descriptionFontSize}>{description}</DIV>
-      <ButtonContainer>
+      <ButtonContainer direction={buttonDirection}>
         {positiveBtnText && (
-          <PositiveButton onClick={onPositiveClick}>{positiveBtnText}</PositiveButton>
+          <PositiveButton onClick={onPositiveClick} {...positiveBtnStyle}>
+            {positiveBtnText}
+          </PositiveButton>
         )}
         {negativeBtnText && (
-          <NegativeButton onClick={onNegativeClick}>{negativeBtnText}</NegativeButton>
+          <NegativeButton onClick={onNegativeClick} {...negativeBtnStyle}>
+            {negativeBtnText}
+          </NegativeButton>
         )}
       </ButtonContainer>
     </CardContainer>

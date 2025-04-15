@@ -19,7 +19,7 @@ import LoginScreen from './screens/LoginScreen';
 import SignupScreen from './screens/SignupScreen';
 import StoryQuestionScreen from './screens/StoryQuestionScreen.jsx';
 import CharacterStore from './screens/CharacterStore';
-
+import EditBookshelf from './screens/EditBookshelf.jsx';
 // 하단 고정 바
 import BottomNav from './components/BottomNav';
 
@@ -59,6 +59,8 @@ function App() {
         <Route path="/favorite" element={<Favorite/>} />
         <Route path="/character-storage" element={<CharacterStore />} /> 
         <Route path="/reading" element={<ReadingScreen />}/>
+        <Route path="/edit-bookshelf" element={<EditBookshelf />} />
+
       </Routes>
 
       {/* 모든 페이지에서 하단 고정 바 표시 */}
