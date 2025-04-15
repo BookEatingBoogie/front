@@ -6,12 +6,6 @@ import RoundedButton from '../components/RoundedButton';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-const EditContainer = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 10px;
-`;
-
 const SummaryContainer = styled.div`
   background-color: #fbf9f4;
   color: #000;
@@ -20,87 +14,75 @@ const SummaryContainer = styled.div`
   margin-bottom: 20px;
 `;
 
-const TextArea = styled.textarea`
-  width: 100%;
-  height: 100px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 10px;
-  resize: vertical;
-  box-sizing: border-box;
-`;
+const baseURL = 'http://localhost:8080';
 
 const ConfirmStoryScreen = () => {
   const navigate = useNavigate();
   const storyInfo = useRecoilValue(storyCreationState);
   const characterInfo = useRecoilValue(characterInfoState);
+  // storyInfo.charID에 해당하는 캐릭터를 찾습니다.
   const character = characterInfo.find(c => c.id === String(storyInfo.charID)) || {};
 
-  // 이야기 요약 구성
-  const autoSummary = `
-    주인공 이름: ${character.name || '이름 없음'}
-    나이: ${character.age || '미정'}, 성별: ${character.gender || '미정'}
-    직업: ${character.job || '없음'}, 성격: ${character.speciality || '없음'}
-
-    장르: ${storyInfo.genre || '선택 안됨'}
-    장소: ${storyInfo.place || '선택 안됨'}
-    분위기: ${storyInfo.mood || '선택 안됨'}
+  // 읽기 전용으로 보여줄 스토리 요약 (필요에 따라 형식을 바꿀 수 있습니다)
+  const displaySummary = `
+    주인공: ${character.name || '없음'}
+    장르: ${storyInfo.genre || '없음'}
+    장소: ${storyInfo.place || '없음'}
+    분위기: ${storyInfo.mood || '없음'}
     조력자: ${storyInfo.helper ? '있음' : '없음'}
     방해자: ${storyInfo.villain ? '있음' : '없음'}
-  `;
+  `.trim();
 
-  const [editMode, setEditMode] = useState(false);
-  const [summaryText, setSummaryText] = useState(autoSummary.trim());
-
-  const handleToggleEdit = () => setEditMode(true);
-  const handleFinishEdit = () => {
-    setEditMode(false);
-    console.log('최종 요약:', summaryText);
+  // "이야기 생성하러 가기" 버튼 클릭 시, 백엔드에 스토리 정보를 전송합니다.
+  const handleGenerateStory = async () => {
+    try {
+      const payload = {
+        charID: storyInfo.charID,
+        genre: storyInfo.genre,
+        place: storyInfo.place,
+        mood: storyInfo.mood,
+        helper: storyInfo.helper,
+        villain: storyInfo.villain,
+      };
+      const response = await fetch(`${baseURL}/gpt/story`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!response.ok) throw new Error('스토리 생성 실패');
+      // 백엔드에서 string 형식의 결과를 반환한다고 가정합니다.
+      const resultString = await response.text();
+      console.log('스토리 생성 결과:', resultString);
+      // 결과를 받은 후 /result 화면으로 이동합니다.
+      navigate('/result');
+    } catch (error) {
+      console.error('스토리 전송 오류:', error);
+      // 오류 발생 시에도 /result로 이동하거나, 추가 에러 처리를 할 수 있습니다.
+      navigate('/result');
+    }
   };
 
-  const handleButtonClick = () => {
-    if (editMode) {
-      handleFinishEdit();
-    } else {
-      navigate('/loading');
-    }
+  // "편집하기" 버튼 클릭 시, /story-question 페이지로 돌아갑니다.
+  const handleEditStory = () => {
+    navigate('/story-question');
   };
 
   return (
     <BaseScreenLayout
       progressText="마지막 단계"
-      title="마지막으로 이야기 내용을 확인해주세요!"
-      subTitle="수정할 사항이 있다면 아래 내용을 변경해주세요."
+      title="이야기 정보를 확인해주세요!"
+      subTitle="수정이 필요하면 편집하기 버튼을, 스토리 생성을 원하면 이야기 생성하러 가기 버튼을 눌러주세요."
       imageSrc={null}
     >
-      <EditContainer>
-        {!editMode && (
-          <RoundedButton
-            onClick={handleToggleEdit}
-            bgColor="rgba(253, 252, 250, 0.20)"
-            fontColor="white"
-            borderColor="white"
-            style={{ padding: '4px 8px', fontSize: '12px', width: 'auto' }}
-          >
-            편집하기
-          </RoundedButton>
-        )}
-      </EditContainer>
-
       <SummaryContainer>
-        <h3>이야기 내용</h3>
-        {editMode ? (
-          <TextArea
-            value={summaryText}
-            onChange={(e) => setSummaryText(e.target.value)}
-          />
-        ) : (
-          <p style={{ whiteSpace: 'pre-wrap' }}>{summaryText}</p>
-        )}
+        {displaySummary}
       </SummaryContainer>
-
-      <RoundedButton onClick={handleButtonClick}>
-        {editMode ? '편집 완료' : '이야기 생성하러 가기'}
+        
+      <RoundedButton onClick={handleGenerateStory}>
+        이야기 생성하러 가기
+      </RoundedButton>
+      <RoundedButton onClick={handleEditStory}>
+        편집하기
       </RoundedButton>
     </BaseScreenLayout>
   );
