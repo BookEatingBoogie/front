@@ -1,8 +1,8 @@
 import { atom } from 'recoil';
-import testImg from '../assets/images/마법사 유원이.webp';
-import 서영이 from '../assets/images/서영이와 다람쥐.webp';
-import 유원이 from '../assets/images/마법사 유원이.webp';
-import 민지 from '../assets/images/민지와 눈내리는 마을.webp';
+import testImg from '../assets/images/마법사 유원이.webp';
+import 서영이 from '../assets/images/서영이와 다람쥐.webp'
+import 유원이 from '../assets/images/마법사 유원이.webp';
+import 민지 from '../assets/images/민지와 눈내리는 마을.webp';
 
 
 export const characterInfoState = atom({
@@ -63,7 +63,7 @@ export const storyInfoState = atom({
 export const userInfoState = atom({
   key: 'userInfo',
   default: [{
-    id: '',
+    id: 'qwer',
     password: '',
     nickname: '',
     pNumber: '',

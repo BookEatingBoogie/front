@@ -19,7 +19,7 @@ const ResultScreen = () => {
 
   // "내 책장으로 가기" 버튼 클릭
   const handleGoToStorage = () => {
-    navigate('/book-storage');
+    navigate('/bookshelf');
   };
 
   return (
