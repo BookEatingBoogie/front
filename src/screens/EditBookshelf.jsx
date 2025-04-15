@@ -1,4 +1,3 @@
-// EditBookshelf.jsx
 import React, { useState } from 'react';
 import { useRecoilState } from 'recoil';
 import { storyInfoState } from '../recoil/atoms';
@@ -96,7 +95,7 @@ export default function EditBookshelf() {
               storyId={story.id}
               hideDate={true}
               hideFavorite={true}
-              isEditing={false} // 체크박스 제거
+              isEditing={false} 
             />
             <IconWrapper>
               {selectedIds.includes(story.id) ? <BsCheckCircleFill /> : <BsCheckCircle />}
@@ -107,7 +106,7 @@ export default function EditBookshelf() {
 
       {showPopup && (
         <Overlay>
-         <PopCard
+        <PopCard
             useWarningIcon={true}
             titleColor="#EE5555"
             buttonDirection="column"

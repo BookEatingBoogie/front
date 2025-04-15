@@ -79,7 +79,7 @@ export default function Favorite() {
             title="즐겨찾기한 동화가 없어요"
             description="마음에 드는 동화를 별표로 저장해보세요!"
             buttonText="책장으로 돌아가기"
-            onButtonClick={() => navigate('/bookshelf')} // ✅ 책장 이동 처리
+            onButtonClick={() => navigate('/bookshelf')} 
           />
         )}
       </ContentContainer>
