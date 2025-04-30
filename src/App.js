@@ -7,7 +7,6 @@ import ConfirmCharacterScreen from './screens/ConfirmCharacterScreen';
 import CharacterQuestionScreen from './screens/CharacterQuestionScreen.jsx';
 import CharacterSelectScreen from './screens/CharacterSelectScreen';
 import ResultScreen from './screens/ResultScreen';
-import ConfirmInfoScreen from './screens/ConfirmInfoScreen';
 import ConfirmStoryScreen from './screens/ConfirmStoryScreen';
 import LoadingScreen from './screens/LoadingScreen';
 import IntroScreen from './screens/IntroScreen';
@@ -53,11 +52,10 @@ function App() {
         <Route path="/settings" element={<SettingsScreen />} />
         <Route path="/character-question" element={<CharacterQuestionScreen />} />
         <Route path="/story-question" element={<StoryQuestionScreen />} />
-        <Route path="/confirm" element={<ConfirmCharacterScreen />} />
+        <Route path="/confirm-character" element={<ConfirmCharacterScreen />} />
         <Route path='/character-select' element={<CharacterSelectScreen />} />
         <Route path="/select-existing-character" element={<SelectExistingCharacterScreen />} /> 
         <Route path='/result' element={<ResultScreen />} />
-        <Route path='/confirm-info' element={<ConfirmInfoScreen />} />
         <Route path="/confirm-story" element={<ConfirmStoryScreen />} />
         <Route path="/loading" element={<LoadingScreen />} />
         <Route path="/favorite" element={<Favorite/>} />

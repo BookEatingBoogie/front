@@ -33,12 +33,11 @@ const CharacterCreationScreen = () => {
       // FormData에 파일 추가 (파일명은 "hello.jpeg"로 강제 지정)
       const formData = new FormData();
       formData.append('image', file, 'hello.jpeg');
-      formData.append('image', file, 'hello.jpeg');
 
       // 지정된 엔드포인트로 파일 전송 (POST 요청, no-cors 모드 적용)
       await fetch('https://cfr-realistic-follow-recovered.trycloudflare.com/upload/image?filename=hello.jpeg', {
         method: 'POST',
-        mode: 'cors',
+        mode: 'no-cors',
         body: formData,
       });
       
@@ -65,7 +64,7 @@ const CharacterCreationScreen = () => {
         console.log('업데이트된 characterInfo:', updated);
         return updated;
       });
-      navigate('/confirm'); // ConfirmCharacterScreen으로 이동
+      navigate('/character-question'); // ConfirmCharacterScreen으로 이동
     } catch (error) {
       console.error('파일 업로드 중 오류:', error);
     }
@@ -73,18 +72,17 @@ const CharacterCreationScreen = () => {
 
   // "눌러서 말하기" 버튼 -> 음성 입력 (여기서는 단순히 confirm 화면으로 이동)
   const handleMicClick = () => {
-    navigate('/confirm');
+    navigate('/character-question');
   };
 
   return (
     <BaseScreenLayout
-      progressText="6/6"
-      progressCurrent={6}
-      progressTotal={6}
-      title={`${characterName}은 어떻게 생겼나요?`}
+      progressText="1/3"
+      progressCurrent={1}
+      progressTotal={3}
+      title={`주인공은 어떻게 생겼나요?`}
       subTitle={
-        "인물의 사진이 있다면 사진을 업로드 해주세요.\n" +
-        "사진이 없다면 인물의 생김새를 말해주세요."
+        "주인공이 될 인물의 사진을 업로드 해주세요."
       }
       imageSrc={null}
     >

@@ -24,10 +24,10 @@ const ConfirmCharacterScreen = () => {
 
   return (
     <BaseScreenLayout
-      progressText="6/6"
-      progressCurrent={6}
-      progressTotal={6}
-      title={`${characterName}가 이렇게 생겼군요!`}
+      progressText="3/3"
+      progressCurrent={3}
+      progressTotal={3}
+      title={`${characterName}은 이렇게 생겼군요!`}
       subTitle="이 인물로 이야기를 만들어볼까요?"
       imageSrc={null}
     >
