@@ -7,7 +7,9 @@ import silhouetteImg from '../assets/images/silhouette.png';
 import MicSpeakButton from '../components/MicSpeakButton';
 
 const baseURL = 'http://localhost:8080';
-const totalQuestions = 8; // 7개의 질문 + 1번째 최종 호출
+// visible 질문은 7개가 출력됨 (인덱스 0~6 = 7문항)
+// 그리고 마지막 질문(인덱스 6)의 답변 후 바로 최종 호출을 보냄
+const totalQuestions = 7;
 
 // fallback 질문 배열 (인덱스 0~6)
 const fallbackQuestions = [
@@ -20,7 +22,7 @@ const fallbackQuestions = [
   '추가 질문: (랜덤 extra)',
 ];
 
-// 최종 fallback 캐릭터 정보 (마지막 호출 실패 시 참고)
+// 최종 fallback 캐릭터 정보 (최종 호출 실패 시)
 const finalFallbackCharacter = {
   id: '2',
   name: '새로운 캐릭터',
@@ -41,25 +43,19 @@ const CharacterQuestionScreen = () => {
   const audioChunksRef = useRef([]);
   const [hasStartedRecording, setHasStartedRecording] = useState(false);
 
-  // 초기 질문 로드 : 인덱스 0 질문을 백엔드에서 GET 방식으로 받아옴
-  const fetchInitialQuestion = async () => {
-    try {
-      const response = await fetch(`${baseURL}/gpt/character`);
-      if (!response.ok) throw new Error('질문 데이터를 받아올 수 없습니다.');
-      // 백엔드가 첫 질문(문자열)을 반환한다고 가정합니다.
-      const questionText = await response.json();
-      setCurrentQuestion(questionText);
-    } catch (error) {
-      console.error("초기 질문 로드 오류:", error);
-      setCurrentQuestion(fallbackQuestions[0]);
-    }
-  };
-
+  // 첫 번째 질문을 빈 문자열 POST로 받아오기 (questionIndex === 0)
   useEffect(() => {
-    fetchInitialQuestion();
+    (async () => {
+      const result = await sendAnswerToBackend("The child has come to create a main character! Welcome the child and ask the first question about the character's name to start the story creation.");
+      if (result) {
+        setCurrentQuestion(result);
+      } else {
+        setCurrentQuestion(fallbackQuestions[0]);
+      }
+    })();
   }, []);
 
-  // TTS 처리 : 현재 질문 텍스트를 음성으로 재생
+  // TTS 처리: currentQuestion을 음성으로 재생
   const playTTS = async (text) => {
     try {
       const response = await fetch("http://localhost:5001/tts", {
@@ -93,11 +89,11 @@ const CharacterQuestionScreen = () => {
       mediaRecorderRef.current.start();
       setHasStartedRecording(true);
     } catch (error) {
-      console.error("녹음 실패:", error);
+      console.error("녹음 시작 오류:", error);
     }
   };
 
-  // 녹음 중지 및 STT 처리
+  // 음성 녹음 중지 및 STT 처리
   const stopRecording = () => {
     if (mediaRecorderRef.current) {
       mediaRecorderRef.current.stop();
@@ -111,16 +107,17 @@ const CharacterQuestionScreen = () => {
             body: formData,
           });
           const data = await response.json();
-          await completeRecording(data.transcript);
+          await handleAnswer(data.transcript);
         } catch (err) {
           console.error("STT 오류:", err);
+          await handleAnswer(""); // 에러 시 빈 문자열 처리
         }
       });
       setHasStartedRecording(false);
     }
   };
 
-  // 사용자의 답변을 백엔드에 전송하는 함수
+  // 백엔드에 POST로 { userContent: answerText } 전송하는 함수
   const sendAnswerToBackend = async (answerText) => {
     try {
       const payload = { userContent: answerText };
@@ -130,7 +127,6 @@ const CharacterQuestionScreen = () => {
         body: JSON.stringify(payload),
       });
       if (!response.ok) throw new Error('답변 전송 실패');
-      // 질문 인덱스 0~6: 다음 질문 문자열, 인덱스 7: 최종 캐릭터 정보를 JSON 객체(또는 문자열)로 반환
       const result = await response.json();
       return result;
     } catch (err) {
@@ -139,9 +135,9 @@ const CharacterQuestionScreen = () => {
     }
   };
 
-  // 녹음 결과(STT 텍스트)를 처리하는 함수
-  const completeRecording = async (text) => {
-    // 질문 인덱스 0~6까지는 기존 캐릭터 정보를 업데이트합니다.
+  // 사용자의 답변(STT 텍스트)을 처리하는 함수
+  const handleAnswer = async (text) => {
+    // 인덱스 0~5까지: 질문 업데이트(각 필드 업데이트)
     if (questionIndex < totalQuestions - 1) {
       const updatedCharacter = { ...characterInfo[0] };
       if (questionIndex === 0) updatedCharacter.name = text;
@@ -154,20 +150,22 @@ const CharacterQuestionScreen = () => {
       
       setCharacterInfo([updatedCharacter, ...characterInfo.slice(1)]);
       
-      const responseFromBackend = await sendAnswerToBackend(text);
-      // 백엔드가 정상 응답을 주지 않으면 fallback 질문 사용
-      const nextQuestion = responseFromBackend ? responseFromBackend : fallbackQuestions[questionIndex + 1];
-      setQuestionIndex(prev => prev + 1);
-      setCurrentQuestion(nextQuestion);
-    } else {
-      // 마지막 호출: 인덱스 7
-      // 최종 호출에서는 백엔드에서 최종 캐릭터 정보를 반환받습니다.
-      const responseFromBackend = await sendAnswerToBackend(text);
-      if (responseFromBackend) {
-        // 최종 결과를 navigate의 state로 전달합니다.
-        navigate('/confirm-info', { state: { finalCharacter: responseFromBackend } });
+      // 만약 현재 질문이 인덱스 6(마지막 질문)가 아니라면 다음 질문을 받아 업데이트
+      if (questionIndex < totalQuestions - 1 - 1) {
+        const responseFromBackend = await sendAnswerToBackend(text);
+        const nextQuestion = responseFromBackend !== null
+          ? responseFromBackend
+          : fallbackQuestions[questionIndex + 1];
+        setQuestionIndex(prev => prev + 1);
+        setCurrentQuestion(nextQuestion);
       } else {
-        navigate('/confirm-info', { state: { finalCharacter: finalFallbackCharacter } });
+        // 인덱스가 6: 사용자가 7번째 질문에 답변을 완료하면, 즉시 최종 호출을 수행
+        const responseFromBackend = await sendAnswerToBackend(text);
+        if (responseFromBackend) {
+          navigate('/confirm-info', { state: { finalCharacter: responseFromBackend } });
+        } else {
+          navigate('/confirm-info', { state: { finalCharacter: finalFallbackCharacter } });
+        }
       }
     }
   };
@@ -182,9 +180,11 @@ const CharacterQuestionScreen = () => {
       imageSrc={silhouetteImg}
       imageBottom={0}
     >
-      <div onMouseDown={() => !hasStartedRecording && startRecording()}>
-        <MicSpeakButton onComplete={stopRecording} />
-      </div>
+      {questionIndex < totalQuestions && (
+        <div onMouseDown={() => !hasStartedRecording && startRecording()}>
+          <MicSpeakButton onComplete={stopRecording} />
+        </div>
+      )}
     </BaseScreenLayout>
   );
 };
