@@ -50,12 +50,17 @@ export const characterInfoState = atom({
 export const storyCreationState = atom({
   key: 'storyCreationState',
   default: {
-    charID: 0,         // 선택된 캐릭터의 ID
-    genre: '',            // 장르
-    place: '',            // 장소 (예: 우주, 왕국...)
-    mood: '',             // 날씨 (예: 맑음, 흐림...)
-    helper: false,        // 조력자 유무
-    villain: false        // 방해자 유무
+    charID: 1,                     // 예시 캐릭터 ID
+    genre: '모험',                 // 예시 장르
+    place: '산',                  // 예시 장소
+    history: [
+      '옛날 옛적에 용감한 주인공이 산에서 살고 있었어요.',
+    ],                            // 예시 히스토리 배열
+    story: '옛날 옛적에 용감한 주인공이 산에서 살고 있었어요.', // 최신 스토리
+    image: 유원이, // 예시 배경 이미지 URL
+    choices: ['산 아래로 달려 내려간다', '그 자리에 머문다', '정상으로 올라간다'], // 예시 선택지
+    step: 1,                       // 현재 진행 단계
+    selectedChoice: '',           // 마지막 선택 값
   },
 });
 

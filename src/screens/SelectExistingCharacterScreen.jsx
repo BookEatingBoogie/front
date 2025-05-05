@@ -3,7 +3,6 @@ import React, { useState } from 'react';
  import { characterInfoState } from '../recoil/atoms';
  import { useNavigate } from 'react-router-dom';
  import Header from '../components/Header';
- import BottomNav from '../components/BottomNav';
  import Block from '../components/Block';
  import Empty from '../components/Empty';
  import PopCard from '../components/PopCard';
@@ -60,7 +59,7 @@ import React, { useState } from 'react';
        selectedCharacter,
        ...prev.filter(c => c.id !== selectedCharacter.id),
      ]);
-     navigate('/confirm');
+     navigate('/confirm-character');
    };
  
    return (

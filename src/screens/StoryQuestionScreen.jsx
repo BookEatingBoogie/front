@@ -1,101 +1,120 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilState } from 'recoil';
 import { storyCreationState, characterInfoState } from '../recoil/atoms';
 import BaseScreenLayout from '../components/BaseScreenLayout';
-import ChoiceButton from '../components/ChoiceButton';
 import styled from 'styled-components';
+import { postStoryStart } from '../api/story';
+import dokwhere from '../assets/images/dokkaebi_where.png';
+import cloudMkGif from '../assets/images/cloudmk4.gif'; //mk 234중 회의에서 정해야함함
 
 const storyQuestions = [
   {
     key: 'genre',
     question: '장르를 선택해 주세요.',
-    options: ['친구', '가족', '일상', '마법', '영웅', '액션', '고전', '여행', '수수께끼'],
+    options: ['일상', '마법', '영웅', '액션', '모험'],
   },
   {
     key: 'place',
     question: '장소를 선택해 주세요.',
-    options: ['우주', '왕국', '산', '바다', '학교', '집', '도시', '시골'],
-  },
-  {
-    key: 'mood',
-    question: '날씨를 선택해 주세요.',
-    options: ['맑음', '흐림', '약간흐림', '비', '눈'],
-  },
-  {
-    key: 'role',
-    question: '등장인물을 선택해 주세요.',
-    options: ['조력자 있음', '방해자 있음', '둘 다 있음', '둘 다 없음'],
+    options: ['우주', '왕국', '산', '바다', '학교', '집'],
   },
 ];
 
-const Container = styled.div`
+const OptionsContainer = styled.div`
+  position: relative;
+  width: 100%;
+  height: 300px; /* 필요에 따라 조절 */
+`;
+
+const OptionItem = styled.div`
+  position: absolute;
+`;
+
+const CloudButton = styled.div`
+  width: 6.5rem;
+  height: 6.5rem;
+  background: url(${cloudMkGif}) no-repeat center/contain;
   display: flex;
   align-items: center;
   justify-content: center;
-`;
-const ArrowButton = styled.button`
-  background: transparent;
-  border: none;
-  color: #fff;
-  font-size: 1.5rem;
+  font-size: 0.875rem;
+  font-weight: bold;
+  color: #333;
   cursor: pointer;
-  padding: 0 0.625rem;
-  &:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
+  user-select: none;
+  transition: transform 0.2s;
+  &:hover {
+    transform: scale(1.05);
   }
 `;
-const SliderContainer = styled.div`
-  width: 23.75rem;
-  overflow: hidden;
-`;
-const Slider = styled.div`
-  display: flex;
-  gap: 0.625rem;
-  transition: transform 0.3s ease-in-out;
-`;
-const OptionItem = styled.div`
-  width: 6.5rem;
-  flex-shrink: 0;
-  display: flex;
-  justify-content: center;
-`;
 
-const StoryQuestionScreen = () => {
+export default function StoryQuestionScreen() {
   const navigate = useNavigate();
   const [storyData, setStoryData] = useRecoilState(storyCreationState);
   const [characterInfo] = useRecoilState(characterInfoState);
   const [questionIndex, setQuestionIndex] = useState(0);
-  const [page, setPage] = useState(0);
-  const itemsPerPage = 3;
-  const sliderWidth = 21.4;
-
+  const [positions, setPositions] = useState([]);
   const current = storyQuestions[questionIndex];
-  const totalPages = Math.ceil(current.options.length / itemsPerPage);
 
-  const handleSelect = (text) => {
-    if (current.key === 'role') {
-      const helper = text === '조력자 있음' || text === '둘 다 있음';
-      const villain = text === '방해자 있음' || text === '둘 다 있음';
-      setStoryData(prev => ({
-        ...prev,
-        helper,
-        villain,
-        charID: parseInt(characterInfo[0].id),
-      }));
-    } else {
-      setStoryData(prev => ({
-        ...prev,
-        [current.key]: text,
-      }));
+  useEffect(() => {
+    const count = current.options.length;
+    const rows = Math.ceil(Math.sqrt(count));
+    const cols = Math.ceil(count / rows);
+    const cellW = 100 / cols;
+    const cellH = 100 / rows;
+
+    const cells = [];
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        cells.push([r, c]);
+      }
     }
+    const shuffled = cells.sort(() => Math.random() - 0.5).slice(0, count);
+
+    const newPos = shuffled.map(([r, c]) => {
+      const padX = cellW * 0.1;
+      const padY = cellH * 0.1;
+      const left = c * cellW + padX + Math.random() * (cellW - 2 * padX);
+      const top = r * cellH + padY + Math.random() * (cellH - 2 * padY);
+      return { left: `${left}%`, top: `${top}%` };
+    });
+
+    setPositions(newPos);
+  }, [questionIndex]);
+
+  const handleSelect = async (option) => {
+    const key = current.key;
+    const charID = parseInt(characterInfo[0].id, 10);
+
+    setStoryData(prev => ({
+      ...prev,
+      ...(key === 'genre' && { charID, genre: option }),
+      ...(key === 'place' && { place: option }),
+    }));
 
     if (questionIndex < storyQuestions.length - 1) {
-      setQuestionIndex(prev => prev + 1);
-      setPage(0);
+      setQuestionIndex(i => i + 1);
     } else {
-      navigate('/confirm-story');
+      try {
+        const payload = {
+          charID,
+          genre: storyData.genre,
+          place: option,
+        };
+        const { data } = await postStoryStart(payload);
+        setStoryData(prev => ({
+          ...prev,
+          story: data.story,
+          image: data.imageUrl,
+          choices: data.choices,
+        }));
+        navigate('/confirm-story');
+      } catch (err) {
+        console.error(err);
+        alert('기초 스토리 생성 중 오류가 발생했습니다.');
+        navigate('/confirm-story');
+      }
     }
   };
 
@@ -106,25 +125,17 @@ const StoryQuestionScreen = () => {
       progressTotal={storyQuestions.length}
       title="이야기에 대해 말해 주세요."
       subTitle={current.question}
+      imageSrc={dokwhere}
     >
-      <Container>
-        <ArrowButton onClick={() => setPage(p => p - 1)} disabled={page === 0}>&lt;</ArrowButton>
-        <SliderContainer>
-          <Slider style={{ transform: `translateX(-${page * sliderWidth}rem)` }}>
-            {current.options.map((option) => (
-              <OptionItem key={option}>
-                <ChoiceButton
-                  text={option}
-                  onClick={() => handleSelect(option)}
-                />
-              </OptionItem>
-            ))}
-          </Slider>
-        </SliderContainer>
-        <ArrowButton onClick={() => setPage(p => p + 1)} disabled={page === totalPages - 1}>&gt;</ArrowButton>
-      </Container>
+      <OptionsContainer>
+        {current.options.map((opt, idx) => (
+          <OptionItem key={opt} style={positions[idx]}>
+            <CloudButton onClick={() => handleSelect(opt)}>
+              {opt}
+            </CloudButton>
+          </OptionItem>
+        ))}
+      </OptionsContainer>
     </BaseScreenLayout>
   );
-};
-
-export default StoryQuestionScreen;
+}

@@ -3,11 +3,15 @@ import requests
 import io
 from flask_cors import CORS
 import traceback
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 
-API_KEY = "서영이 tts 키"
+API_KEY = os.getenv("ELEVENLABS_API_KEY")
 #VOICE_ID = "Mmepzv6cBqMI22R2YaXy"
 VOICE_ID = "Pl0as0xxDQN6MJj9LvVq"
 

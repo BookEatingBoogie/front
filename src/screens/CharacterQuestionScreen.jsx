@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRecoilState } from 'recoil';
 import { characterInfoState } from '../recoil/atoms';
 import { useNavigate } from 'react-router-dom';
@@ -6,10 +6,34 @@ import BaseScreenLayout from '../components/BaseScreenLayout';
 import silhouetteImg from '../assets/images/silhouette.png';
 import RoundedButton from '../components/RoundedButton';
 
-const NameQuestionScreen = () => {
+export default function CharacterQuestionScreen() {
   const navigate = useNavigate();
   const [characterInfo, setCharacterInfo] = useRecoilState(characterInfoState);
   const [name, setName] = useState(characterInfo[0]?.name || '');
+  const questionText = '주인공의 이름이 무엇인가요?';
+
+  // 마운트 시 TTS 자동 실행
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch(
+          "http://localhost:5001/tts",
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: questionText }),
+          }
+        );
+        if (!res.ok) throw new Error('TTS 요청 실패');
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        audio.play();
+      } catch (err) {
+        console.error('TTS 오류:', err);
+      }
+    })();
+  }, []); // 빈 배열: 최초 1회만 실행
 
   const handleNext = () => {
     if (!name.trim()) return;
@@ -48,6 +72,4 @@ const NameQuestionScreen = () => {
       </RoundedButton>
     </BaseScreenLayout>
   );
-};
-
-export default NameQuestionScreen;
+}
