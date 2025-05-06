@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilState } from 'recoil';
 import { storyCreationState, characterInfoState } from '../recoil/atoms';
@@ -6,7 +6,7 @@ import BaseScreenLayout from '../components/BaseScreenLayout';
 import styled from 'styled-components';
 import { postStoryStart } from '../api/story';
 import dokwhere from '../assets/images/dokkaebi_where.png';
-import cloudMkGif from '../assets/images/cloudmk4.gif'; //mk 234중 회의에서 정해야함함
+import cloudMkGif from '../assets/images/cloudmk4.gif'; // 회의 후 결정될 gif
 
 const storyQuestions = [
   {
@@ -45,7 +45,7 @@ const CloudButton = styled.div`
   user-select: none;
   transition: transform 0.2s;
   &:hover {
-    transform: scale(1.05);
+    transform: scale(1.2);
   }
 `;
 
@@ -55,8 +55,11 @@ export default function StoryQuestionScreen() {
   const [characterInfo] = useRecoilState(characterInfoState);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [positions, setPositions] = useState([]);
+  const audioRef = useRef(null);
+
   const current = storyQuestions[questionIndex];
 
+  // 옵션 위치 계산
   useEffect(() => {
     const count = current.options.length;
     const rows = Math.ceil(Math.sqrt(count));
@@ -82,6 +85,39 @@ export default function StoryQuestionScreen() {
 
     setPositions(newPos);
   }, [questionIndex]);
+
+  // TTS: 현재 질문 읽어주기
+  useEffect(() => {
+    const speak = async () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        URL.revokeObjectURL(audioRef.current.src);
+      }
+      try {
+        const res = await fetch('http://localhost:5001/tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: current.question })
+        });
+        if (!res.ok) throw new Error('TTS 요청 실패');
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        audioRef.current = audio;
+        audio.play();
+      } catch (err) {
+        console.error('TTS 에러:', err);
+      }
+    };
+    speak();
+    // 컴포넌트 언마운트 시 URL 해제
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        URL.revokeObjectURL(audioRef.current.src);
+      }
+    };
+  }, [current.question]);
 
   const handleSelect = async (option) => {
     const key = current.key;
@@ -123,8 +159,8 @@ export default function StoryQuestionScreen() {
       progressText={`${questionIndex + 1} / ${storyQuestions.length}`}
       progressCurrent={questionIndex + 1}
       progressTotal={storyQuestions.length}
-      title="이야기에 대해 말해 주세요."
-      subTitle={current.question}
+      title={current.question}
+      subTitle="이야기에 대해 말해 주세요."
       imageSrc={dokwhere}
     >
       <OptionsContainer>

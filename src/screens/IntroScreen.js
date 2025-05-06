@@ -16,10 +16,10 @@ const Container = styled.div`
 
 const Title = styled.h1`
   position: absolute;
-  top: 60px;
+  top: 3.75rem;          /* 60px → 60/16 = 3.75rem */
   left: 50%;
   transform: translateX(-50%);
-  font-size: 24px;
+  font-size: 1.5rem;     /* 24px → 24/16 = 1.5rem */
   color: #fff;
   margin: 0;
   text-align: center;
@@ -28,22 +28,22 @@ const Title = styled.h1`
 
 const SubTitle = styled.p`
   position: relative;
-  top: 130px;
+  top: 8.125rem;         /* 130px → 130/16 = 8.125rem */
   left: 50%;
   transform: translateX(-50%);
-  font-size: 14px;
+  font-size: 0.875rem;   /* 14px → 14/16 = 0.875rem */
   color: #fff;
   margin: 0;
   text-align: center;
   line-height: 1.4;
   width: 80%;
-  max-width: 400px;
+  max-width: 25rem;      /* 400px → 400/16 = 25rem */
 `;
 
 const DokkaebiWrapper = styled.div`
   position: absolute;
-  bottom: 100px;
-  width: 360px;
+  bottom: 6.25rem;       /* 100px → 100/16 = 6.25rem */
+  width: 22.5rem;        /* 360px → 360/16 = 22.5rem */
   max-width: 80%;
   margin: 0 auto;
   left: 50%;
