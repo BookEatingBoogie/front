@@ -5,8 +5,9 @@ import { storyCreationState, characterInfoState } from '../recoil/atoms';
 import BaseScreenLayout from '../components/BaseScreenLayout';
 import styled from 'styled-components';
 import { postStoryStart } from '../api/story';
-import dokwhere from '../assets/images/dokkaebi_where.png';
 import cloudMkGif from '../assets/images/cloudmk4.gif'; // 회의 후 결정될 gif
+import Lottie from 'react-lottie-player';
+import thinkAnimation from '../assets/thinkAnimation.json';
 
 const storyQuestions = [
   {
@@ -24,7 +25,9 @@ const storyQuestions = [
 const OptionsContainer = styled.div`
   position: relative;
   width: 100%;
-  height: 300px; /* 필요에 따라 조절 */
+  height: 13.75rem;
+  margin-top: -4rem;
+  z-index: 2;
 `;
 
 const OptionItem = styled.div`
@@ -34,7 +37,7 @@ const OptionItem = styled.div`
 const CloudButton = styled.div`
   width: 6.5rem;
   height: 6.5rem;
-  background: url(${cloudMkGif}) no-repeat center/contain;
+  background: url(${props => props.gif}) no-repeat center/contain;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -66,7 +69,6 @@ export default function StoryQuestionScreen() {
     const cols = Math.ceil(count / rows);
     const cellW = 100 / cols;
     const cellH = 100 / rows;
-
     const cells = [];
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
@@ -74,7 +76,6 @@ export default function StoryQuestionScreen() {
       }
     }
     const shuffled = cells.sort(() => Math.random() - 0.5).slice(0, count);
-
     const newPos = shuffled.map(([r, c]) => {
       const padX = cellW * 0.1;
       const padY = cellH * 0.1;
@@ -82,7 +83,6 @@ export default function StoryQuestionScreen() {
       const top = r * cellH + padY + Math.random() * (cellH - 2 * padY);
       return { left: `${left}%`, top: `${top}%` };
     });
-
     setPositions(newPos);
   }, [questionIndex]);
 
@@ -110,7 +110,6 @@ export default function StoryQuestionScreen() {
       }
     };
     speak();
-    // 컴포넌트 언마운트 시 URL 해제
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
@@ -161,17 +160,34 @@ export default function StoryQuestionScreen() {
       progressTotal={storyQuestions.length}
       title={current.question}
       subTitle="이야기에 대해 말해 주세요."
-      imageSrc={dokwhere}
+      // imageSrc 제거
     >
       <OptionsContainer>
         {current.options.map((opt, idx) => (
           <OptionItem key={opt} style={positions[idx]}>
-            <CloudButton onClick={() => handleSelect(opt)}>
+            <CloudButton gif={cloudMkGif} onClick={() => handleSelect(opt)}>
               {opt}
             </CloudButton>
           </OptionItem>
         ))}
       </OptionsContainer>
+
+      {/* thinkAnimation.json Lottie */}
+      <Lottie
+        loop
+        animationData={thinkAnimation}
+        play
+        style={{
+          position: 'absolute',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '22.5rem',
+          maxWidth: '100%',
+          height: 'auto',
+          bottom: '-22rem', //////
+          zIndex: 1
+        }}
+      />
     </BaseScreenLayout>
   );
 }

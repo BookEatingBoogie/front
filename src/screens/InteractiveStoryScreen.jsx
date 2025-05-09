@@ -1,26 +1,34 @@
-import React, { useEffect, useState } from 'react';                  // React 훅(useEffect, useState) import
-import { useRecoilState } from 'recoil';                              // Recoil 상태 관리용 hook import
-import { storyCreationState } from '../recoil/atoms';                 // 스토리 생성 상태를 저장하는 atom import
-import { useNavigate } from 'react-router-dom';                       // 페이지 이동용 hook import
-import BaseScreenLayout from '../components/BaseScreenLayout';        // 공통 레이아웃 컴포넌트 import
-import styled from 'styled-components';                               // styled-components import
-import squirrelImg from '../assets/images/서영이와 다람쥐.webp';        // 더미 이미지 import
+import React, { useEffect, useState } from 'react';                       // React 훅 import
+import { useRecoilState } from 'recoil';                                   // Recoil 상태 관리용 hook import
+import { storyCreationState } from '../recoil/atoms';                      // 스토리 생성 상태 atom import
+import { useNavigate } from 'react-router-dom';                            // 페이지 이동용 hook import
+import BaseScreenLayout from '../components/BaseScreenLayout';             // 레이아웃 컴포넌트 import
+import styled, { keyframes, createGlobalStyle } from 'styled-components';  // styled-components 및 keyframes, createGlobalStyle import
+import squirrelImg from '../assets/images/서영이와 다람쥐.webp';             // 더미 이미지 import
 
-// 백엔드 연결 시 사용: 스토리 시작/진행 API 함수 import (주석 해제 후 사용)
-// import { postStoryStart, postStoryNext } from '../api/story';
+// 1) 전역 스타일: --angle 커스텀 프로퍼티 정의
+const GlobalStyles = createGlobalStyle`
+  @property --angle {
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
+  }
+`;
 
-// Lottie 애니메이션용 라이브러리와 JSON 데이터 import
-import Lottie from 'react-lottie-player';
-import buttonAnimationData from '../assets/buttonAnimation.json';    // assets 폴더에 위치한 Lottie JSON
+// 2) spin keyframes: --angle 값을 0deg → 360deg로 변경
+const spin = keyframes`
+  from { --angle: 0deg; }
+  to   { --angle: 360deg; }
+`;
 
-// 화면 전체를 감싸는 컨테이너 스타일
+// 3) 화면 전체 컨테이너
 const Content = styled.div`
   position: relative;
   width: 100%;
   height: 100%;
 `;
 
-// 이미지 비율 유지와 그림자, 라운드 처리용 래퍼 스타일
+// 4) 스토리 이미지 래퍼 (정사각형 비율 유지, 반경, 그림자 포함)
 const ImageWrapper = styled.div`
   width: 100%;
   margin: 2rem auto 0;
@@ -28,18 +36,17 @@ const ImageWrapper = styled.div`
   border-radius: 1rem;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-  /* Lottie 재생 중이 아닐 땐 storyData.image, 없으면 squirrelImg 사용 */
   background-image: ${props => `url("${props.image || squirrelImg}")`};
   background-size: cover;
   background-position: center;
   &::before {
     content: "";
     display: block;
-    padding-top: 100%; /* 정사각형 비율 유지 */
+    padding-top: 100%; /* 1:1 비율 */
   }
 `;
 
-// 선택지 버튼을 겹치도록 배치하는 오버레이 스타일
+// 5) 선택지 오버레이 (화면 하단 중앙)
 const ChoicesOverlay = styled.div`
   position: absolute;
   bottom: 1rem;
@@ -52,7 +59,7 @@ const ChoicesOverlay = styled.div`
   gap: 0.75rem;
 `;
 
-// 기본 버튼 스타일 (클릭 전)
+// 6) 기본 투명 버튼 스타일 (클릭 전)
 const TransparentButton = styled.button`
   width: 100%;
   padding: 0.75rem 1rem;
@@ -65,20 +72,45 @@ const TransparentButton = styled.button`
   font-weight: 700;
   text-align: center;
   cursor: pointer;
+  position: relative; /* ::after/::before 위치 기준 */
+  z-index: 0;
   &:hover {
     background: rgba(255, 255, 255, 0.9);
   }
 `;
 
+// 7) 선택 시 반짝이는 빛나는 테두리 버튼 스타일
+const GlowButton = styled(TransparentButton)`
+  /* ::before: 블러 & 반투명 효과 / ::after: 선명한 그라디언트 */
+  &::before, &::after {
+    content: '';
+    position: absolute;
+    top: -3px; left: -3px;
+    width: calc(100% + 6px);
+    height: calc(100% + 6px);
+    border-radius: 0.5rem;
+    background-image: conic-gradient(from var(--angle), #FFC642,rgb(241, 225, 188), #FFC642,rgb(244, 226, 186), #FFC642);
+    animation: ${spin} 3s linear infinite;
+    z-index: -1;
+  }
+  &::before {
+    filter: blur(1.5rem);
+    opacity: 0.5;
+  }
+`;
+
+// 8) 선택 애니메이션 유지 시간 (밀리초 단위)
+const GLOW_DURATION = 1000; // 1초 후에 handleChoice 실행
+
 export default function InteractiveStoryScreen() {
-  const navigate = useNavigate();                                     // 페이지 이동 함수
-  const [storyData, setStoryData] = useRecoilState(storyCreationState); // 스토리 상태 가져오기/설정
+  const navigate = useNavigate();                                      // 페이지 이동 함수
+  const [storyData, setStoryData] = useRecoilState(storyCreationState); // 스토리 상태
   const { history = [], choices = [], step = 0, charID, genre, place } = storyData;
 
-  // **애니메이션 중인 버튼 인덱스 관리 state**
+  // 9) 애니메이션 중인 버튼 인덱스 관리
   const [animatingIndex, setAnimatingIndex] = useState(null);
 
-  // 컴포넌트 마운트 또는 step, charID, genre, place 변경 시 최초 API 호출 (백엔드 연결 후 주석 해제)
+  // 10) 최초 API 호출 (백엔드 연결 시 주석 해제)
   useEffect(() => {
     /*
     if (step === 0) {
@@ -98,10 +130,10 @@ export default function InteractiveStoryScreen() {
     */
   }, [step, charID, genre, place, setStoryData]);
 
-  // 선택지를 눌렀을 때(애니메이션 후) 호출되는 스토리 진행 함수
+  // 11) 실제 스토리 진행 함수 (애니메이션 후 호출)
   const handleChoice = (choice) => {
-    // --- 다음 API 호출 (백 연결 후 주석 해제) ---
     /*
+    // 백엔드 연결 시 주석 해제 ↓
     if (step < 5) {
       postStoryNext({ charID, choice, step })
         .then(({ data }) => {
@@ -119,7 +151,7 @@ export default function InteractiveStoryScreen() {
     }
     */
 
-    // **더미 데이터 업데이트 (백엔드 연결 후 실제 API 호출로 변경)**
+    // 더미 데이터 업데이트
     setStoryData(prev => ({
       ...prev,
       history: [...prev.history, `선택: ${choice}`],
@@ -130,61 +162,62 @@ export default function InteractiveStoryScreen() {
       selectedChoice: choice,
     }));
 
-    // 마지막 스텝 이후엔 리딩 화면으로 이동
+    // 마지막 스텝 이후 리딩 화면으로 이동
     if (step >= 5) {
       navigate('/reading');
     }
   };
 
-  // 현재 보여줄 스토리 텍스트 결정
+  // 12) 버튼 클릭 시 애니메이션 트리거 + 지연 후 handleChoice 호출
+  const handleOptionClick = (opt, idx) => {
+    setAnimatingIndex(idx);                              // 해당 인덱스에 GlowButton 렌더링
+    setTimeout(() => {
+      setAnimatingIndex(null);                           // 애니메이션 상태 초기화
+      handleChoice(opt);                                 // 스토리 진행 함수 호출
+    }, GLOW_DURATION);
+  };
+
+  // 13) 현재 스토리 텍스트
   const currentStory = history.length
     ? history[history.length - 1]
     : '스토리가 준비되는 중입니다...';
 
   return (
-    <BaseScreenLayout
-      progressText={`${step} / 5`}    // 상단 프로그레스 텍스트
-      progressCurrent={step}           // 현재 프로그레스 값
-      progressTotal={5}                // 총 프로그레스 값
-      title="모험을 이어가 볼까요?"     // 화면 타이틀
-      subTitle={currentStory}          // 스토리 텍스트
-      imageSrc={null}                  // 배경 이미지 비활성화
-    >
-      <Content>
-        <ImageWrapper image={storyData.image}>
-          <ChoicesOverlay>
-            {
-              // choices가 없으면 ['다음'] 보여줌
-              (choices.length > 0 ? choices : ['다음']).map((opt, idx) => (
+    <>
+      <GlobalStyles /> {/* @property 정의 적용 */}
+      <BaseScreenLayout
+        progressText={`${step} / 5`}
+        progressCurrent={step}
+        progressTotal={5}
+        title="모험을 이어가 볼까요?"
+        subTitle={currentStory}
+        imageSrc={null}
+      >
+        <Content>
+          <ImageWrapper image={storyData.image}>
+            <ChoicesOverlay>
+              {(choices.length > 0 ? choices : ['다음']).map((opt, idx) =>
                 animatingIndex === idx
-                  // 애니메이션 중일 때 Lottie 컴포넌트 렌더링
                   ? (
-                    <Lottie
-                      key={`anim-${idx}`}
-                      loop={false}                     // 반복 재생하지 않음
-                      animationData={buttonAnimationData} // JSON 애니메이션 데이터
-                      play                              // 자동 재생
-                      style={{ width: '100%', height: '100%' }}  // 크기 지정
-                      onComplete={() => {              // 애니메이션 완료 시 호출
-                        setAnimatingIndex(null);       // 애니메이션 상태 초기화
-                        handleChoice(opt);             // 스토리 진행 함수 호출
-                      }}
-                    />
+                    // 애니메이션 중에는 GlowButton 렌더링
+                    <GlowButton key={idx}>
+                      {opt}
+                    </GlowButton>
                   )
-                  // 애니메이션 전 기본 버튼 렌더링
                   : (
+                    // 클릭 전 기본 버튼
                     <TransparentButton
                       key={idx}
-                      onClick={() => setAnimatingIndex(idx)} // 클릭 시 애니메이션 시작
+                      onClick={() => handleOptionClick(opt, idx)}
                     >
                       {opt}
                     </TransparentButton>
                   )
-              ))
-            }
-          </ChoicesOverlay>
-        </ImageWrapper>
-      </Content>
-    </BaseScreenLayout>
+              )}
+            </ChoicesOverlay>
+          </ImageWrapper>
+        </Content>
+      </BaseScreenLayout>
+    </>
   );
 }
