@@ -17,9 +17,9 @@ const CharacterSelectScreen = () => {
 
   return (
     <BaseScreenLayout
-      progressText="1/6"
+      progressText="1/3"
       progressCurrent={1}
-      progressTotal={6}
+      progressTotal={3}
       title={"이야기에는\n주인공이 필요해요!"}
       subTitle="기존 캐릭터를 사용하거나, 새 캐릭터를 만들어 보세요."
       imageSrc={dokkaebiImg}

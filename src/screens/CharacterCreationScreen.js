@@ -5,15 +5,35 @@ import { useNavigate } from 'react-router-dom';
 import BaseScreenLayout from '../components/BaseScreenLayout';
 import MicSpeakButton from '../components/MicSpeakButton';
 import GallerySelectButton from '../components/GallerySelectButton';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+
+const REGION = 'ap-northeast-2';
+const BUCKET = 'bookeating';
+const S3_BASE_URL = `https://${BUCKET}.s3.${REGION}.amazonaws.com/`;
+
+const s3Client = new S3Client({
+  region: REGION,
+  credentials: {
+    accessKeyId: process.env.REACT_APP_AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.REACT_APP_AWS_SECRET_ACCESS_KEY,
+  },
+});
+
+const uploadToS3 = async (file) => {
+  const key = `character/${Date.now()}_${file.name}`;
+  await s3Client.send(new PutObjectCommand({
+    Bucket: BUCKET,
+    Key: key,
+    Body: file,
+    ContentType: file.type,
+    ACL: 'public-read',
+  }));
+  return `${S3_BASE_URL}${key}`;
+};
 
 const CharacterCreationScreen = () => {
   const navigate = useNavigate();
   const [characterInfo, setCharacterInfo] = useRecoilState(characterInfoState);
-  // characterInfo는 배열 형태이므로, 첫 번째 요소를 사용
-  const character = characterInfo[0] || {};
-  const characterName = character.name || '인물이름';
-
-  // 파일 업로드용 ref
   const fileInputRef = useRef(null);
 
   // "갤러리에서 사진 찾아오기" 버튼 클릭 -> 파일 인풋 클릭
@@ -45,25 +65,16 @@ const CharacterCreationScreen = () => {
       // 업로드가 정상적으로 진행되었다고 가정하고, S3에 저장될 파일 URL(혹은 해당 서버의 파일 URL)을 지정합니다.
       const imageUrl = 'https://cfr-realistic-follow-recovered.trycloudflare.com/hello.jpeg';
       console.log('업로드 성공, 이미지 URL:', imageUrl);
+      const s3Url = await uploadToS3(file);
+      console.log('S3 업로드 완료:', s3Url);
 
       // characterInfoState의 첫 번째 캐릭터 정보 업데이트 (이미지 URL 반영)
       setCharacterInfo(prev => {
-        const updated = prev.length > 0
-          ? [{ ...prev[0], img: imageUrl }, ...prev.slice(1)]
-          : [{
-              id: '0',
-              name: characterName,
-              age: '',
-              gender: '',
-              job: '',
-              speciality: '',
-              note: '',
-              userImg: imageUrl,
-              img: '',
-            }];
-        console.log('업데이트된 characterInfo:', updated);
-        return updated;
+        const first = prev[0] || {};
+        const updated = { ...first, userImg: s3Url };
+        return [updated, ...prev.slice(1)];
       });
+      
       navigate('/character-question'); // ConfirmCharacterScreen으로 이동
     } catch (error) {
       console.error('파일 업로드 중 오류:', error);

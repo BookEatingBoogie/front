@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import BaseScreenLayout from '../components/BaseScreenLayout';
 import silhouetteImg from '../assets/images/silhouette.png';
 import RoundedButton from '../components/RoundedButton';
+import { postCharacter } from '../api/character';
 
 export default function CharacterQuestionScreen() {
   const navigate = useNavigate();
@@ -35,13 +36,39 @@ export default function CharacterQuestionScreen() {
     })();
   }, []); // 빈 배열: 최초 1회만 실행
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!name.trim()) return;
+
+    // 1) Recoil에 이름 저장
     setCharacterInfo(prev => {
-      const updatedFirst = { ...prev[0], name: name.trim() };
-      return [updatedFirst, ...prev.slice(1)];
+      const first = prev[0];
+      return [{ ...first, name: name.trim() }, ...prev.slice(1)];
     });
-    navigate('/confirm-character');
+
+    try {
+      // 2) API 호출
+      const payload = {
+        charName: name.trim(),
+        userImg: characterInfo[0]?.userImg,  // 방금 S3에 업로드된 URL
+      };
+      const { data } = await postCharacter(payload);
+
+      if (data.success) {
+        // 3) 응답으로 받은 charImg를 Recoil에 저장
+        setCharacterInfo(prev => {
+          const first = prev[0];
+          return [{ ...first, img: data.charImg }, ...prev.slice(1)];
+        });
+        // 4) 최종 확인 화면으로
+        navigate('/confirm-character');
+      } else {
+        alert(data.message || '캐릭터 생성에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('postCharacter error:', error);
+      alert('서버 오류로 캐릭터 정보를 등록하지 못했습니다.');
+      navigate('/confirm-character');
+    }
   };
 
   return (

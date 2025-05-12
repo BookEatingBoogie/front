@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';                       // React 훅 import
+import React, { useState } from 'react';
 import { useRecoilState } from 'recoil';                                   // Recoil 상태 관리용 hook import
 import { storyCreationState } from '../recoil/atoms';                      // 스토리 생성 상태 atom import
 import { useNavigate } from 'react-router-dom';                            // 페이지 이동용 hook import
 import BaseScreenLayout from '../components/BaseScreenLayout';             // 레이아웃 컴포넌트 import
 import styled, { keyframes, createGlobalStyle } from 'styled-components';  // styled-components 및 keyframes, createGlobalStyle import
 import squirrelImg from '../assets/images/서영이와 다람쥐.webp';             // 더미 이미지 import
+import { postStoryNext } from '../api/story';
 
 // 1) 전역 스타일: --angle 커스텀 프로퍼티 정의
 const GlobalStyles = createGlobalStyle`
@@ -105,82 +106,63 @@ const GLOW_DURATION = 1000; // 1초 후에 handleChoice 실행
 export default function InteractiveStoryScreen() {
   const navigate = useNavigate();                                      // 페이지 이동 함수
   const [storyData, setStoryData] = useRecoilState(storyCreationState); // 스토리 상태
-  const { history = [], choices = [], step = 0, charID, genre, place } = storyData;
+  const { history = [], choices = [], step, question, story} = storyData;
 
   // 9) 애니메이션 중인 버튼 인덱스 관리
   const [animatingIndex, setAnimatingIndex] = useState(null);
+  
+  // 개발 중에는 true, 실제 붙일 땐 false
+  const useDummy = true;
 
-  // 10) 최초 API 호출 (백엔드 연결 시 주석 해제)
-  useEffect(() => {
-    /*
-    if (step === 0) {
-      postStoryStart({ charID, genre, place })
-        .then(({ data }) => {
-          setStoryData(prev => ({
-            ...prev,
-            history: [data.story],
-            story: data.story,
-            image: data.imageUrl,
-            choices: data.choices,
-            step: 1,
-          }));
-        })
-        .catch(() => alert('스토리 생성에 실패했습니다.'));
-    }
-    */
-  }, [step, charID, genre, place, setStoryData]);
-
-  // 11) 실제 스토리 진행 함수 (애니메이션 후 호출)
-  const handleChoice = (choice) => {
-    /*
-    // 백엔드 연결 시 주석 해제 ↓
-    if (step < 5) {
-      postStoryNext({ charID, choice, step })
-        .then(({ data }) => {
-          setStoryData(prev => ({
-            ...prev,
-            history: [...prev.history, data.story],
-            story: data.story,
-            image: data.imageUrl,
-            choices: data.choices,
-            step: prev.step + 1,
-          }));
-        })
-        .catch(() => alert('다음 스토리 생성에 실패했습니다.'));
-      return;
-    }
-    */
-
-    // 더미 데이터 업데이트
-    setStoryData(prev => ({
-      ...prev,
-      history: [...prev.history, `선택: ${choice}`],
-      story: `다음 이야기 (더미): ${choice} 이후의 내용입니다.`,
-      image: squirrelImg,
-      choices: ['선택지 A', '선택지 B', '선택지 C'],
-      step: prev.step + 1,
-      selectedChoice: choice,
-    }));
-
-    // 마지막 스텝 이후 리딩 화면으로 이동
-    if (step >= 5) {
-      navigate('/reading');
-    }
-  };
-
-  // 12) 버튼 클릭 시 애니메이션 트리거 + 지연 후 handleChoice 호출
   const handleOptionClick = (opt, idx) => {
-    setAnimatingIndex(idx);                              // 해당 인덱스에 GlowButton 렌더링
+    setAnimatingIndex(idx);
+
     setTimeout(() => {
-      setAnimatingIndex(null);                           // 애니메이션 상태 초기화
-      handleChoice(opt);                                 // 스토리 진행 함수 호출
+      setAnimatingIndex(null);
+
+      if (useDummy) {
+        // ← 더미 데이터 업데이트 분기
+        setStoryData(prev => {
+          const newStep = prev.step + 1;
+          return {
+            ...prev,
+            history: [...prev.history, `선택: ${opt}`],
+            story:   `다음 이야기: ${opt} 이후의 내용입니다.`,
+            question:`${opt}을 선택했군요. 무엇을 할까요?`,
+            image:   squirrelImg,
+            choices: ['A', 'B', 'C'],
+            step:    newStep,
+          };
+        });
+        if (step >= 5) navigate('/reading');
+      } else {
+        // ← 실제 백엔드 호출 분기
+        postStoryNext({ choice: opt })
+          .then(({ data }) => {
+            setStoryData(prev => {
+              const newStep = prev.step + 1;
+              if (newStep > 5) navigate('/reading');
+              return {
+                ...prev,
+                history: [...prev.history, data.story],
+                story:    data.story,
+                question: data.question,
+                image:    data.imgUrl,
+                choices:  data.choices,
+                step:     newStep,
+              };
+            });
+          })
+          .catch(err => {
+            console.error(err);
+            alert('다음 스토리 생성에 실패했습니다.');
+          });
+      }
     }, GLOW_DURATION);
   };
 
   // 13) 현재 스토리 텍스트
-  const currentStory = history.length
-    ? history[history.length - 1]
-    : '스토리가 준비되는 중입니다...';
+  const currentStory = question;
 
   return (
     <>
@@ -189,8 +171,8 @@ export default function InteractiveStoryScreen() {
         progressText={`${step} / 5`}
         progressCurrent={step}
         progressTotal={5}
-        title="모험을 이어가 볼까요?"
-        subTitle={currentStory}
+        title={currentStory}
+        subTitle={story}
         imageSrc={null}
       >
         <Content>

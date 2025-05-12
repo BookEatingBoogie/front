@@ -6,9 +6,13 @@ const api = axios.create({
 });
 
 export function signupUser({ userID, password, userName, phoneNum }) {
-  return api.post('/api/auth/signup', { userID, password, userName, phoneNum });
+  return api.post('/signup', { userID, password, userName, phoneNum });
 }
 
 export function loginUser({ userID, password }) {
-  return api.post('/api/auth/login', { userID, password });
+  return api.post('/login', { userID, password });
+}
+
+export function checkUserId(userID) {
+  return api.get('/api/users/check', { params: { userID } });
 }

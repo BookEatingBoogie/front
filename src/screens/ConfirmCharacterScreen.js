@@ -26,7 +26,7 @@ export default function ConfirmCharacterScreen() {
       const payload = {
         userID,
         charName: characterName,
-        userImg: characterImg,
+        charImg: characterImg,
       };
 
       const { data } = await postCharacter(payload);

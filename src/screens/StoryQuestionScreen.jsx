@@ -4,7 +4,7 @@ import { useRecoilState } from 'recoil';
 import { storyCreationState, characterInfoState } from '../recoil/atoms';
 import BaseScreenLayout from '../components/BaseScreenLayout';
 import styled from 'styled-components';
-import { postStoryStart } from '../api/story';
+import { postStoryIntro } from '../api/story';
 import cloudMkGif from '../assets/images/cloudmk4.gif'; // 회의 후 결정될 gif
 import Lottie from 'react-lottie-player';
 import thinkAnimation from '../assets/thinkAnimation.json';
@@ -122,34 +122,46 @@ export default function StoryQuestionScreen() {
     const key = current.key;
     const charID = parseInt(characterInfo[0].id, 10);
 
+    // 1) Recoil에 genre/place 먼저 저장
     setStoryData(prev => ({
       ...prev,
-      ...(key === 'genre' && { charID, genre: option }),
+      characterId: charID,
+      ...(key === 'genre' && { genre: option }),
       ...(key === 'place' && { place: option }),
     }));
 
+    // 2) 아직 질문이 남아 있으면 다음 질문으로
     if (questionIndex < storyQuestions.length - 1) {
       setQuestionIndex(i => i + 1);
-    } else {
-      try {
-        const payload = {
-          charID,
-          genre: storyData.genre,
-          place: option,
-        };
-        const { data } = await postStoryStart(payload);
-        setStoryData(prev => ({
-          ...prev,
-          story: data.story,
-          image: data.imageUrl,
-          choices: data.choices,
-        }));
-        navigate('/confirm-story');
-      } catch (err) {
-        console.error(err);
-        alert('기초 스토리 생성 중 오류가 발생했습니다.');
-        navigate('/confirm-story');
-      }
+      return;
+    }
+
+    // 3) 마지막 질문에 답했을 때만 /intro 호출
+    try {
+      const payload = {
+        characterId: charID,
+        genre: storyData.genre || (key==='genre' ? option : ''),
+        place: option,
+      };
+      const { data } = await postStoryIntro(payload);
+
+      // 4) Recoil에 응답 저장 (step:0→1)
+      setStoryData(prev => ({
+        ...prev,
+        step:    1,
+        history: [data.story],
+        story:   data.story,
+        image:   data.imgUrl,
+        choices: data.choices,
+        question: data.question,
+      }));
+
+      // 5) 실제 스토리 화면(InteractiveStoryScreen)으로 이동
+      navigate('/confirm-story');
+    } catch (err) {
+      console.error(err);
+      alert('초기 스토리 생성에 실패했습니다.');
+      navigate('/confirm-story');
     }
   };
 

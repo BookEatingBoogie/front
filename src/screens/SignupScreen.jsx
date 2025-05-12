@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import { signupUser } from '../api/auth';
+import { signupUser, checkUserId } from '../api/auth';
 
 const SignupContainer = styled.div`
   height: 100vh;
@@ -136,9 +136,14 @@ export default function SignupScreen() {
   const [phoneNum, setPhoneNum] = useState('');
   const [isIdAvailable, setIsIdAvailable] = useState(null);
 
-  const handleCheckId = () => {
+  const handleCheckId = async () => {
     if (!userID.trim()) return;
-    setIsIdAvailable(userID.trim() !== 'taken');
+        try {
+          const { data } = await checkUserId(userID.trim());
+          setIsIdAvailable(data.available);
+        } catch {
+          alert('ID 중복 확인에 실패했습니다.');
+        }
   };
 
   const handleSignup = async () => {
@@ -156,7 +161,7 @@ export default function SignupScreen() {
     }
 
     try {
-      const { data } = await signupUser({ userID, password, userName, phoneNum });
+      const { data } = await signupUser({ userID, password, name: userName, phoneNumber: phoneNum });
       if (data.success) {
         alert('회원가입 성공! 로그인 화면으로 이동합니다.');
         navigate('/login');
