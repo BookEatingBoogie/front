@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { storyInfoState, characterInfoState } from '../recoil/atoms';
-import Header from '../components/Header';
+import Header from '../components/Header'
 import BottomNav from '../components/BottomNav';
 import Block from '../components/Block';
 import Empty from '../components/Empty';
@@ -32,6 +32,10 @@ const HeaderTitle = styled.div`
   color: white;
   font-size: 1.2rem;
   font-weight: bold;
+
+  @media (max-width: 480px) {
+    font-size: 1rem;
+  }
 `;
 
 const DIV = styled.div`
@@ -40,11 +44,12 @@ const DIV = styled.div`
   text-align: center;
   font-family: Pretendard;
   font-size: 1rem;
-  font-style: normal;
   font-weight: 700;
-  line-height: normal;
-  letter-spacing: -0.02rem;
   margin-top: 0.5rem;
+
+  @media (max-width: 480px) {
+    font-size: 0.9rem;
+  }
 `;
 
 const EditButtonWrapper = styled.div`
@@ -67,18 +72,22 @@ const EditButton = styled.button`
   padding: 0.25rem 1rem;
   align-items: center;
   gap: 0.25rem;
+
+  @media (max-width: 480px) {
+    font-size: 0.9rem;
+    padding: 0.2rem 0.75rem;
+  }
 `;
 
 const Separator = styled.hr`
   width: 100%;
   border: none;
   border-top: 1px solid #e0e0e0;
-  margin: 0.25rem 0 0.25rem 0;
+  margin: 0.25rem 0;
 `;
 
 const WrapperBetweenCategoryAndTitle = styled.div`
   width: 100%;
-
 `;
 
 const CharacterCategoryWrapper = styled.div`
@@ -105,7 +114,6 @@ const CharacterCircle = styled.div`
   background-color: ${(props) => (props.selected ? '#FFF9EC' : 'transparent')};
   border-radius: 1.5rem 1.5rem 0 0;
   padding: 0.5rem;
-  margin-bottom: 0;
   z-index: ${(props) => (props.selected ? 2 : 1)};
 `;
 
@@ -121,6 +129,10 @@ const CharacterLabel = styled.span`
   color: ${(props) => (props.selected ? '#1A202B' : '#888')};
   font-weight: ${(props) => (props.selected ? '600' : '400')};
   margin-top: 0.3rem;
+
+  @media (max-width: 480px) {
+    font-size: 0.7rem;
+  }
 `;
 
 const CharacterSectionTitle = styled.div`
@@ -132,15 +144,21 @@ const CharacterSectionTitle = styled.div`
   text-align: center;
   background-color: ${(props) => (props.$hasContent ? '#FFF9EC' : '#fff')};
   margin-top: -0.25rem;
+
+  @media (max-width: 480px) {
+    font-size: 0.85rem;
+  }
 `;
 
 const ContentContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;
+  align-items: flex-start;
   padding: 0.875rem 1rem 1.5rem 0.875rem;
   gap: 1rem;
   width: 100%;
+  min-height: 50vh;
 `;
 
 const HighlightedWrapper = styled.div`
@@ -240,7 +258,7 @@ export default function Bookshelf() {
               />
             ))
           ) : (
-            <div style={{ width: '100%', backgroundColor: '#fff' }}>
+            <div style={{ width: '100%', backgroundColor: '#fff', flexGrow: 1 }}>
               <Empty
                 title="선택한 캐릭터의 동화가 없어요."
                 description="다른 캐릭터를 선택해보세요!"

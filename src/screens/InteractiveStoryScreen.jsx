@@ -134,14 +134,14 @@ export default function InteractiveStoryScreen() {
             step:    newStep,
           };
         });
-        if (step >= 5) navigate('/reading');
+        if (step >= 5) navigate('/making-cover');
       } else {
         // ← 실제 백엔드 호출 분기
         postStoryNext({ choice: opt })
           .then(({ data }) => {
             setStoryData(prev => {
               const newStep = prev.step + 1;
-              if (newStep > 5) navigate('/reading');
+              if (newStep > 5) navigate('/making-cover');
               return {
                 ...prev,
                 history: [...prev.history, data.story],

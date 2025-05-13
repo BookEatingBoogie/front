@@ -2,6 +2,7 @@ import styled from "styled-components";
 import imageSrc from "../assets/images/empty.png";
 
 const Container = styled.div`
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -9,8 +10,10 @@ const Container = styled.div`
   padding: 2rem;
   gap: 1rem;
   text-align: center;
-  height: 80vh;
+  width: 100%;
+  min-height: 300px; // 높이 부족으로 줄어들 때 대비
 `;
+
 
 const Image = styled.img`
   width: 150px;

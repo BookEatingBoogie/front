@@ -23,6 +23,7 @@ import ParentReportScreen from './screens/ParentReportScreen.jsx';
 import SelectExistingCharacterScreen from './screens/SelectExistingCharacterScreen.jsx';
 // 하단 고정 바
 import BottomNav from './components/BottomNav';
+import MakingBookCover from './screens/MakingBookCover';
 
 function PrivateRoute({ children }) {
   // --- 로그인 검증 (백연동 후 주석 해제) ---
@@ -72,6 +73,7 @@ function App() {
           <Route path="character-storage" element={<CharacterStore />} />
           <Route path="reading" element={<ReadingScreen />} />
           <Route path="edit-bookshelf" element={<EditBookshelf />} />
+          <Route path="making-cover" element={<MakingBookCover/>}/>
         </Route>
       </Routes>
 

@@ -6,7 +6,7 @@ import PopCard from '../components/PopCard';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
-import { BsCheckCircle, BsCheckCircleFill,BsExclamationTriangleFill } from 'react-icons/bs';
+import { BsCheckCircle, BsCheckCircleFill } from 'react-icons/bs';
 
 const Container = styled.div`
   background-color: #fff;
@@ -34,6 +34,24 @@ const Grid = styled.div`
   flex-wrap: wrap;
   gap: 1rem;
   padding: 1rem;
+  justify-content: flex-start;
+`;
+
+const StoryWrapper = styled.div`
+  position: relative;
+  flex: 1 1 calc(50% - 1rem);
+
+  @media (min-width: 480px) {
+    flex: 1 1 calc(33.33% - 1rem);
+  }
+
+  @media (min-width: 768px) {
+    flex: 1 1 calc(25% - 1rem);
+  }
+
+  @media (min-width: 1024px) {
+    flex: 1 1 calc(20% - 1rem);
+  }
 `;
 
 const Overlay = styled.div`
@@ -87,7 +105,7 @@ export default function EditBookshelf() {
 
       <Grid>
         {storyList.map((story) => (
-          <div key={story.id} style={{ position: 'relative' }} onClick={() => toggleSelect(story.id)}>
+          <StoryWrapper key={story.id} onClick={() => toggleSelect(story.id)}>
             <Block
               blockImg={story.img?.[0] || story.cover?.testImg}
               blockName={story.title}
@@ -95,18 +113,18 @@ export default function EditBookshelf() {
               storyId={story.id}
               hideDate={true}
               hideFavorite={true}
-              isEditing={false} 
+              isEditing={false}
             />
             <IconWrapper>
               {selectedIds.includes(story.id) ? <BsCheckCircleFill /> : <BsCheckCircle />}
             </IconWrapper>
-          </div>
+          </StoryWrapper>
         ))}
       </Grid>
 
       {showPopup && (
         <Overlay>
-        <PopCard
+          <PopCard
             useWarningIcon={true}
             titleColor="#EE5555"
             buttonDirection="column"
@@ -129,7 +147,6 @@ export default function EditBookshelf() {
               color: '#fff',
             }}
           />
-
         </Overlay>
       )}
     </Container>

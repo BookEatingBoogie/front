@@ -15,6 +15,11 @@ const Container = styled.div`
   background-color: #fff;
   overflow: hidden;
   position: relative;
+  padding-bottom: 140px;
+
+  @media (max-width: 480px) {
+    padding-bottom: 100px;
+  }
 `;
 
 const ImageWrapper = styled.div`
@@ -25,21 +30,32 @@ const ImageWrapper = styled.div`
 `;
 
 const StyledImage = styled.img`
-  width: 25.75rem;
-  height: 100%;
+  width: 100%;
+  max-width: 25.75rem;
+  height: auto;
   object-fit: contain;
+
+  @media (max-width: 480px) {
+    padding: 0 1rem;
+  }
 `;
 
 const TextWrapper = styled.div`
-  display: flex;
-  width: 25.75rem;
-  padding: 1rem;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  position: absolute;
+  bottom: 120px;
+  left: 0;
+  width: 100%;
+  text-align: center;
   font-size: 1rem;
   font-weight: 500;
   color: #333;
+  padding: 1rem;
+  z-index: 20;
+
+  @media (max-width: 480px) {
+    font-size: 0.9rem;
+    padding: 0.75rem;
+  }
 `;
 
 const OverlayTop = styled.div`
@@ -54,6 +70,10 @@ const OverlayTop = styled.div`
   justify-content: space-between;
   align-items: center;
   z-index: 10;
+
+  @media (max-width: 480px) {
+    padding: 0.75rem;
+  }
 `;
 
 const BackGroup = styled.div`
@@ -91,7 +111,7 @@ const SoundIcon = styled(BsVolumeUpFill)`
 
 const OverlayBottom = styled.div`
   position: absolute;
-  bottom: 64px;
+  bottom: 0;
   width: 100%;
   background-color: #FFF9EC;
   padding: 0.75rem 1rem;
@@ -100,6 +120,11 @@ const OverlayBottom = styled.div`
   gap: 0.75rem;
   z-index: 10;
   box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.05);
+
+  @media (max-width: 480px) {
+    padding: 0.5rem 0.75rem;
+    gap: 0.5rem;
+  }
 `;
 
 const ProgressInfo = styled.div`
@@ -151,6 +176,11 @@ const NavButton = styled.button`
   &:hover {
     background-color: #FFEAA7;
   }
+
+  @media (max-width: 480px) {
+    padding: 0.3rem 0.8rem;
+    font-size: 0.85rem;
+  }
 `;
 
 const PlayButton = styled.button`
@@ -166,6 +196,12 @@ const PlayButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
+
+  @media (max-width: 480px) {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+  }
 `;
 
 export default function ReadingScreen() {
@@ -214,7 +250,7 @@ export default function ReadingScreen() {
         }
       };
     } catch (err) {
-      console.error("🛑 TTS 오류:", err);
+      console.error("TTS 오류:", err);
       setIsSpeaking(false);
     }
   };
@@ -257,13 +293,13 @@ export default function ReadingScreen() {
       speakText(texts[currentPage]);
       autoStarted.current = true;
     }
-  }, []);
+  }, [currentPage, speakText, texts]);
 
   useEffect(() => {
     if (autoPlay && !isSpeaking && texts[currentPage]) {
       speakText(texts[currentPage]);
     }
-  }, [currentPage]);
+  }, [currentPage, autoPlay, isSpeaking, speakText, texts]);
 
   if (!story) return <div>불러오는 중...</div>;
 

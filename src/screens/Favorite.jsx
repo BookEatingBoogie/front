@@ -26,6 +26,23 @@ const ContentContainer = styled.div`
   width: 100%;
 `;
 
+const StoryWrapper = styled.div`
+  position: relative;
+  flex: 1 1 calc(50% - 1rem);
+
+  @media (min-width: 480px) {
+    flex: 1 1 calc(33.33% - 1rem);
+  }
+
+  @media (min-width: 768px) {
+    flex: 1 1 calc(25% - 1rem);
+  }
+
+  @media (min-width: 1024px) {
+    flex: 1 1 calc(20% - 1rem);
+  }
+`;
+
 const Overlay = styled.div`
   position: fixed;
   top: 0;
@@ -43,9 +60,8 @@ export default function Favorite() {
   const allStories = useRecoilValue(storyInfoState);
   const favoriteIds = useRecoilValue(favoriteStoryIdsState);
   const [selectedStory, setSelectedStory] = useState(null);
-  const navigate = useNavigate(); // ✅ 책장으로 이동 버튼용
+  const navigate = useNavigate();
 
-  // 즐겨찾기된 story만 필터링
   const favoriteStories = Array.isArray(allStories)
     ? allStories.filter(story => favoriteIds.includes(story.id))
     : [];
@@ -57,22 +73,22 @@ export default function Favorite() {
   const handleClosePopup = () => {
     setSelectedStory(null);
   };
-  
+
   return (
     <FavoriteContainer>
       <Header pageName="즐겨찾기" />
       <ContentContainer>
         {favoriteStories.length > 0 ? (
           favoriteStories.map((story) => (
-            <Block
-              key={story.id}
-              blockImg={story.img?.[0] || story.cover}
-              blockName={story.title}
-              creationDate={story.date}
-              storyId={story.id}
-              showFavorite={true}
-              onClick={() => handleBlockClick(story)}
-            />
+            <StoryWrapper key={story.id} onClick={() => handleBlockClick(story)}>
+              <Block
+                blockImg={story.img?.[0] || story.cover}
+                blockName={story.title}
+                creationDate={story.date}
+                storyId={story.id}
+                showFavorite={true}
+              />
+            </StoryWrapper>
           ))
         ) : (
           <Empty
@@ -93,7 +109,10 @@ export default function Favorite() {
             description={selectedStory.summary}
             positiveBtnText="열기"
             negativeBtnText="닫기"
-            onPositiveClick={() => console.log("책 열기")}
+            onPositiveClick={() => {
+              handleClosePopup();
+              navigate("/reading");
+            }}
             onNegativeClick={handleClosePopup}
             titleFontSize="1.1rem"
             subFontSize="0.9rem"
