@@ -96,10 +96,12 @@ const CharacterCreationScreen = () => {
         "주인공이 될 인물의 사진을 업로드 해주세요."
       }
       imageSrc={null}
-    >
+    > 
+    // 여기주석처리
       <div style={{ marginBottom: '20px' }}>
         <MicSpeakButton onComplete={handleMicClick} />
       </div>
+      // 여기주석처리
 
       <GallerySelectButton onClick={handleSelectImage} />
 

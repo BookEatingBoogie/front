@@ -5,21 +5,13 @@ import { storyCreationState, characterInfoState } from '../recoil/atoms';
 import BaseScreenLayout from '../components/BaseScreenLayout';
 import styled from 'styled-components';
 import { postStoryIntro } from '../api/story';
-import cloudMkGif from '../assets/images/cloudmk4.gif'; // 회의 후 결정될 gif
+import cloudMkGif from '../assets/images/cloudmk4.gif';
 import Lottie from 'react-lottie-player';
 import thinkAnimation from '../assets/thinkAnimation.json';
 
 const storyQuestions = [
-  {
-    key: 'genre',
-    question: '장르를 선택해 주세요.',
-    options: ['일상', '마법', '영웅', '액션', '모험'],
-  },
-  {
-    key: 'place',
-    question: '장소를 선택해 주세요.',
-    options: ['우주', '왕국', '산', '바다', '학교', '집'],
-  },
+  { key: 'genre', question: '장르를 선택해 주세요.', options: ['일상', '마법', '영웅', '액션', '모험'] },
+  { key: 'place', question: '장소를 선택해 주세요.', options: ['우주', '왕국', '산', '바다', '학교', '집'] },
 ];
 
 const OptionsContainer = styled.div`
@@ -34,6 +26,7 @@ const OptionItem = styled.div`
   position: absolute;
 `;
 
+/* active 여부에 따라 크게(1.2) 혹은 작게(0.8) 스케일, transition 0.6s */
 const CloudButton = styled.div`
   width: 6.5rem;
   height: 6.5rem;
@@ -46,9 +39,10 @@ const CloudButton = styled.div`
   color: #333;
   cursor: pointer;
   user-select: none;
-  transition: transform 0.2s;
+  transition: transform 0.6s ease;
+  transform: scale(${props => (props.active ? 1.3 : 1.15)});
   &:hover {
-    transform: scale(1.2);
+    transform: scale(${props => (props.active ? 1.4 : 1.15)});
   }
 `;
 
@@ -58,13 +52,17 @@ export default function StoryQuestionScreen() {
   const [characterInfo] = useRecoilState(characterInfoState);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [positions, setPositions] = useState([]);
+  const [showThree, setShowThree] = useState(true); // true → 3개, false → 2개
   const audioRef = useRef(null);
 
   const current = storyQuestions[questionIndex];
+  const optionsCount = current.options.length;
+  const firstGroupSize = 3; // 앞에서 3개
+  const secondGroupSize = optionsCount - firstGroupSize; // 뒤에서 2개
 
-  // 옵션 위치 계산
+  // 옵션 위치 계산 (기존 로직 그대로)
   useEffect(() => {
-    const count = current.options.length;
+    const count = optionsCount;
     const rows = Math.ceil(Math.sqrt(count));
     const cols = Math.ceil(count / rows);
     const cellW = 100 / cols;
@@ -77,16 +75,25 @@ export default function StoryQuestionScreen() {
     }
     const shuffled = cells.sort(() => Math.random() - 0.5).slice(0, count);
     const newPos = shuffled.map(([r, c]) => {
-      const padX = cellW * 0.1;
-      const padY = cellH * 0.1;
+      const padX = cellW * 0.25;
+      const padY = cellH * 0.25;
       const left = c * cellW + padX + Math.random() * (cellW - 2 * padX);
       const top = r * cellH + padY + Math.random() * (cellH - 2 * padY);
       return { left: `${left}%`, top: `${top}%` };
     });
     setPositions(newPos);
+  }, [questionIndex, optionsCount]);
+
+  // 1.5초마다 3개/2개 토글
+  useEffect(() => {
+    setShowThree(true);
+    const iv = setInterval(() => {
+      setShowThree(prev => !prev);
+    }, 1500);
+    return () => clearInterval(iv);
   }, [questionIndex]);
 
-  // TTS: 현재 질문 읽어주기
+  // TTS 읽기 (기존 로직 그대로)
   useEffect(() => {
     const speak = async () => {
       if (audioRef.current) {
@@ -121,31 +128,23 @@ export default function StoryQuestionScreen() {
   const handleSelect = async (option) => {
     const key = current.key;
     const charID = parseInt(characterInfo[0].id, 10);
-
-    // 1) Recoil에 genre/place 먼저 저장
     setStoryData(prev => ({
       ...prev,
       characterId: charID,
       ...(key === 'genre' && { genre: option }),
       ...(key === 'place' && { place: option }),
     }));
-
-    // 2) 아직 질문이 남아 있으면 다음 질문으로
     if (questionIndex < storyQuestions.length - 1) {
       setQuestionIndex(i => i + 1);
       return;
     }
-
-    // 3) 마지막 질문에 답했을 때만 /intro 호출
     try {
       const payload = {
         characterId: charID,
-        genre: storyData.genre || (key==='genre' ? option : ''),
+        genre: storyData.genre || (key === 'genre' ? option : ''),
         place: option,
       };
       const { data } = await postStoryIntro(payload);
-
-      // 4) Recoil에 응답 저장 (step:0→1)
       setStoryData(prev => ({
         ...prev,
         step:    1,
@@ -155,11 +154,8 @@ export default function StoryQuestionScreen() {
         choices: data.choices,
         question: data.question,
       }));
-
-      // 5) 실제 스토리 화면(InteractiveStoryScreen)으로 이동
       navigate('/confirm-story');
-    } catch (err) {
-      console.error(err);
+    } catch {
       alert('초기 스토리 생성에 실패했습니다.');
       navigate('/confirm-story');
     }
@@ -172,19 +168,25 @@ export default function StoryQuestionScreen() {
       progressTotal={storyQuestions.length}
       title={current.question}
       subTitle="이야기에 대해 말해 주세요."
-      // imageSrc 제거
     >
       <OptionsContainer>
-        {current.options.map((opt, idx) => (
-          <OptionItem key={opt} style={positions[idx]}>
-            <CloudButton gif={cloudMkGif} onClick={() => handleSelect(opt)}>
-              {opt}
-            </CloudButton>
-          </OptionItem>
-        ))}
+        {current.options.map((opt, idx) => {
+          // showThree=true면 idx<3, false면 idx>=3만 active
+          const isActive = showThree ? idx < firstGroupSize : idx >= firstGroupSize;
+          return (
+            <OptionItem key={opt} style={positions[idx]}>
+              <CloudButton
+                gif={cloudMkGif}
+                active={isActive}
+                onClick={() => handleSelect(opt)}
+              >
+                {opt}
+              </CloudButton>
+            </OptionItem>
+          );
+        })}
       </OptionsContainer>
 
-      {/* thinkAnimation.json Lottie */}
       <Lottie
         loop
         animationData={thinkAnimation}
@@ -196,7 +198,7 @@ export default function StoryQuestionScreen() {
           width: '22.5rem',
           maxWidth: '100%',
           height: 'auto',
-          bottom: '-22rem', //////
+          bottom: '-22rem',
           zIndex: 1
         }}
       />
