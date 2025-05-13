@@ -93,7 +93,7 @@ const CharacterCategoryWrapper = styled.div`
   width: 100%;
   overflow-x: auto;
   background-color: #fff;
-  margin-left: 1rem;
+  margin-left: rem;
   margin-top: 1rem; 
 `;
 
