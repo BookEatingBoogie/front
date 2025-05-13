@@ -64,16 +64,12 @@ const OverlayTop = styled.div`
   width: 100%;
   background-color: #fff9ec;
   color: #1A202B;
-  padding: 1rem 0.75rem 0.8rem 1rem;
+  padding: 1rem;
   border-bottom: 1px solid #eee;
   display: ${(props) => (props.$visible ? 'flex' : 'none')};
   justify-content: space-between;
   align-items: center;
   z-index: 10;
-
-  @media (max-width: 480px) {
-    padding: 0.75rem;
-  }
 `;
 
 const BackGroup = styled.div`
@@ -120,11 +116,6 @@ const OverlayBottom = styled.div`
   gap: 0.75rem;
   z-index: 10;
   box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.05);
-
-  @media (max-width: 480px) {
-    padding: 0.5rem 0.75rem;
-    gap: 0.5rem;
-  }
 `;
 
 const ProgressInfo = styled.div`
@@ -222,61 +213,66 @@ export default function ReadingScreen() {
   const progress = ((currentPage + 1) / totalPages) * 100;
   const texts = story.text || Array(totalPages).fill(story.summary);
 
+  const stopSpeaking = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current.src = '';
+      audioRef.current.removeAttribute('src'); 
+      audioRef.current.load();
+      audioRef.current.oncanplaythrough = null;
+      audioRef.current.onended = null;
+    }
+    setIsSpeaking(false);
+  };
+  
+
   const speakText = async (text) => {
     try {
-      setIsSpeaking(true);
+      stopSpeaking(); // 이전 재생 중단
+  
       const res = await fetch("http://localhost:5001/tts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text }),
       });
-
+  
       if (!res.ok) throw new Error("TTS 요청 실패");
-
+  
       const blob = await res.blob();
       const audioUrl = URL.createObjectURL(blob);
-
+  
       if (audioRef.current) {
         audioRef.current.src = audioUrl;
-        audioRef.current.play();
+  
+        audioRef.current.onended = () => {
+          setIsSpeaking(false);
+          if (autoPlay && currentPage < totalPages - 1) {
+            setCurrentPage((prev) => prev + 1);
+          } else if (currentPage === totalPages - 1) {
+            setShowFinishPopup(true);
+          }
+        };
+  
+        await audioRef.current.play(); // 💡 바로 실행
+        setIsSpeaking(true);
       }
-
-      audioRef.current.onended = () => {
-        setIsSpeaking(false);
-        if (autoPlay && currentPage < totalPages - 1) {
-          setCurrentPage((prev) => prev + 1);
-        } else if (currentPage === totalPages - 1) {
-          setShowFinishPopup(true);
-        }
-      };
     } catch (err) {
       console.error("TTS 오류:", err);
       setIsSpeaking(false);
     }
   };
-
-  const stopSpeaking = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
-    setIsSpeaking(false);
-  };
+  
 
   const toggleTTS = () => {
     if (isSpeaking) {
-      audioRef.current?.pause();
-      setIsSpeaking(false);
+      stopSpeaking(); // ⏸ 누르면 완전 정지
     } else {
-      if (audioRef.current?.paused && audioRef.current?.currentTime > 0) {
-        audioRef.current.play();
-        setIsSpeaking(true);
-      } else {
-        setAutoPlay(true);
-        speakText(texts[currentPage]);
-      }
+      setAutoPlay(true);
+      speakText(texts[currentPage]); // ▶ 다시 읽기
     }
   };
+  
 
   const handleNext = () => {
     stopSpeaking();
@@ -293,13 +289,13 @@ export default function ReadingScreen() {
       speakText(texts[currentPage]);
       autoStarted.current = true;
     }
-  }, [currentPage, speakText, texts]);
+  }, [currentPage]);
 
   useEffect(() => {
     if (autoPlay && !isSpeaking && texts[currentPage]) {
       speakText(texts[currentPage]);
     }
-  }, [currentPage, autoPlay, isSpeaking, speakText, texts]);
+  }, [currentPage, autoPlay, isSpeaking]);
 
   if (!story) return <div>불러오는 중...</div>;
 

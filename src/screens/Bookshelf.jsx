@@ -89,18 +89,19 @@ const Separator = styled.hr`
 const WrapperBetweenCategoryAndTitle = styled.div`
   width: 100%;
 `;
-
 const CharacterCategoryWrapper = styled.div`
   width: 100%;
   overflow-x: auto;
   background-color: #fff;
+  margin-left: 1rem;
+  margin-top: 1rem; 
 `;
 
 const CharacterCategoryContainer = styled.div`
   display: flex;
   align-items: flex-end;
   gap: 0.75rem;
-  padding: 1rem;
+  padding: 0;
   width: max-content;
 `;
 
@@ -137,14 +138,14 @@ const CharacterLabel = styled.span`
 
 const CharacterSectionTitle = styled.div`
   width: 100%;
-  padding: 0.75rem 1rem 0.5rem 1rem;
+  padding: 0.75rem 1rem 0.5rem -1rem;
   font-weight: 600;
   font-size: 0.95rem;
   color: #1A202B;
   text-align: center;
   background-color: ${(props) => (props.$hasContent ? '#FFF9EC' : '#fff')};
   margin-top: -0.25rem;
-
+  padding-top: 1rem;
   @media (max-width: 480px) {
     font-size: 0.85rem;
   }
@@ -164,6 +165,7 @@ const ContentContainer = styled.div`
 const HighlightedWrapper = styled.div`
   width: 100%;
   background-color: ${(props) => (props.active ? '#FFF9EC' : '#fff')};
+  height: 100vh;
 `;
 
 const Overlay = styled.div`

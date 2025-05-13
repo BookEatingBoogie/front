@@ -55,7 +55,7 @@ const CharacterCreationScreen = () => {
       formData.append('image', file, 'hello.jpeg');
 
       // 지정된 엔드포인트로 파일 전송 (POST 요청, no-cors 모드 적용)
-      await fetch('https://cfr-realistic-follow-recovered.trycloudflare.com/upload/image?filename=hello.jpeg', {
+      await fetch('https://gates-condition-brief-against.trycloudflare.com/upload/image?filename=hello.jpeg', {
         method: 'POST',
         mode: 'no-cors',
         body: formData,

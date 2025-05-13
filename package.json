@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.806.0",
+    "@aws-sdk/client-s3": "^3.808.0",
     "@google-cloud/speech": "^7.0.1",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
