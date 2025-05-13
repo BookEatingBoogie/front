@@ -15,10 +15,11 @@ const CardContainer = styled.div`
 `;
 
 const IMG = styled.img`
-  width: ${(props) => props.size || '150px'};
-  height: ${(props) => props.size || '150px'};
+  width: ${(props) => props.imageWidth || '100%'};
+  aspect-ratio: 2 / 3;
+  object-fit: contain;
   border-radius: ${(props) => props.cornerRadius || '10px'};
-  object-fit: cover;
+  background-color: transparent;
 `;
 
 const Title = styled.div`
@@ -97,14 +98,16 @@ export default function PopCard({
   titleFontSize,
   subFontSize,
   descriptionFontSize,
-
-  // ✅ 추가된 props
   positiveBtnStyle = {},
   negativeBtnStyle = {},
 }) {
   return (
     <CardContainer>
-      <IMG src={imageSrc} size={imageSize} cornerRadius={cornerRadius} />
+      <IMG
+      src={imageSrc}
+      imageWidth={imageSize}
+      cornerRadius={cornerRadius}/>
+
       <Title fontSize={titleFontSize}>{cardTitle}</Title>
       <SubTitle fontSize={subFontSize}>{subTitle}</SubTitle>
       <DIV fontSize={descriptionFontSize}>{description}</DIV>

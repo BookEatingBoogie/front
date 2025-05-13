@@ -13,7 +13,7 @@ const CharacterContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: #fff;
+  background-color: #fff9ec;
   min-height: 100vh;
 `;
 
@@ -66,7 +66,7 @@ export default function CharacterStore() {
               onClick={() => handleBlockClick(char)}
               hideDate={true}
               hideFavorite={true}
-              customSize={true} // ✅ 비율 유지 + 크기 제한 적용
+              customSize={true} 
             />
           ))
         ) : (

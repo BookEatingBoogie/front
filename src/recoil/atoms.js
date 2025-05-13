@@ -1,6 +1,6 @@
 import { atom } from 'recoil';
 import testImg from '../assets/images/마법사 유원이.webp';
-import 서영이 from '../assets/images/서영이와 다람쥐.webp'
+import 서영이 from '../assets/images/testImg.png'
 import 유원이 from '../assets/images/마법사 유원이.webp';
 import 민지 from '../assets/images/민지와 눈내리는 마을.webp';
 
@@ -21,28 +21,28 @@ export const characterInfoState = atom({
       userImg: '',
     },
     {
-      id: '1',
-      name: '유원이',
-      age: '7',
-      gender: '여성',
-      job: '마법사',
-      speciality: '마법을 잘 써',//성격
+      id: '0',
+      name: '서영이',
+      age: '5',
+      gender: '몰라',
+      job: '다람쥐',
+      speciality: '돈을 잘 벌어',
       ability:'슈퍼맨',
-      note: '검은 고양이 네로와 모험을 떠났어',
-      img: 유원이,
-      userImg:'',
+      note: '사람으로 변했다.',
+      img: 서영이,
+      userImg: '',
     },
     {
-      id: '2',
-      name: '민지',
+      id: '0',
+      name: '서영이',
       age: '5',
-      gender: '여성',
-      job: '꼬마소녀',
-      speciality: '동물과 대화가 가능해',
+      gender: '몰라',
+      job: '다람쥐',
+      speciality: '돈을 잘 벌어',
       ability:'슈퍼맨',
-      note: '마음씨가 착해서 사람 뿐 아니라 동물에 대해서도 공감력이 좋다.',
-      img: 민지,
-      userImg:'',
+      note: '사람으로 변했다.',
+      img: 서영이,
+      userImg: '',
     },
   ],
 });
@@ -56,7 +56,7 @@ export const storyCreationState = atom({
     history: [
       '옛날 옛적에 용감한 주인공이 산에서 살고 있었어요.',
     ],                            // 예시 히스토리 배열
-    story: '토비는 빛나는 돌의 정체를 알아내기 위해 근처 마을로 향했습니다. 마을 광장에는 노련해 보이는 여행자가 돌고 있으며, 신비한 책을 펼쳐 들고 있었습니다. 토비는 이 여행자에게 어떤 질문을 할까요? 다음 세가지 선택지 중에 하나를 골라줘! ', // 최신 스토리
+    story: '옛날 옛적에 용감한 주인공이 산에서 살고 있었어요.', // 최신 스토리
     question: '질문1',
     image: 유원이, // 예시 배경 이미지 URL
     choices: ['산 아래로 달려 내려간다', '그 자리에 머문다', '정상으로 올라간다'], // 예시 선택지

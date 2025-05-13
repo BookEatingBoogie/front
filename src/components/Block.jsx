@@ -13,16 +13,20 @@ const BlockContainer = styled.div`
 
 const ImageWrapper = styled.div`
   position: relative;
-  width: 7.5rem;
-  height: 9.375rem;
+  width: 100%;
+  max-width: 180px; /* 이미지가 너무 커지지 않도록 제한 */
+  border-radius: 25px;
+  border: 0.5px solid #1A202B;
+  box-shadow: 15px 15px 15px -15px  rgba(26, 32, 43, 1);
 `;
 
 const IMG = styled.img`
   width: 100%;
-  height: 100%;
+  aspect-ratio: 2 / 3; /* 512:768 비율 유지 */
+  height: auto;
+  object-fit: contain;
   border-radius: 0.3125rem;
-  object-fit: cover;
-  background-color: lightgray;
+  // background-color: rgba(251, 246, 229, 0.7);
 `;
 
 const Title = styled.div`
@@ -61,20 +65,22 @@ export default function Block({
   hideDate = false,
   hideFavorite = false,
   onClick,
+  customSize = false,
 }) {
   return (
     <BlockContainer onClick={onClick}>
       <ImageWrapper>
-        <IMG src={blockImg} alt={blockName || "story image"} />
-        
+        <IMG
+          src={blockImg}
+          alt={blockName || "story image"}
+          customSize={customSize}
+        />
         {!hideFavorite && showFavorite && storyId && !isEditing && (
           <FavoriteButton storyId={storyId} />
         )}
       </ImageWrapper>
-
       <Title>{blockName}</Title>
       {!hideDate && <Date>{creationDate}</Date>}
     </BlockContainer>
   );
 }
-
