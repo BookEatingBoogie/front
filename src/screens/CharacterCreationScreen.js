@@ -91,7 +91,7 @@ const CharacterCreationScreen = () => {
       progressText="1/3"
       progressCurrent={1}
       progressTotal={3}
-      title={`주인공은 어떻게 생겼나요?`}
+      title={`주인공은 어떻게\n생겼나요?`}
       subTitle={
         "주인공이 될 인물의 사진을 업로드 해주세요."
       }

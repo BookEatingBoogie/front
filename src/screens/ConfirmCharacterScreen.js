@@ -51,7 +51,7 @@ export default function ConfirmCharacterScreen() {
       progressText="3/3"
       progressCurrent={3}
       progressTotal={3}
-      title={`${characterName}! 이렇게 생겼군요!`}
+      title={`${characterName}!\n이렇게 생겼군요!`}
       subTitle="이 인물로 이야기를 만들어볼까요?"
       imageSrc={null}
     >

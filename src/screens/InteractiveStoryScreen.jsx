@@ -22,11 +22,13 @@ const spin = keyframes`
   to   { --angle: 360deg; }
 `;
 
-// 3) 화면 전체 컨테이너
+// 3) 화면 전체 컨테이너: 이미지와 버튼을 세로로 정렬하고 중앙에 배치
 const Content = styled.div`
-  position: relative;
-  width: 100%;
-  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;           /* 이미지와 버튼 사이 간격 */
+  padding-bottom: 2rem; /* 아래 여백 */
 `;
 
 // 4) 스토리 이미지 래퍼
@@ -47,16 +49,12 @@ const ImageWrapper = styled.div`
   }
 `;
 
-// 5) 선택지 오버레이
+// 5) 선택지 오버레이: 이미지 아래, 가로로 버튼 나열
 const ChoicesOverlay = styled.div`
-  position: absolute;
-  bottom: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 90%;
-  max-width: 360px;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  justify-content: center;
   gap: 0.75rem;
 `;
 
@@ -105,71 +103,92 @@ const GLOW_DURATION = 1000;
 export default function InteractiveStoryScreen() {
   const navigate = useNavigate();
   const [storyData, setStoryData] = useRecoilState(storyCreationState);
-  const { choices = [], step, question, story } = storyData;
-
+  const { choices = [], step, question, story, image } = storyData;
   const [animatingIndex, setAnimatingIndex] = useState(null);
   const audioRef = useRef(null);
-
   const useDummy = true;
 
-  // question, story 바뀔 때마다 순차 재생
-  useEffect(() => {
-    if (!question && !story) return;
+  // question, story 바뀔 때마다 순차 재생 (TTS)
+useEffect(() => {
+  if (!question && !story) return;
+  let isCancelled = false;
 
-    let qUrl = null;
-    let sUrl = null;
-    let isCancelled = false;
+  // 문장 단위 분할 함수: ., !, ? 뒤로 자르되, 매칭 안 되면 전체를 하나의 청크로
+  const splitText = (text) =>
+    text
+      ? text.match(/[^\.!\?]+[\.!\?]+/g)?.map(s => s.trim()) || [text]
+      : [];
 
-    const playSequence = async () => {
-      try {
-        // 질문 TTS
-        const resQ = await fetch('http://localhost:5001/tts', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: question }),
-        });
-        if (!resQ.ok) throw new Error('질문 TTS 실패');
-        const blobQ = await resQ.blob();
-        qUrl = URL.createObjectURL(blobQ);
+  // TTS API 호출 → Blob URL 반환
+  const ttsFetch = (chunk) =>
+    fetch('http://localhost:5001/tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: chunk }),
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('TTS 요청 실패');
+        return res.blob();
+      })
+      .then(blob => URL.createObjectURL(blob));
 
-        // 스토리 TTS
-        const resS = await fetch('http://localhost:5001/tts', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: story }),
-        });
-        if (!resS.ok) throw new Error('스토리 TTS 실패');
-        const blobS = await resS.blob();
-        sUrl = URL.createObjectURL(blobS);
+  // 청크 배열을 받아 순차 재생하되, 현재 청크 재생 중에 다음 청크를 미리 요청
+  const playChunks = async (chunks) => {
+    let preFetchedUrl = null;
 
-        if (isCancelled) return;
+    for (let i = 0; i < chunks.length; i++) {
+      if (isCancelled) break;
 
-        const audio = new Audio(qUrl);
-        audioRef.current = audio;
-        audio.play();
+      // 현재 URL: 첫 청크는 await 호출, 이후엔 prefetch 결과 사용
+      let url = i === 0
+        ? await ttsFetch(chunks[i])
+        : preFetchedUrl;
 
-        audio.addEventListener('ended', () => {
-          if (isCancelled) return;
-          const nextAudio = new Audio(sUrl);
-          audioRef.current = nextAudio;
-          nextAudio.play();
-        });
-      } catch (err) {
-        console.error('TTS 에러:', err);
+      // 다음 청크가 있으면 즉시 fetch 시작 (prefetch)
+      let nextPromise = null;
+      if (i + 1 < chunks.length) {
+        nextPromise = ttsFetch(chunks[i + 1]);
       }
-    };
 
-    playSequence();
+      // 현재 청크 재생
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      audio.play();
 
-    return () => {
-      isCancelled = true;
-      if (audioRef.current) {
-        audioRef.current.pause();
+      // 재생이 끝날 때까지 대기
+      await new Promise(resolve => {
+        audio.addEventListener('ended', resolve);
+      });
+
+      // 사용한 URL 해제
+      URL.revokeObjectURL(url);
+
+      // prefetch 결과를 다음 반복에 사용
+      if (nextPromise) {
+        preFetchedUrl = await nextPromise;
       }
-      if (qUrl) URL.revokeObjectURL(qUrl);
-      if (sUrl) URL.revokeObjectURL(sUrl);
-    };
-  }, [question, story]);
+    }
+  };
+
+  (async () => {
+    const qChunks = splitText(question);
+    const sChunks = splitText(story);
+
+    if (qChunks.length) {
+      await playChunks(qChunks);
+    }
+    if (!isCancelled && sChunks.length) {
+      await playChunks(sChunks);
+    }
+  })();
+
+  return () => {
+    isCancelled = true;
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+  };
+}, [question, story]);
 
   const handleOptionClick = (opt, idx) => {
     setAnimatingIndex(idx);
@@ -225,19 +244,21 @@ export default function InteractiveStoryScreen() {
         imageSrc={null}
       >
         <Content>
-          <ImageWrapper image={storyData.image}>
-            <ChoicesOverlay>
-              {(choices.length > 0 ? choices : ['다음']).map((opt, idx) =>
-                animatingIndex === idx ? (
-                  <GlowButton key={idx}>{opt}</GlowButton>
-                ) : (
-                  <TransparentButton key={idx} onClick={() => handleOptionClick(opt, idx)}>
-                    {opt}
-                  </TransparentButton>
-                )
-              )}
-            </ChoicesOverlay>
-          </ImageWrapper>
+          {/* 1) 이미지 */}
+          <ImageWrapper image={image} />
+
+          {/* 2) 그림 바깥, 바로 아래에 버튼 */}
+          <ChoicesOverlay>
+            {(choices.length > 0 ? choices : ['다음']).map((opt, idx) =>
+              animatingIndex === idx ? (
+                <GlowButton key={idx}>{opt}</GlowButton>
+              ) : (
+                <TransparentButton key={idx} onClick={() => handleOptionClick(opt, idx)}>
+                  {opt}
+                </TransparentButton>
+              )
+            )}
+          </ChoicesOverlay>
         </Content>
       </BaseScreenLayout>
     </>
