@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilState } from 'recoil';                                   // Recoil 상태 관리용 hook import
-import { storyCreationState } from '../recoil/atoms';                      // 스토리 생성 상태 atom import
-import BaseScreenLayout from '../components/BaseScreenLayout';             // 레이아웃 컴포넌트 import
-import styled, { keyframes, createGlobalStyle } from 'styled-components';  // styled-components 및 keyframes, createGlobalStyle import
-import squirrelImg from '../assets/images/서영이와 다람쥐.webp';             // 더미 이미지 import
+import { useRecoilState } from 'recoil';
+import { storyCreationState } from '../recoil/atoms';
+import BaseScreenLayout from '../components/BaseScreenLayout';
+import styled, { keyframes, createGlobalStyle } from 'styled-components';
+import squirrelImg from '../assets/images/서영이와 다람쥐.webp';
 import { postStoryNext } from '../api/story';
+import { toast } from 'react-toastify';
 
 // 1) 전역 스타일: --angle 커스텀 프로퍼티 정의
 const GlobalStyles = createGlobalStyle`
@@ -27,8 +28,8 @@ const Content = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;           /* 이미지와 버튼 사이 간격 */
-  padding-bottom: 2rem; /* 아래 여백 */
+  gap: 1rem;
+  padding-bottom: 2rem;
 `;
 
 // 4) 스토리 이미지 래퍼
@@ -101,15 +102,17 @@ const GlowButton = styled(TransparentButton)`
 const GLOW_DURATION = 1000;
 
 export default function InteractiveStoryScreen() {
+  useEffect(() => {
+    toast.info('컴포넌트 마운트 테스트 알림');
+  }, []);
   const navigate = useNavigate();
   const [storyData, setStoryData] = useRecoilState(storyCreationState);
   const { choices = [], step, question, story, image } = storyData;
   const [animatingIndex, setAnimatingIndex] = useState(null);
   const audioRef = useRef(null);
-  const useDummy = true;
+  const useDummy = true; // 백 연결시 false로 변경경
 
-  // question, story 바뀔 때마다 순차 재생 (TTS)
-useEffect(() => {
+  useEffect(() => {
   if (!question && !story) return;
   let isCancelled = false;
 
@@ -194,7 +197,9 @@ useEffect(() => {
     setAnimatingIndex(idx);
     setTimeout(() => {
       setAnimatingIndex(null);
+
       if (useDummy) {
+        // 👉 더미 로직
         setStoryData(prev => {
           const newStep = prev.step + 1;
           return {
@@ -207,13 +212,27 @@ useEffect(() => {
             step:    newStep,
           };
         });
-        if (step >= 5) navigate('/making-cover');
+        if (step >= 5) {
+          navigate('/making-cover');
+        }
       } else {
-        postStoryNext({ choice: opt })
-          .then(({ data }) => {
+        // 👉 실제 요청 로직
+        const req = postStoryNext({ choice: opt });
+
+        // 마지막 스텝이라면 즉시 페이지 이동
+        if (step + 1 > 5) {
+          navigate('/making-cover');
+        }
+
+        // 백엔드 응답이 오면 토스트 띄우기
+        req.then(res => {
+          const data = res.data;
+          if (data === 'success') {
+            toast.success('처리가 완료되었습니다!');
+          } else {
+            // 정상적으로 storyData 업데이트
             setStoryData(prev => {
               const newStep = prev.step + 1;
-              if (newStep > 5) navigate('/making-cover');
               return {
                 ...prev,
                 history: [...prev.history, data.story],
@@ -224,10 +243,10 @@ useEffect(() => {
                 step:     newStep,
               };
             });
-          })
-          .catch(() => {
-            alert('다음 스토리 생성에 실패했습니다.');
-          });
+          }
+        }).catch(() => {
+          toast.error('다음 스토리 생성에 실패했습니다.');
+        });
       }
     }, GLOW_DURATION);
   };
@@ -247,7 +266,7 @@ useEffect(() => {
           {/* 1) 이미지 */}
           <ImageWrapper image={image} />
 
-          {/* 2) 그림 바깥, 바로 아래에 버튼 */}
+          {/* 2) 선택지 버튼 */}
           <ChoicesOverlay>
             {(choices.length > 0 ? choices : ['다음']).map((opt, idx) =>
               animatingIndex === idx ? (

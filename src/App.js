@@ -25,6 +25,10 @@ import SelectExistingCharacterScreen from './screens/SelectExistingCharacterScre
 import BottomNav from './components/BottomNav';
 import MakingBookCover from './screens/MakingBookCover';
 
+// ToastContainer 전역 등록
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 function PrivateRoute({ children }) {
   // --- 로그인 검증 (백연동 후 주석 해제) ---
   // const token = localStorage.getItem('jwt');
@@ -47,6 +51,14 @@ function App() {
   return (
     <RecoilRoot>
       <GlobalStyle />
+
+      <ToastContainer
+      position="top-center"
+      autoClose={3000}
+      hideProgressBar
+      closeOnClick
+      pauseOnHover
+      />
 
       {/* 라우트 설정 */}
       <Routes>
