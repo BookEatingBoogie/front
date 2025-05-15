@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import Lottie from 'react-lottie-player';
-import introAnimation from '../assets/introAnimation1.json'; // Lottie JSON 파일
+import introAnimation from '../assets/introAnimation1.json';
 
 const Container = styled.div`
   position: relative;
@@ -80,6 +80,7 @@ export default function IntroScreen() {
   }, [play, navigate]);
 
   return (
+    <>
     <Container>
       <Title>{"직접 이야기를\n만들어 봐요!"}</Title>
       <SubTitle>이야기를 만들려면 도깨비의 방망이를 두드려 보세요!</SubTitle>
@@ -95,5 +96,6 @@ export default function IntroScreen() {
         <HammerHotspot onClick={() => !play && setPlay(true)} />
       </DokkaebiWrapper>
     </Container>
+    </>
   );
 }

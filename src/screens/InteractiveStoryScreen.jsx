@@ -227,7 +227,7 @@ export default function InteractiveStoryScreen() {
         // 백엔드 응답이 오면 토스트 띄우기
         req.then(res => {
           const data = res.data;
-          if (data === 'success') {
+          if (res.status === 201) {
             toast.success('처리가 완료되었습니다!');
           } else {
             // 정상적으로 storyData 업데이트
@@ -253,7 +253,7 @@ export default function InteractiveStoryScreen() {
 
   return (
     <>
-      <GlobalStyles />
+    <GlobalStyles />
       <BaseScreenLayout
         progressText={`${step} / 5`}
         progressCurrent={step}

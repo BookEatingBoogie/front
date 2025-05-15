@@ -34,6 +34,7 @@ const uploadToS3 = async (file) => {
 const CharacterCreationScreen = () => {
   const navigate = useNavigate();
   const [characterInfo, setCharacterInfo] = useRecoilState(characterInfoState);
+  const [isFinished, setIsFinished] = useState(false);
   const fileInputRef = useRef(null);
 
   // "갤러리에서 사진 찾아오기" 버튼 클릭 -> 파일 인풋 클릭
@@ -74,7 +75,11 @@ const CharacterCreationScreen = () => {
         const updated = { ...first, userImg: s3Url };
         return [updated, ...prev.slice(1)];
       });
-      
+      setIsFinished(true); 
+      setTimeout(() => {
+        navigate('/character-question');
+      }, 1500);
+
       navigate('/character-question'); // ConfirmCharacterScreen으로 이동
     } catch (error) {
       console.error('파일 업로드 중 오류:', error);
@@ -103,7 +108,10 @@ const CharacterCreationScreen = () => {
       </div>
       // 여기주석처리
 
-      <GallerySelectButton onClick={handleSelectImage} />
+      <GallerySelectButton
+      onClick={handleSelectImage}
+      isFinished={isFinished}
+      />
 
       <input
         type="file"
