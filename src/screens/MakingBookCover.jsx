@@ -1,19 +1,24 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import Draggable from 'react-draggable';
 import html2canvas from 'html2canvas';
 
-const Container = styled.div`
+const CoverContainer = styled.div`
   display: flex;
+  margin: 5rem auto 0; // 상단의 여백 후 가운데 정렬 
+  width: 50vw;
   padding: 2rem;
   background-color: #f2f2f2;
   border-radius: 1rem;
   justify-content: center;
+  align-items: center;
   gap: 2rem;
-  flex-wrap: wrap;
+  // flex-wrap: wrap;
+  padding-bottom: 5rem;7o
 
   @media (max-width: 768px) {
+    // width: 90vw;
     flex-direction: column;
     padding: 1rem;
     align-items: center;
@@ -24,26 +29,40 @@ const CanvasSection = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 80%
+  height: 90%
 `;
 
 const Title = styled.div`
   font-size: 1.1rem;
-  font-weight: 600;
+  font-weight: 800;
   margin-bottom: 0.75rem;
-  color: #333;
+  color: #001840;
   text-align: center;
 `;
 
 const Canvas = styled.div`
-  width: 500px;
-  height: 340px;
-  background-image: url('/bg.jpeg');
-  background-size: cover;
+  aspect-ratio: 2 / 3;                    
+  width: 100%;                          
+  background-image: url('/back.png');  
+  background-size: 100% 100%;          
   background-position: center;
+  background-repeat: no-repeat;
   position: relative;
   border-radius: 1rem;
   overflow: hidden;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+
+  @media (max-width: 768px) {
+    width: 90%
+  }
+`;
+
+
+const CapturedCanvas = styled.img`
+  width: 500px;
+  height: 340px;
+  border-radius: 1rem;
+  object-fit: cover;
 
   @media (max-width: 768px) {
     width: 90vw;
@@ -51,38 +70,54 @@ const Canvas = styled.div`
   }
 `;
 
+const StickerWrapper = styled.div`
+  position: relative;
+  display: inline-block;
+`;
+
 const Sticker = styled.img`
-  width: 60px;
-  height: 60px;
-  cursor: grab;
+  width: ${({ scale }) => 60 * scale}px;
+  height: ${({ scale }) => 60 * scale}px;
   user-select: none;
-  pointer-events: all;
   -webkit-user-drag: none;
-  touch-action: none;
+  pointer-events: none;
+`;
+
+const DeleteButton = styled.button`
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: red;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 0.7rem;
+  cursor: pointer;
+  display: none;
+
+  ${StickerWrapper}:hover & {
+    display: block;
+  }
 `;
 
 const CanvasText = styled.div`
   position: absolute;
-  width: 100%;
-  text-align: center;
-  color: #333;
-  font-weight: bold;
-  font-size: 1.3rem;
-  top: 1rem;
-  z-index: 10;
-  text-shadow: 1px 1px 2px white;
+  font-weight:  1000;
+  font-size: 2rem;
+  cursor: move;
+  white-space: nowrap; /* 줄바꿈 방지 */
 `;
 
 const CanvasAuthor = styled.div`
   position: absolute;
-  bottom: 1rem;
-  width: 100%;
-  text-align: center;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #333;
-  text-shadow: 1px 1px 2px white;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: move;
+  white-space: nowrap;
 `;
+
 
 const InputArea = styled.div`
   margin-top: 1rem;
@@ -101,14 +136,19 @@ const Input = styled.input`
 `;
 
 const SaveButton = styled.button`
-  margin-top: 0.75rem;
-  padding: 0.5rem 1.25rem;
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.6rem 1.5rem;
   background-color: #ffc75f;
-  color: #333;
+  color: #1A202B;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: 1.5rem;
   font-weight: 600;
+  font-size: 0.95rem;
   cursor: pointer;
+  z-index: 200;
 
   &:hover {
     background-color: #ffb830;
@@ -171,81 +211,269 @@ const StickerOption = styled.img`
     border-color: #444;
   }
 `;
+const ResizeHandle = styled.div`
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  width: 12px;
+  height: 12px;
+  cursor: nwse-resize;
+  z-index: 2;
+`;
+const TextColorInput = styled.input`
+  margin-top: 0.5rem;
+  width: 60px;
+  height: 30px;
+  border: none;
+  cursor: pointer;
+`;
+
+const TextPositionControls = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+`;
+
+const TextAlignButton = styled.button`
+  padding: 0.3rem 0.6rem;
+  border: 1px solid #aaa;
+  border-radius: 0.375rem;
+  background-color: white;
+  cursor: pointer;
+  font-size: 0.8rem;
+
+  &:hover {
+    background-color: #eee;
+  }
+`;
+
+
+const TextAlignColorRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+`;
+const InputWithColorWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  position: relative;
+`;
+
+const ColorButton = styled.button`
+  margin-left: 0.5rem;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 0.375rem;
+  padding: 0.3rem 0.5rem;
+  cursor: pointer;
+  font-size: 1rem;
+
+  &:hover {
+    background-color: #f1f1f1;
+  }
+`;
+
+const ColorPopover = styled.div`
+  position: absolute;
+  top: 2.5rem;
+  right: 0;
+  z-index: 100;
+`;
 
 export default function MakingBookCover() {
+  const navigate = useNavigate();
+
+  const [step, setStep] = useState(1);
   const [stickers, setStickers] = useState([]);
+  const [resizingId, setResizingId] = useState(null);
+  const [selectedStickerId, setSelectedStickerId] = useState(null);
+  const [titleColor, setTitleColor] = useState('#1A202B');
+const [authorColor, setAuthorColor] = useState('#1A202B');
+const [showTitleColorPicker, setShowTitleColorPicker] = useState(false);
+const [showAuthorColorPicker, setShowAuthorColorPicker] = useState(false);
+
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
-  const navigate = useNavigate();
+  const [textColor, setTextColor] = useState('#1A202B');
+  
+  const [textPos, setTextPos] = useState({ x: 0, y: 0 });
+  const [authorPos, setAuthorPos] = useState({ x: 0, y: 0 });
   const canvasRef = useRef(null);
 
   const handleAddSticker = (src) => {
-    setStickers([...stickers, { src, id: Date.now() }]);
+    setStickers([...stickers, { src, id: Date.now(), scale: 1, x: 0, y: 0 }]);
   };
 
-  const handleSave = async () => {
-    if (!canvasRef.current) return;
-
-    const canvasElement = canvasRef.current;
-    const canvasImage = await html2canvas(canvasElement);
-    const dataUrl = canvasImage.toDataURL('image/png');
-
-    const link = document.createElement('a');
-    link.href = dataUrl;
-    link.download = `cover_${Date.now()}.png`;
-    link.click();
+  const removeSticker = (id) => {
+    setStickers((prev) => prev.filter((s) => s.id !== id));
   };
 
-  const stickerList = [
-    '/sticker_tokki.png',
-    '/sticker_gold.png',
-    '/sticker_magic.jpeg',
-  ];
+  const handleMouseDown = (id) => {
+    setSelectedStickerId(id);
+  };
+
+  const handleMouseMove = (e) => {
+    if (resizingId !== null) {
+      setStickers((prev) =>
+        prev.map((s) =>
+          s.id === resizingId
+            ? { ...s, scale: Math.max(0.3, Math.min(3, s.scale + (e.movementX + e.movementY) * 0.005)) }
+            : s
+        )
+      );
+    }
+  };
+
+  const handleMouseUp = () => {
+    setResizingId(null);
+  };
+  useEffect(() => {
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [resizingId]);
+
+  const handleSave = () => {
+    setStep(2);
+   if(step ==2){
+    navigate('/bookshelf');
+   }
+  };
 
   return (
-    <Container>
+    <CoverContainer>
       <CanvasSection>
         <Title>동화책에 들어갈 그림을 만들어보아요!</Title>
         <Canvas ref={canvasRef}>
-          <CanvasText>{title}</CanvasText>
-          <CanvasAuthor>by {author}</CanvasAuthor>
-          {stickers.map((s) => (
-            <Draggable
-              key={s.id}
-              bounds="parent"
-              enableUserSelectHack={false}
-            >
-              <Sticker src={s.src} />
-            </Draggable>
-          ))}
+          {step === 1 &&
+            stickers.map((s) => (
+              <Draggable
+                key={s.id}
+                bounds="parent"
+                defaultPosition={{ x: s.x, y: s.y }}
+                onStop={(e, data) =>
+                  setStickers((prev) =>
+                    prev.map((item) =>
+                      item.id === s.id ? { ...item, x: data.x, y: data.y } : item
+                    )
+                  )
+                }
+              >
+                <StickerWrapper>
+                  <Sticker
+                    src={s.src}
+                    scale={s.scale}
+                    onMouseDown={() => handleMouseDown(s.id)}
+                  />
+                  <DeleteButton onClick={() => removeSticker(s.id)}>×</DeleteButton>
+                  <ResizeHandle onMouseDown={() => setResizingId(s.id)} />
+                </StickerWrapper>
+              </Draggable>
+            ))}
+  
+          {step === 2 &&
+            stickers.map((s) => (
+              <StickerWrapper
+                key={s.id}
+                style={{ position: 'absolute', left: `${s.x}px`, top: `${s.y}px` }}
+              >
+                <Sticker src={s.src} scale={s.scale} />
+              </StickerWrapper>
+            ))}
+  
+          {step === 2 && (
+            <>
+              <Draggable
+                bounds="parent"
+                defaultPosition={textPos}
+                onStop={(e, data) => setTextPos({ x: data.x, y: data.y })}
+              >
+                <CanvasText style={{ color: titleColor }}>{title}</CanvasText>
+              </Draggable>
+  
+              <Draggable
+                bounds="parent"
+                defaultPosition={authorPos}
+                onStop={(e, data) => setAuthorPos({ x: data.x, y: data.y })}
+              >
+                <CanvasAuthor style={{ color: authorColor }}>
+                  지은이: {author}
+                </CanvasAuthor>
+              </Draggable>
+            </>
+          )}
         </Canvas>
+  
+        {step === 2 && (
+  <InputArea>
+    <InputWithColorWrapper>
+      <Input
+        type="text"
+        maxLength={10}
+        placeholder="제목 (10자 이내)"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+      />
+      <ColorButton onClick={() => setShowTitleColorPicker((prev) => !prev)}>
+        색상
+      </ColorButton>
+      {showTitleColorPicker && (
+        <ColorPopover>
+          <input
+            type="color"
+            value={titleColor}
+            onChange={(e) => setTitleColor(e.target.value)}
+          />
+        </ColorPopover>
+      )}
+    </InputWithColorWrapper>
 
-        <InputArea>
-          <Input
-            type="text"
-            maxLength={10}
-            placeholder="제목 (10자 이내)"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+    {/* 지은이 입력 + 색상 선택 */}
+    <InputWithColorWrapper>
+      <Input
+        type="text"
+        maxLength={5}
+        placeholder="만든 사람 이름"
+        value={author}
+        onChange={(e) => setAuthor(e.target.value)}
+      />
+      <ColorButton onClick={() => setShowAuthorColorPicker((prev) => !prev)}>
+        색상
+      </ColorButton>
+      {showAuthorColorPicker && (
+        <ColorPopover>
+          <input
+            type="color"
+            value={authorColor}
+            onChange={(e) => setAuthorColor(e.target.value)}
           />
-          <Input
-            type="text"
-            placeholder="만든 사람 이름"
-            value={author}
-            onChange={(e) => setAuthor(e.target.value)}
-          />
-          <SaveButton onClick={handleSave}>저장하기</SaveButton>
-        </InputArea>
+        </ColorPopover>
+      )}
+    </InputWithColorWrapper>
+  </InputArea>
+)}
+
       </CanvasSection>
-
-      <Sidebar>
-        <SidebarTitle>스티커 사용하기</SidebarTitle>
-        <StickerList>
-          {stickerList.map((src, index) => (
-            <StickerOption key={index} src={src} onClick={() => handleAddSticker(src)} />
-          ))}
-        </StickerList>
-      </Sidebar>
-    </Container>
+  
+      {step === 1 && (
+        <Sidebar>
+          <SidebarTitle>스티커 사용하기</SidebarTitle>
+          <StickerList>
+            {['/sticker_tokki.png', '/sticker_gold.png', '/sticker_magic.jpeg'].map((src, i) => (
+              <StickerOption key={i} src={src} onClick={() => handleAddSticker(src)} />
+            ))}
+          </StickerList>
+        </Sidebar>
+      )}
+  
+      <SaveButton onClick={handleSave}>
+        {step === 1 ? '다음 단계로' : '저장하기'}
+      </SaveButton>
+    </CoverContainer>
   );
+  
 }

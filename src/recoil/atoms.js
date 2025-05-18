@@ -1,8 +1,11 @@
 import { atom } from 'recoil';
 import testImg from '../assets/images/마법사 유원이.webp';
-import 서영이 from '../assets/images/서영이와 다람쥐.webp'
-import 유원이 from '../assets/images/마법사 유원이.webp';
-import 민지 from '../assets/images/민지와 눈내리는 마을.webp';
+import 서영이 from '../assets/images/testImg.png'
+import 유원이 from '../assets/images/유원이.png';
+import 민지 from '../assets/images/민지.png';
+import 코코 from '../assets/images/코코.png';
+import 코코1 from '../assets/images/코코1.png';
+import 코코2 from '../assets/images/코코2.png';
 
 
 export const characterInfoState = atom({
@@ -21,28 +24,28 @@ export const characterInfoState = atom({
       userImg: '',
     },
     {
-      id: '1',
+      id: '2',
       name: '유원이',
-      age: '7',
-      gender: '여성',
-      job: '마법사',
-      speciality: '마법을 잘 써',//성격
-      ability:'슈퍼맨',
-      note: '검은 고양이 네로와 모험을 떠났어',
-      img: 유원이,
-      userImg:'',
+      age: '5',
+      gender: '여자',
+      job: '수의사',
+      speciality: '동물과 소통이 가능해',
+      ability:'소통능력',
+      note: '사라지는 동물들을 찾으러 떠난 소녀',
+      img: 민지,
+      userImg: '',
     },
     {
-      id: '2',
-      name: '민지',
+      id: '3',
+      name: '코코',
       age: '5',
-      gender: '여성',
-      job: '꼬마소녀',
-      speciality: '동물과 대화가 가능해',
-      ability:'슈퍼맨',
-      note: '마음씨가 착해서 사람 뿐 아니라 동물에 대해서도 공감력이 좋다.',
-      img: 민지,
-      userImg:'',
+      gender: '여자',
+      job: '수의사',
+      speciality: '동물과 소통이 가능해',
+      ability:'소통능력',
+      note: '사라지는 동물들을 찾으러 떠난 소녀',
+      img: 코코,
+      userImg: '',
     },
   ],
 });
@@ -56,7 +59,7 @@ export const storyCreationState = atom({
     history: [
       '옛날 옛적에 용감한 주인공이 산에서 살고 있었어요.',
     ],                            // 예시 히스토리 배열
-    story: '깊은 숲속에 꼬마 토끼 토비는 매일같이 새롭고 신나는 것을 찾으러 다녔어요. 그의 하얀 털은 햇살에 반짝였고, 커다란 귀는 바람의 속삭임을 들을 수 있었답니다. 어느 날, 토비는 처음 보는 낯선 오솔길이 나타난 걸 발견했어요. 그는 조심스럽지만 호기심을 가지고 앞으로 나아가기로 했죠.', // 최신 스토리
+    story: '깊은 숲속에 꼬마 토끼 토비는 매일같이 새롭고 신나는 것을 찾으러 다녔어요.', // 최신 스토리
     question: '토비는 처음에 어디로 갔을까요?',
     image: 유원이, // 예시 배경 이미지 URL
     choices: ['산 아래로', '가만히', '정상으로'], // 예시 선택지
@@ -70,13 +73,23 @@ export const storyInfoState = atom({
   default: [
     {
       id: '1',
-      title: '마법사 유원이',
+      title: '코코의 모험기',
       date: '2025.02.01',
       favorite: 'false',
-      summary: '마법사 유원이의 네로와 함께하는 모험 이야기',
-      img: Array(10).fill(유원이),
+      summary: '마법사 코코와 네로와 함께하는 모험 이야기',
+      img: Array(10).fill(코코1),
       cover: testImg,
-      characters: ['유원이'], // ✅ 필수
+      characters: ['코코'], // 
+    },
+    {
+      id: '2',
+      title: '마법사 코코',
+      date: '2025.02.01',
+      favorite: 'false',
+      summary: '마법사 코코와 네로와 함께하는 모험 이야기',
+      img: Array(10).fill(코코2),
+      cover: testImg,
+      characters: ['코코'], // 
     },
   ],
 });

@@ -1,4 +1,3 @@
-// Bookshelf.jsx
 import React, { useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { storyInfoState, characterInfoState } from '../recoil/atoms';
@@ -93,7 +92,7 @@ const CharacterCategoryWrapper = styled.div`
   width: 100%;
   overflow-x: auto;
   background-color: #fff;
-  margin-left: 1rem;
+  margin-left: rem;
   margin-top: 1rem; 
 `;
 
@@ -106,23 +105,23 @@ const CharacterCategoryContainer = styled.div`
 `;
 
 const CharacterCircle = styled.div`
-  flex: 0 0 auto;
+  width: 55px;
+  height: 64px;
+  overflow: hidden;
+  border: ${(props) => (props.selected ? '2px solid #FFC75F' : '1px solid #ccc')};
+  background-color: ${(props) => (props.selected ? '#FFF9EC' : '#fff')};
   display: flex;
-  flex-direction: column;
   align-items: center;
-  cursor: pointer;
-  border: ${(props) => (props.selected ? '2px solid #FFC75F' : '2px solid transparent')};
-  background-color: ${(props) => (props.selected ? '#FFF9EC' : 'transparent')};
+  justify-content: center;
+  position: relative;
   border-radius: 1.5rem 1.5rem 0 0;
-  padding: 0.5rem;
-  z-index: ${(props) => (props.selected ? 2 : 1)};
 `;
 
 const CharacterImg = styled.img`
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
+  width: auto;
+  height: 180px; /* 원보다 훨씬 큼 */
   object-fit: cover;
+  transform: translateY(60px); /* 위로 올려서 얼굴만 보이게 */
 `;
 
 const CharacterLabel = styled.span`
@@ -130,7 +129,11 @@ const CharacterLabel = styled.span`
   color: ${(props) => (props.selected ? '#1A202B' : '#888')};
   font-weight: ${(props) => (props.selected ? '600' : '400')};
   margin-top: 0.3rem;
-
+  width: 100%
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   @media (max-width: 480px) {
     font-size: 0.7rem;
   }
@@ -212,7 +215,6 @@ export default function Bookshelf() {
       <CharacterCategoryWrapper>
         <CharacterCategoryContainer>
           <CharacterCircle onClick={() => setSelectedCharacter(null)} selected={selectedCharacter === null}>
-            <div style={{ width: 48, height: 48 }}></div>
             <CharacterLabel selected={selectedCharacter === null}>ALL</CharacterLabel>
           </CharacterCircle>
 
@@ -223,7 +225,6 @@ export default function Bookshelf() {
               selected={selectedCharacter === char.name}
             >
               <CharacterImg src={char.img} alt={char.name} />
-              <CharacterLabel selected={selectedCharacter === char.name}>{char.name}</CharacterLabel>
             </CharacterCircle>
           ))}
         </CharacterCategoryContainer>
@@ -257,6 +258,7 @@ export default function Bookshelf() {
                 storyId={story.id}
                 showFavorite={true}
                 onClick={() => handleBlockClick(story)}
+                withShadow={false}
               />
             ))
           ) : (
@@ -276,6 +278,7 @@ export default function Bookshelf() {
         <Overlay onClick={handleClosePopup}>
           <PopCard
             imageSrc={selectedStory.img?.[0] || selectedStory.cover?.testImg}
+            imageSize="150px" 
             cardTitle={selectedStory.title}
             subTitle={selectedStory.date}
             description={selectedStory.summary}
@@ -290,6 +293,7 @@ export default function Bookshelf() {
             subFontSize="0.9rem"
             descriptionFontSize="0.8rem"
           />
+
         </Overlay>
       )}
 

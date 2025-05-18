@@ -1,6 +1,13 @@
 import React from 'react';
 import styled from 'styled-components';
 
+const breakpoints = {
+  sm: '360px',
+  md: '720px',
+  lg: '1080px',
+  xl: '1440px',
+};
+
 const Container = styled.div`
   position: relative;
   width: 100%;
@@ -52,6 +59,15 @@ const Title = styled.h1`
   margin: 0;
   text-align: center;
   white-space: pre-line;
+  @media (min-width: ${breakpoints.md}) {
+    font-size: 1.6rem;
+  }
+  @media (min-width: ${breakpoints.lg}) {
+    font-size: 1.8rem;
+  }
+  @media (min-width: ${breakpoints.xl}) {
+    font-size: 2rem;
+  }  
 `;
 
 const SubTitle = styled.p`
@@ -67,6 +83,20 @@ const SubTitle = styled.p`
   width: 80%;
   max-width: 25rem;      /* 400px → 400/16 = 25rem */
   white-space: pre-line;
+  @media (min-width: ${breakpoints.md}) {
+    max-width: 40rem;
+    font-size: 1rem;
+  }
+  @media (min-width: ${breakpoints.lg}) {
+    top: 9rem;
+    max-width: 60rem;
+    font-size: 1.125rem;
+  }
+  @media (min-width: ${breakpoints.xl}) {
+    top: 10rem;
+    max-width: 80rem;
+    font-size: 1.14rem;
+  }
 `;
 
 const ContentWrapper = styled.div`
