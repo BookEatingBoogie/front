@@ -13,7 +13,7 @@ const CharacterContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: #fff9ec;
+  background-color: #fff;
   min-height: 100vh;
 `;
 
@@ -56,7 +56,7 @@ export default function CharacterStore() {
   return (
     <CharacterContainer>
       <Header pageName={"내 캐릭터"} />
-      <ContentContainer>
+      <ContentContainer>x
         {characterList.length > 0 ? (
           characterList.map((char, index) => (
             <Block
@@ -67,6 +67,8 @@ export default function CharacterStore() {
               hideDate={true}
               hideFavorite={true}
               customSize={true} 
+              withShadow={true}
+              
             />
           ))
         ) : (

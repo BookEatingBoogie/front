@@ -1,8 +1,12 @@
 import { atom } from 'recoil';
 import testImg from '../assets/images/마법사 유원이.webp';
 import 서영이 from '../assets/images/testImg.png'
-import 유원이 from '../assets/images/마법사 유원이.webp';
-import 민지 from '../assets/images/민지와 눈내리는 마을.webp';
+import 유원이 from '../assets/images/유원이.png';
+import 민지 from '../assets/images/민지.png';
+import 코코 from '../assets/images/코코.png';
+import 코코1 from '../assets/images/코코1.png';
+import 코코2 from '../assets/images/코코2.png';
+
 
 
 export const characterInfoState = atom({
@@ -21,27 +25,27 @@ export const characterInfoState = atom({
       userImg: '',
     },
     {
-      id: '0',
-      name: '서영이',
+      id: '2',
+      name: '유원이',
       age: '5',
-      gender: '몰라',
-      job: '다람쥐',
-      speciality: '돈을 잘 벌어',
-      ability:'슈퍼맨',
-      note: '사람으로 변했다.',
-      img: 서영이,
+      gender: '여자',
+      job: '수의사',
+      speciality: '동물과 소통이 가능해',
+      ability:'소통능력',
+      note: '사라지는 동물들을 찾으러 떠난 소녀',
+      img: 민지,
       userImg: '',
     },
     {
-      id: '0',
-      name: '서영이',
+      id: '3',
+      name: '코코',
       age: '5',
-      gender: '몰라',
-      job: '다람쥐',
-      speciality: '돈을 잘 벌어',
-      ability:'슈퍼맨',
-      note: '사람으로 변했다.',
-      img: 서영이,
+      gender: '여자',
+      job: '수의사',
+      speciality: '동물과 소통이 가능해',
+      ability:'소통능력',
+      note: '사라지는 동물들을 찾으러 떠난 소녀',
+      img: 코코,
       userImg: '',
     },
   ],
@@ -70,13 +74,23 @@ export const storyInfoState = atom({
   default: [
     {
       id: '1',
-      title: '마법사 유원이',
+      title: '코코의 모험기',
       date: '2025.02.01',
       favorite: 'false',
-      summary: '마법사 유원이의 네로와 함께하는 모험 이야기',
-      img: Array(10).fill(유원이),
+      summary: '마법사 코코와 네로와 함께하는 모험 이야기',
+      img: Array(10).fill(코코1),
       cover: testImg,
-      characters: ['유원이'], // ✅ 필수
+      characters: ['코코'], // 
+    },
+    {
+      id: '2',
+      title: '마법사 코코',
+      date: '2025.02.01',
+      favorite: 'false',
+      summary: '마법사 코코와 네로와 함께하는 모험 이야기',
+      img: Array(10).fill(코코2),
+      cover: testImg,
+      characters: ['코코'], // 
     },
   ],
 });
