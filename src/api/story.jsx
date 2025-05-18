@@ -1,17 +1,24 @@
-import axios from 'axios';
+export async function postStoryNext({ choice }) {
+  try {
+    console.log('📤 postStoryNext 호출됨, 보낼 choice:', choice);
+    
+    const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/story`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ choice }),
+    });
 
-const api = axios.create({
-  baseURL: process.env.REACT_APP_API_BASE_URL,
-  headers: { 'Content-Type': 'application/json' },
-});
-
-
-export function postStoryIntro({ genre, place, characterId }) {
-  // 최초 생성: /intro
-  return api.post('/intro', { genre, place, characterId });
-}
-
-export function postStoryNext({ choice }) {
-  // 이후 스텝: /story
-  return api.post('/story', { choice });
+    console.log('📥 서버 응답 status:', res.status);
+    const data = await res.json();
+    console.log('📥 서버 응답 내용:', data);
+    return {
+      status: res.status,
+      data,
+    };
+  } catch (error) {
+    console.error('❌ postStoryNext fetch error:', error);
+    throw error;
+  }
 }

@@ -17,6 +17,7 @@ const ButtonContainer = styled.div`
   padding: 48px 0;
   white-space: pre-line;
   margin: 0 auto;
+  max-width: 21rem;
 
   display: flex;
   flex-direction: column;

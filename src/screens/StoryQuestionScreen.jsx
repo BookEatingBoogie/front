@@ -4,7 +4,6 @@ import { useRecoilState } from 'recoil';
 import { storyCreationState, characterInfoState } from '../recoil/atoms';
 import BaseScreenLayout from '../components/BaseScreenLayout';
 import styled from 'styled-components';
-import { postStoryIntro } from '../api/story';
 import cloudMkGif from '../assets/images/cloudmk4.gif';
 import Lottie from 'react-lottie-player';
 import thinkAnimation from '../assets/thinkAnimation.json';
@@ -127,37 +126,59 @@ export default function StoryQuestionScreen() {
 
   const handleSelect = async (option) => {
     const key = current.key;
-    const charID = parseInt(characterInfo[0].id, 10);
+    const charID = parseInt(characterInfo[0].charId, 10);
     setStoryData(prev => ({
       ...prev,
-      characterId: charID,
+      charId: charID,
       ...(key === 'genre' && { genre: option }),
       ...(key === 'place' && { place: option }),
     }));
+
     if (questionIndex < storyQuestions.length - 1) {
       setQuestionIndex(i => i + 1);
       return;
     }
+
     try {
       const payload = {
-        characterId: charID,
-        genre: storyData.genre || (key === 'genre' ? option : ''),
-        place: option,
+        charId: charID,
+        genre: key === 'genre' ? option : storyData.genre,
+        place: key === 'place' ? option : storyData.place,
       };
-      const { data } = await postStoryIntro(payload);
+
+      console.log('보내는 payload:', payload);
+
+      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/intro`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      console.log('응답 코드:', res.status);
+
+      const resText = await res.text();  // JSON이 아닐 수 있으니 먼저 텍스트로
+      console.log('응답 본문:', resText);
+
+      if (!res.ok) throw new Error('초기 스토리 생성 실패');
+
+      const data = JSON.parse(resText);  // 이제 안전하게 파싱
+
       setStoryData(prev => ({
         ...prev,
-        step:    1,
+        step: 1,
         history: [data.story],
-        story:   data.story,
-        image:   data.imgUrl,
+        story: data.story,
+        image: data.imgUrl,
         choices: data.choices,
         question: data.question,
       }));
+
       navigate('/confirm-story');
-    } catch {
+    } catch (error) {
+      console.error('스토리 생성 중 에러 발생:', error);
       alert('초기 스토리 생성에 실패했습니다.');
-      navigate('/confirm-story');
     }
   };
 

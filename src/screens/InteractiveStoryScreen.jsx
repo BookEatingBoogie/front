@@ -48,6 +48,18 @@ const ImageWrapper = styled.div`
     display: block;
     padding-top: 100%;
   }
+  @media (min-width: 360px) {
+    max-width: 26rem;    /* 160px */
+  }
+  @media (min-width: 720px) {
+    max-width: 13.75rem; /* 220px */
+  }
+  @media (min-width: 1080px) {
+    max-width: 17.5rem;  /* 280px */
+  }
+  @media (min-width: 1440px) {
+    max-width: 22.5rem;  /* 360px */
+  }
 `;
 
 // 5) 선택지 오버레이: 이미지 아래, 가로로 버튼 나열
@@ -110,7 +122,7 @@ export default function InteractiveStoryScreen() {
   const { choices = [], step, question, story, image } = storyData;
   const [animatingIndex, setAnimatingIndex] = useState(null);
   const audioRef = useRef(null);
-  const useDummy = true; // 백 연결시 false로 변경경
+  const useDummy = false; // 백 연결시 false로 변경
 
   useEffect(() => {
   if (!question && !story) return;
@@ -194,12 +206,14 @@ export default function InteractiveStoryScreen() {
 }, [question, story]);
 
   const handleOptionClick = (opt, idx) => {
+    console.log('👉 선택된 옵션:', opt);
     setAnimatingIndex(idx);
     setTimeout(() => {
       setAnimatingIndex(null);
 
       if (useDummy) {
         // 👉 더미 로직
+        console.log('🧪 useDummy=true, 더미 데이터 사용 중');
         setStoryData(prev => {
           const newStep = prev.step + 1;
           return {
@@ -225,12 +239,13 @@ export default function InteractiveStoryScreen() {
         }
 
         // 백엔드 응답이 오면 토스트 띄우기
-        req.then(res => {
-          const data = res.data;
-          if (res.status === 201) {
-            toast.success('처리가 완료되었습니다!');
+        req.then(({ status, data }) => {
+          console.log('✅ 응답 status:', status);
+          if (status === 201) {
+            toast.success('줄거리 생성이 끝났어요요! 이제 표지꾸미기를 마치면 완성된 동화책을 확인할 수 있어요!');
           } else {
             // 정상적으로 storyData 업데이트
+            console.log('📝 Recoil 업데이트 시작');
             setStoryData(prev => {
               const newStep = prev.step + 1;
               return {
@@ -238,13 +253,14 @@ export default function InteractiveStoryScreen() {
                 history: [...prev.history, data.story],
                 story:    data.story,
                 question: data.question,
-                image:    data.imgUrl,
+                image:    data.imgUrl, //오류시 s3_url
                 choices:  data.choices,
                 step:     newStep,
               };
             });
           }
-        }).catch(() => {
+        }).catch((err) => {
+          console.error('❌ 스토리 생성 실패:', err);
           toast.error('다음 스토리 생성에 실패했습니다.');
         });
       }

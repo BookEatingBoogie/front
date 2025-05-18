@@ -51,23 +51,25 @@ export default function CharacterQuestionScreen() {
         charName: name.trim(),
         userImg: characterInfo[0]?.userImg,  // 방금 S3에 업로드된 URL
       };
-      const { data } = await postCharacter(payload);
+      const result = await postCharacter(payload);
+      console.log("📦 서버 응답:", result);
+      console.log("🔎 status:", result.status);
+      console.log("🔎 message:", result.message);
+      console.log("🔎 charImg:", result.charImg);
 
-      if (data.success) {
-        // 3) 응답으로 받은 charImg를 Recoil에 저장
+      if (result.success) {
         setCharacterInfo(prev => {
           const first = prev[0];
-          return [{ ...first, img: data.charImg }, ...prev.slice(1)];
+          return [{ ...first, img: result.charImg, charId: result.charId, }, ...prev.slice(1)];
         });
-        // 4) 최종 확인 화면으로
         navigate('/confirm-character');
       } else {
-        alert(data.message || '캐릭터 생성에 실패했습니다.');
+        alert(result.message || '캐릭터 생성에 실패했습니다.');
       }
     } catch (error) {
       console.error('postCharacter error:', error);
       alert('서버 오류로 캐릭터 정보를 등록하지 못했습니다.');
-      navigate('/confirm-character');
+      //navigate('/confirm-character');
     }
   };
 

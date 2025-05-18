@@ -20,8 +20,9 @@ export const characterInfoState = atom({
       speciality: '돈을 잘 벌어',
       ability:'슈퍼맨',
       note: '사람으로 변했다.',
+      charId: 4,
       img: 서영이,
-      userImg: '',
+      userImg: 'https://bookeating.s3.ap-northeast-2.amazonaws.com/character/img2.jpg"',
     },
     {
       id: '2',
@@ -53,7 +54,7 @@ export const characterInfoState = atom({
 export const storyCreationState = atom({
   key: 'storyCreationState',
   default: {
-    charID: 1,                     // 예시 캐릭터 ID
+    charId: 1,                     // 예시 캐릭터 ID
     genre: '모험',                 // 예시 장르
     place: '산',                  // 예시 장소
     history: [

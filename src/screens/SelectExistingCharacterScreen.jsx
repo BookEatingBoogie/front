@@ -75,6 +75,8 @@ import React, { useState } from 'react';
                onClick={() => handleBlockClick(char)}
                hideDate={true}
                hideFavorite={true}
+               customSize={true} 
+               withShadow={true}
              />
            ))
          ) : (
@@ -92,6 +94,7 @@ import React, { useState } from 'react';
            <div onClick={(e) => e.stopPropagation()}>
              <PopCard
                imageSrc={selectedCharacter.img || '/default-character.png'}
+               imageSize="150px"
                cardTitle={selectedCharacter.name}
                subTitle={`${selectedCharacter.gender} | 나이 ${selectedCharacter.age}세 | ${selectedCharacter.job}`}
                description={selectedCharacter.speciality + '\n' + selectedCharacter.note}
