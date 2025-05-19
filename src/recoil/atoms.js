@@ -35,6 +35,7 @@ export const characterInfoState = atom({
       note: '사라지는 동물들을 찾으러 떠난 소녀',
       img: 민지,
       userImg: '',
+      charId: 8,
     },
     {
       id: '3',
@@ -62,7 +63,7 @@ export const storyCreationState = atom({
     ],                            // 예시 히스토리 배열
     story: '깊은 숲속에 꼬마 토끼 토비는 매일같이 새롭고 신나는 것을 찾으러 다녔어요.', // 최신 스토리
     question: '토비는 처음에 어디로 갔을까요?',
-    image: 유원이, // 예시 배경 이미지 URL
+    image: testImg, // 예시 배경 이미지 URL
     choices: ['산 아래로', '가만히', '정상으로'], // 예시 선택지
     step: 1,                       // 현재 진행 단계
     selectedChoice: '',           // 마지막 선택 값

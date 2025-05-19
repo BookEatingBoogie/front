@@ -52,13 +52,13 @@ const ImageWrapper = styled.div`
     max-width: 26rem;    /* 160px */
   }
   @media (min-width: 720px) {
-    max-width: 13.75rem; /* 220px */
+    max-width: 27rem; /* 220px */
   }
   @media (min-width: 1080px) {
-    max-width: 17.5rem;  /* 280px */
+    max-width: 28rem;  /* 280px */
   }
   @media (min-width: 1440px) {
-    max-width: 22.5rem;  /* 360px */
+    max-width: 29rem;  /* 360px */
   }
 `;
 
@@ -242,7 +242,7 @@ export default function InteractiveStoryScreen() {
         req.then(({ status, data }) => {
           console.log('✅ 응답 status:', status);
           if (status === 201) {
-            toast.success('줄거리 생성이 끝났어요요! 이제 표지꾸미기를 마치면 완성된 동화책을 확인할 수 있어요!');
+            toast.success('줄거리 생성이 끝났어요! 이제 표지꾸미기를 마치면 완성된 동화책을 확인할 수 있어요!');
           } else {
             // 정상적으로 storyData 업데이트
             console.log('📝 Recoil 업데이트 시작');
@@ -253,7 +253,7 @@ export default function InteractiveStoryScreen() {
                 history: [...prev.history, data.story],
                 story:    data.story,
                 question: data.question,
-                image:    data.imgUrl, //오류시 s3_url
+                image:    data.s3_url,
                 choices:  data.choices,
                 step:     newStep,
               };
