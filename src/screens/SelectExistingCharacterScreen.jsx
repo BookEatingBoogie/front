@@ -44,22 +44,23 @@ export default function SelectExistingCharacterScreen() {
   const [selectedCharacter, setSelectedCharacter] = useState(null);
   const navigate = useNavigate();
 
-  // ✅ 서버에서 캐릭터 목록 불러오기
+  // ✅ 서버에서 캐릭터 목록 fetch로 불러오기
   useEffect(() => {
     const fetchCharacters = async () => {
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/mypage/character`);
-        const data = await response.json();
+        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/mypage/character`);
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        const data = await res.json();
 
         const mapped = data.map((char) => ({
           charId: char.charId,
           name: char.charName,
-          age: '', // API에 없으면 빈 값 유지
+          age: '',         // 백엔드에 없으면 빈 문자열 유지
           gender: '',
           job: '',
           speciality: '',
           note: char.charNote,
-          img: char.charImg, // S3 URL
+          img: char.charImg,
           userImg: '',
         }));
 

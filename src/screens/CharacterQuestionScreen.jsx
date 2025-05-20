@@ -75,11 +75,13 @@ export default function CharacterQuestionScreen() {
         userImg: characterInfo[0]?.userImg,  // 방금 S3에 업로드된 URL
       };
       const result = await postCharacter(payload);
+      console.log('✅ BASE URL:', process.env.REACT_APP_API_BASE_URL)
       console.log("📦 서버 응답:", result);
       console.log("🔎 status:", result.status);
       console.log("🔎 message:", result.message);
       console.log("🔎 charImg:", result.charImg);
 
+      console.log("🚀 요청 payload:", payload);
       if (result.success) {
         setCharacterInfo(prev => {
           const first = prev[0];
