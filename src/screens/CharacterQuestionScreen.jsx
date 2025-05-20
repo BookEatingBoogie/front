@@ -6,11 +6,33 @@ import BaseScreenLayout from '../components/BaseScreenLayout';
 import silhouetteImg from '../assets/images/silhouette.png';
 import RoundedButton from '../components/RoundedButton';
 import { postCharacter } from '../api/character';
+import styled from 'styled-components';
+import dokkaebiJumping from '../assets/images/dokkaebi_jumping.gif';
+
+const Overlay = styled.div`
+  position: fixed;
+  z-index: 9999;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6); /* 썬팅 느낌 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const OverlayImage = styled.img`
+  width: 25rem;
+  height: auto;
+  border-radius: 40px;
+`;
 
 export default function CharacterQuestionScreen() {
   const navigate = useNavigate();
   const [characterInfo, setCharacterInfo] = useRecoilState(characterInfoState);
   const [name, setName] = useState(characterInfo[0]?.name || '');
+  const [loading, setLoading] = useState(false);
   const questionText = '주인공의 이름이 무엇인가요?';
 
   // 마운트 시 TTS 자동 실행
@@ -38,6 +60,7 @@ export default function CharacterQuestionScreen() {
 
   const handleNext = async () => {
     if (!name.trim()) return;
+    setLoading(true);
 
     // 1) Recoil에 이름 저장
     setCharacterInfo(prev => {
@@ -51,27 +74,33 @@ export default function CharacterQuestionScreen() {
         charName: name.trim(),
         userImg: characterInfo[0]?.userImg,  // 방금 S3에 업로드된 URL
       };
-      const { data } = await postCharacter(payload);
+      const result = await postCharacter(payload);
+      console.log("📦 서버 응답:", result);
+      console.log("🔎 status:", result.status);
+      console.log("🔎 message:", result.message);
+      console.log("🔎 charImg:", result.charImg);
 
-      if (data.success) {
-        // 3) 응답으로 받은 charImg를 Recoil에 저장
+      if (result.success) {
         setCharacterInfo(prev => {
           const first = prev[0];
-          return [{ ...first, img: data.charImg }, ...prev.slice(1)];
+          return [{ ...first, img: result.charImg, charId: result.charId, }, ...prev.slice(1)];
         });
-        // 4) 최종 확인 화면으로
         navigate('/confirm-character');
       } else {
-        alert(data.message || '캐릭터 생성에 실패했습니다.');
+        alert(result.message || '캐릭터 생성에 실패했습니다.');
       }
     } catch (error) {
       console.error('postCharacter error:', error);
       alert('서버 오류로 캐릭터 정보를 등록하지 못했습니다.');
-      navigate('/confirm-character');
+      //navigate('/confirm-character');
     }
+    finally {
+    setLoading(false); // 🔥 로딩 종료 (성공/실패와 상관없이)
+  }
   };
 
   return (
+    <>
     <BaseScreenLayout
       progressText="2/3"
       progressCurrent={2}
@@ -98,5 +127,12 @@ export default function CharacterQuestionScreen() {
         확인
       </RoundedButton>
     </BaseScreenLayout>
+
+    {loading && (
+        <Overlay>
+          <OverlayImage src={dokkaebiJumping} alt="로딩 중..." />
+        </Overlay>
+      )}
+    </>
   );
 }

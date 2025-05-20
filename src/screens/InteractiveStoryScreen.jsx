@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilState } from 'recoil';                                   // Recoil 상태 관리용 hook import
-import { storyCreationState } from '../recoil/atoms';                      // 스토리 생성 상태 atom import
-import BaseScreenLayout from '../components/BaseScreenLayout';             // 레이아웃 컴포넌트 import
-import styled, { keyframes, createGlobalStyle } from 'styled-components';  // styled-components 및 keyframes, createGlobalStyle import
-import squirrelImg from '../assets/images/서영이와 다람쥐.webp';             // 더미 이미지 import
+import { useRecoilState } from 'recoil';
+import { storyCreationState } from '../recoil/atoms';
+import BaseScreenLayout from '../components/BaseScreenLayout';
+import styled, { keyframes, createGlobalStyle } from 'styled-components';
+import squirrelImg from '../assets/images/서영이와 다람쥐.webp';
 import { postStoryNext } from '../api/story';
+import { toast } from 'react-toastify';
 
-// 1) 전역 스타일: --angle 커스텀 프로퍼티 정의
+// 전역 스타일 정의
 const GlobalStyles = createGlobalStyle`
   @property --angle {
     syntax: "<angle>";
@@ -16,20 +17,19 @@ const GlobalStyles = createGlobalStyle`
   }
 `;
 
-// 2) spin keyframes: --angle 값을 0deg → 360deg로 변경
 const spin = keyframes`
   from { --angle: 0deg; }
   to   { --angle: 360deg; }
 `;
 
-// 3) 화면 전체 컨테이너
 const Content = styled.div`
-  position: relative;
-  width: 100%;
-  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding-bottom: 2rem;
 `;
 
-// 4) 스토리 이미지 래퍼
 const ImageWrapper = styled.div`
   width: 100%;
   margin: 2rem auto 0;
@@ -47,20 +47,14 @@ const ImageWrapper = styled.div`
   }
 `;
 
-// 5) 선택지 오버레이
 const ChoicesOverlay = styled.div`
-  position: absolute;
-  bottom: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 90%;
-  max-width: 360px;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  justify-content: center;
   gap: 0.75rem;
 `;
 
-// 6) 기본 투명 버튼 스타일
 const TransparentButton = styled.button`
   width: 100%;
   padding: 0.75rem 1rem;
@@ -80,7 +74,6 @@ const TransparentButton = styled.button`
   }
 `;
 
-// 7) 선택 시 반짝이는 빛나는 테두리 버튼 스타일
 const GlowButton = styled(TransparentButton)`
   &::before, &::after {
     content: '';
@@ -99,82 +92,100 @@ const GlowButton = styled(TransparentButton)`
   }
 `;
 
-// 8) 선택 애니메이션 유지 시간
 const GLOW_DURATION = 1000;
 
 export default function InteractiveStoryScreen() {
+  useEffect(() => {
+    toast.info('컴포넌트 마운트 테스트 알림');
+  }, []);
+
   const navigate = useNavigate();
   const [storyData, setStoryData] = useRecoilState(storyCreationState);
-  const { choices = [], step, question, story } = storyData;
-
+  const { choices = [], step, question, story, image } = storyData;
   const [animatingIndex, setAnimatingIndex] = useState(null);
   const audioRef = useRef(null);
-
   const useDummy = true;
 
-  // question, story 바뀔 때마다 순차 재생
+  // 👉 TTS 관련 코드 주석 처리
+  /*
   useEffect(() => {
     if (!question && !story) return;
-
-    let qUrl = null;
-    let sUrl = null;
     let isCancelled = false;
 
-    const playSequence = async () => {
-      try {
-        // 질문 TTS
-        const resQ = await fetch('http://localhost:5001/tts', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: question }),
-        });
-        if (!resQ.ok) throw new Error('질문 TTS 실패');
-        const blobQ = await resQ.blob();
-        qUrl = URL.createObjectURL(blobQ);
+    const splitText = (text) =>
+      text
+        ? text.match(/[^\.!\?]+[\.!\?]+/g)?.map(s => s.trim()) || [text]
+        : [];
 
-        // 스토리 TTS
-        const resS = await fetch('http://localhost:5001/tts', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: story }),
-        });
-        if (!resS.ok) throw new Error('스토리 TTS 실패');
-        const blobS = await resS.blob();
-        sUrl = URL.createObjectURL(blobS);
+    const ttsFetch = (chunk) =>
+      fetch('http://localhost:5001/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: chunk }),
+      })
+        .then(res => {
+          if (!res.ok) throw new Error('TTS 요청 실패');
+          return res.blob();
+        })
+        .then(blob => URL.createObjectURL(blob));
 
-        if (isCancelled) return;
+    const playChunks = async (chunks) => {
+      let preFetchedUrl = null;
 
-        const audio = new Audio(qUrl);
+      for (let i = 0; i < chunks.length; i++) {
+        if (isCancelled) break;
+
+        let url = i === 0
+          ? await ttsFetch(chunks[i])
+          : preFetchedUrl;
+
+        let nextPromise = null;
+        if (i + 1 < chunks.length) {
+          nextPromise = ttsFetch(chunks[i + 1]);
+        }
+
+        const audio = new Audio(url);
         audioRef.current = audio;
         audio.play();
 
-        audio.addEventListener('ended', () => {
-          if (isCancelled) return;
-          const nextAudio = new Audio(sUrl);
-          audioRef.current = nextAudio;
-          nextAudio.play();
+        await new Promise(resolve => {
+          audio.addEventListener('ended', resolve);
         });
-      } catch (err) {
-        console.error('TTS 에러:', err);
+
+        URL.revokeObjectURL(url);
+
+        if (nextPromise) {
+          preFetchedUrl = await nextPromise;
+        }
       }
     };
 
-    playSequence();
+    (async () => {
+      const qChunks = splitText(question);
+      const sChunks = splitText(story);
+
+      if (qChunks.length) {
+        await playChunks(qChunks);
+      }
+      if (!isCancelled && sChunks.length) {
+        await playChunks(sChunks);
+      }
+    })();
 
     return () => {
       isCancelled = true;
       if (audioRef.current) {
         audioRef.current.pause();
       }
-      if (qUrl) URL.revokeObjectURL(qUrl);
-      if (sUrl) URL.revokeObjectURL(sUrl);
     };
   }, [question, story]);
+  */
 
   const handleOptionClick = (opt, idx) => {
     setAnimatingIndex(idx);
     setTimeout(() => {
       setAnimatingIndex(null);
+
       if (useDummy) {
         setStoryData(prev => {
           const newStep = prev.step + 1;
@@ -188,13 +199,23 @@ export default function InteractiveStoryScreen() {
             step:    newStep,
           };
         });
-        if (step >= 5) navigate('/making-cover');
+        if (step >= 5) {
+          navigate('/making-cover');
+        }
       } else {
-        postStoryNext({ choice: opt })
-          .then(({ data }) => {
+        const req = postStoryNext({ choice: opt });
+
+        if (step + 1 > 5) {
+          navigate('/making-cover');
+        }
+
+        req.then(res => {
+          const data = res.data;
+          if (res.status === 201) {
+            toast.success('처리가 완료되었습니다!');
+          } else {
             setStoryData(prev => {
               const newStep = prev.step + 1;
-              if (newStep > 5) navigate('/making-cover');
               return {
                 ...prev,
                 history: [...prev.history, data.story],
@@ -205,10 +226,10 @@ export default function InteractiveStoryScreen() {
                 step:     newStep,
               };
             });
-          })
-          .catch(() => {
-            alert('다음 스토리 생성에 실패했습니다.');
-          });
+          }
+        }).catch(() => {
+          toast.error('다음 스토리 생성에 실패했습니다.');
+        });
       }
     }, GLOW_DURATION);
   };
@@ -225,19 +246,18 @@ export default function InteractiveStoryScreen() {
         imageSrc={null}
       >
         <Content>
-          <ImageWrapper image={storyData.image}>
-            <ChoicesOverlay>
-              {(choices.length > 0 ? choices : ['다음']).map((opt, idx) =>
-                animatingIndex === idx ? (
-                  <GlowButton key={idx}>{opt}</GlowButton>
-                ) : (
-                  <TransparentButton key={idx} onClick={() => handleOptionClick(opt, idx)}>
-                    {opt}
-                  </TransparentButton>
-                )
-              )}
-            </ChoicesOverlay>
-          </ImageWrapper>
+          <ImageWrapper image={image} />
+          <ChoicesOverlay>
+            {(choices.length > 0 ? choices : ['다음']).map((opt, idx) =>
+              animatingIndex === idx ? (
+                <GlowButton key={idx}>{opt}</GlowButton>
+              ) : (
+                <TransparentButton key={idx} onClick={() => handleOptionClick(opt, idx)}>
+                  {opt}
+                </TransparentButton>
+              )
+            )}
+          </ChoicesOverlay>
         </Content>
       </BaseScreenLayout>
     </>

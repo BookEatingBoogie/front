@@ -1,8 +1,6 @@
-// Bookshelf.jsx
-import React, { useState } from 'react';
-import { useRecoilValue } from 'recoil';
-import { storyInfoState, characterInfoState } from '../recoil/atoms';
-import Header from '../components/Header'
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import Header from '../components/Header';
 import BottomNav from '../components/BottomNav';
 import Block from '../components/Block';
 import Empty from '../components/Empty';
@@ -32,7 +30,6 @@ const HeaderTitle = styled.div`
   color: white;
   font-size: 1.2rem;
   font-weight: bold;
-
   @media (max-width: 480px) {
     font-size: 1rem;
   }
@@ -46,7 +43,6 @@ const DIV = styled.div`
   font-size: 1rem;
   font-weight: 700;
   margin-top: 0.5rem;
-
   @media (max-width: 480px) {
     font-size: 0.9rem;
   }
@@ -64,7 +60,6 @@ const EditButton = styled.button`
   border: 1px solid rgba(57, 61, 64, 0.5);
   background: rgba(243, 243, 243, 0.58);
   color: #1A202B;
-  text-align: center;
   font-family: Pretendard;
   font-size: 1rem;
   font-weight: 300;
@@ -72,7 +67,6 @@ const EditButton = styled.button`
   padding: 0.25rem 1rem;
   align-items: center;
   gap: 0.25rem;
-
   @media (max-width: 480px) {
     font-size: 0.9rem;
     padding: 0.2rem 0.75rem;
@@ -86,15 +80,11 @@ const Separator = styled.hr`
   margin: 0.25rem 0;
 `;
 
-const WrapperBetweenCategoryAndTitle = styled.div`
-  width: 100%;
-`;
 const CharacterCategoryWrapper = styled.div`
   width: 100%;
   overflow-x: auto;
   background-color: #fff;
-  margin-left: rem;
-  margin-top: 1rem; 
+  margin-top: 1rem;
 `;
 
 const CharacterCategoryContainer = styled.div`
@@ -105,6 +95,22 @@ const CharacterCategoryContainer = styled.div`
   width: max-content;
 `;
 
+<<<<<<< Updated upstream
+const CharacterCircle = styled.div`
+  width: 55px;
+  height: 64px;
+  overflow: hidden;
+  border: ${(props) => (props.selected ? '2px solid #FFC75F' : '1px solid #ccc')};
+  background-color: ${(props) => (props.selected ? '#FFF9EC' : '#fff')};
+=======
+const CharacterWrapper = styled.div`
+>>>>>>> Stashed changes
+  display: flex;
+  align-items: center;
+<<<<<<< Updated upstream
+=======
+`;
+
 const CharacterCircle = styled.div`
   width: 55px;
   height: 64px;
@@ -113,6 +119,7 @@ const CharacterCircle = styled.div`
   background-color: ${(props) => (props.selected ? '#FFF9EC' : '#fff')};
   display: flex;
   align-items: center;
+>>>>>>> Stashed changes
   justify-content: center;
   position: relative;
   border-radius: 1.5rem 1.5rem 0 0;
@@ -120,9 +127,15 @@ const CharacterCircle = styled.div`
 
 const CharacterImg = styled.img`
   width: auto;
+<<<<<<< Updated upstream
   height: 180px; /* 원보다 훨씬 큼 */
   object-fit: cover;
   transform: translateY(60px); /* 위로 올려서 얼굴만 보이게 */
+=======
+  height: 180px;
+  object-fit: cover;
+  transform: translateY(60px);
+>>>>>>> Stashed changes
 `;
 
 const CharacterLabel = styled.span`
@@ -130,7 +143,11 @@ const CharacterLabel = styled.span`
   color: ${(props) => (props.selected ? '#1A202B' : '#888')};
   font-weight: ${(props) => (props.selected ? '600' : '400')};
   margin-top: 0.3rem;
+<<<<<<< Updated upstream
   width: 100%
+=======
+  width: 100%;
+>>>>>>> Stashed changes
   text-align: center;
   display: flex;
   align-items: center;
@@ -142,14 +159,12 @@ const CharacterLabel = styled.span`
 
 const CharacterSectionTitle = styled.div`
   width: 100%;
-  padding: 0.75rem 1rem 0.5rem -1rem;
+  padding: 1rem 1rem 0.5rem 1rem;
   font-weight: 600;
   font-size: 0.95rem;
   color: #1A202B;
   text-align: center;
   background-color: ${(props) => (props.$hasContent ? '#FFF9EC' : '#fff')};
-  margin-top: -0.25rem;
-  padding-top: 1rem;
   @media (max-width: 480px) {
     font-size: 0.85rem;
   }
@@ -186,22 +201,47 @@ const Overlay = styled.div`
 `;
 
 export default function Bookshelf() {
-  const storyList = useRecoilValue(storyInfoState);
-  const characterList = useRecoilValue(characterInfoState);
+  const [storyList, setStoryList] = useState([]);
+  const [characterList, setCharacterList] = useState([]);
   const [selectedCharacter, setSelectedCharacter] = useState(null);
   const [selectedStory, setSelectedStory] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const handleBlockClick = (story) => {
-    setSelectedStory(story);
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/mypage/story`);
+        setCharacterList(res.data.characters || []);
+        setStoryList(res.data.stories || []);
+        console.log('✅ 캐릭터 불러오기 성공:', res.data.characters);
+        console.log('✅ 동화 불러오기 성공:', res.data.stories);
+      } catch (err) {
+        console.error('❌ 데이터 불러오기 실패:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchData();
+  }, []);
+  
 
-  const handleClosePopup = () => {
-    setSelectedStory(null);
+  const handleBlockClick = (story) => setSelectedStory(story);
+  const handleClosePopup = () => setSelectedStory(null);
+  
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
-
   const filteredStoryList = selectedCharacter
-    ? storyList.filter((story) => story.characters?.includes(selectedCharacter))
+    ? storyList.filter((story) =>
+        story.characters?.some((char) => char.charName === selectedCharacter)
+      )
     : storyList;
 
   const isActiveBg = selectedCharacter !== null && filteredStoryList.length > 0;
@@ -215,6 +255,7 @@ export default function Bookshelf() {
       <DIV>캐릭터 카테고리</DIV>
       <CharacterCategoryWrapper>
         <CharacterCategoryContainer>
+<<<<<<< Updated upstream
           <CharacterCircle onClick={() => setSelectedCharacter(null)} selected={selectedCharacter === null}>
             <CharacterLabel selected={selectedCharacter === null}>ALL</CharacterLabel>
           </CharacterCircle>
@@ -228,30 +269,51 @@ export default function Bookshelf() {
               <CharacterImg src={char.img} alt={char.name} />
             </CharacterCircle>
           ))}
+=======
+          <CharacterWrapper>
+            <CharacterCircle onClick={() => setSelectedCharacter(null)} selected={selectedCharacter === null}>
+              <CharacterLabel selected={selectedCharacter === null}>ALL</CharacterLabel>
+            </CharacterCircle>
+          </CharacterWrapper>
+
+          {characterList.map((char) => (
+  <CharacterWrapper key={char.charId}>
+    <CharacterCircle
+      onClick={() => setSelectedCharacter(char.charName)}
+      selected={selectedCharacter === char.charName}
+    >
+      <CharacterImg src={char.charImg} alt={char.charName} />
+    </CharacterCircle>
+    <CharacterLabel selected={selectedCharacter === char.charName}>
+      {char.charName}
+    </CharacterLabel>
+  </CharacterWrapper>
+))}
+
+>>>>>>> Stashed changes
         </CharacterCategoryContainer>
       </CharacterCategoryWrapper>
 
       <Separator />
 
-      <WrapperBetweenCategoryAndTitle>
-        {selectedCharacter === null && (
-          <EditButtonWrapper>
-            <EditButton onClick={() => navigate('/edit-bookshelf')}>편집하기</EditButton>
-          </EditButtonWrapper>
-        )}
+      {selectedCharacter === null && (
+        <EditButtonWrapper>
+          <EditButton onClick={() => navigate('/edit-bookshelf')}>편집하기</EditButton>
+        </EditButtonWrapper>
+      )}
 
-        {selectedCharacter && filteredStoryList.length > 0 && (
-          <CharacterSectionTitle $hasContent={true}>
-            {selectedCharacter}가 나오는 동화들
-          </CharacterSectionTitle>
-        )}
-      </WrapperBetweenCategoryAndTitle>
+      {selectedCharacter && filteredStoryList.length > 0 && (
+        <CharacterSectionTitle $hasContent={true}>
+          {selectedCharacter}가 나오는 동화들
+        </CharacterSectionTitle>
+      )}
 
       <HighlightedWrapper active={isActiveBg}>
         <ContentContainer>
           {filteredStoryList.length > 0 ? (
             filteredStoryList.map((story) => (
               <Block
+<<<<<<< Updated upstream
                 key={story.id}
                 blockImg={story.img?.[0] || story.cover?.testImg}
                 blockName={story.title}
@@ -261,6 +323,17 @@ export default function Bookshelf() {
                 onClick={() => handleBlockClick(story)}
                 withShadow={false}
               />
+=======
+              key={story.storyId}
+              blockImg={story.coverImg || story.img?.[0]}
+              blockName={story.title}
+              creationDate={formatDate(story.creationDate)}
+              storyId={story.storyId}
+              showFavorite={true}
+              onClick={() => handleBlockClick(story)}
+              withShadow={false}
+            />
+>>>>>>> Stashed changes
             ))
           ) : (
             <div style={{ width: '100%', backgroundColor: '#fff', flexGrow: 1 }}>
@@ -278,10 +351,15 @@ export default function Bookshelf() {
       {selectedStory && (
         <Overlay onClick={handleClosePopup}>
           <PopCard
+<<<<<<< Updated upstream
             imageSrc={selectedStory.img?.[0] || selectedStory.cover?.testImg}
             imageSize="150px" 
+=======
+            imageSrc={selectedStory.coverImg || selectedStory.img?.[0]}
+            imageSize="150px"
+>>>>>>> Stashed changes
             cardTitle={selectedStory.title}
-            subTitle={selectedStory.date}
+            subTitle={selectedStory.creationDate}
             description={selectedStory.summary}
             positiveBtnText="열기"
             negativeBtnText="닫기"

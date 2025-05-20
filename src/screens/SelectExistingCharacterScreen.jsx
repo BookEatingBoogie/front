@@ -97,7 +97,7 @@ import React, { useState } from 'react';
                description={selectedCharacter.speciality + '\n' + selectedCharacter.note}
                positiveBtnText="닫기"
                onPositiveClick={handleClosePopup}
-               negativeBtnText="이 캐릭터로 선택하기"
+               negativeBtnText="선택하기"
                onNegativeClick={handleSelectCharacter}
                titleFontSize="1.1rem"
                subFontSize="0.9rem"

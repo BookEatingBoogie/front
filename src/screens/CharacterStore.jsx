@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import { useRecoilValue } from 'recoil';
+import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import BottomNav from '../components/BottomNav';
 import Block from '../components/Block';
 import Empty from '../components/Empty';
 import styled from 'styled-components';
-import { characterInfoState } from '../recoil/atoms';
-import PopCard from '../components/PopCard'; 
+import PopCard from '../components/PopCard';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import defaultImg from '../assets/images/testImg.png'; // 실제 존재하는 경로와 확장자 확인
 
 const CharacterContainer = styled.div`
   display: flex;
@@ -41,9 +41,22 @@ const Overlay = styled.div`
 `;
 
 export default function CharacterStore() {
-  const characterList = useRecoilValue(characterInfoState);
+  const [characterList, setCharacterList] = useState([]);
   const [selectedCharacter, setSelectedCharacter] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchCharacters = async () => {
+      try {
+        const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/mypage/character`);
+        setCharacterList(res.data); 
+      } catch (error) {
+        console.error('캐릭터 불러오기 실패:', error);
+      }
+    };
+
+    fetchCharacters();
+  }, []);
 
   const handleBlockClick = (character) => {
     setSelectedCharacter(character);
@@ -58,17 +71,22 @@ export default function CharacterStore() {
       <Header pageName={"내 캐릭터"} />
       <ContentContainer>x
         {characterList.length > 0 ? (
-          characterList.map((char, index) => (
+          characterList.map((char) => (
             <Block
-              key={index}
-              blockImg={char.img || '/default-character.png'}
-              blockName={char.name}
+              key={char.charId}
+              blockImg={char.charImg || defaultImg}
+              blockName={char.charName}
               onClick={() => handleBlockClick(char)}
               hideDate={true}
               hideFavorite={true}
+<<<<<<< Updated upstream
               customSize={true} 
               withShadow={true}
               
+=======
+              customSize={true}
+              withShadow={true}
+>>>>>>> Stashed changes
             />
           ))
         ) : (
@@ -84,11 +102,11 @@ export default function CharacterStore() {
       {selectedCharacter && (
         <Overlay onClick={handleClosePopup}>
           <PopCard
-            imageSrc={selectedCharacter.img || '/default-character.png'}
+            imageSrc={selectedCharacter.charImg || defaultImg}
             imageSize="150px"
-            cardTitle={selectedCharacter.name}
-            subTitle={`${selectedCharacter.gender} | 나이 ${selectedCharacter.age}세 | ${selectedCharacter.job}`}
-            description={selectedCharacter.speciality + ' \n ' + selectedCharacter.note}
+            cardTitle={selectedCharacter.charName}
+            subTitle={`유저ID: ${selectedCharacter.userId} | 캐릭터ID: ${selectedCharacter.charId}`}
+            description={selectedCharacter.charNote}
             positiveBtnText="닫기"
             onPositiveClick={handleClosePopup}
             titleFontSize="1.1rem"
