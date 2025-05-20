@@ -79,14 +79,9 @@ export default function CharacterStore() {
               onClick={() => handleBlockClick(char)}
               hideDate={true}
               hideFavorite={true}
-<<<<<<< Updated upstream
               customSize={true} 
               withShadow={true}
               
-=======
-              customSize={true}
-              withShadow={true}
->>>>>>> Stashed changes
             />
           ))
         ) : (

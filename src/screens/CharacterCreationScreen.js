@@ -1,7 +1,5 @@
 import React, { useState, useRef } from 'react';
 import { useRecoilState } from 'recoil';
-import React, { useState, useRef } from 'react';
-import { useRecoilState } from 'recoil';
 import { characterInfoState } from '../recoil/atoms';
 import { useNavigate } from 'react-router-dom';
 import BaseScreenLayout from '../components/BaseScreenLayout';
@@ -90,11 +88,8 @@ const CharacterCreationScreen = () => {
       }
       imageSrc={null}
     > 
-<<<<<<< Updated upstream
 
 
-=======
->>>>>>> Stashed changes
       <GallerySelectButton
       onClick={handleSelectImage}
       isFinished={isFinished}

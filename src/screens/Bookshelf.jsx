@@ -95,22 +95,6 @@ const CharacterCategoryContainer = styled.div`
   width: max-content;
 `;
 
-<<<<<<< Updated upstream
-const CharacterCircle = styled.div`
-  width: 55px;
-  height: 64px;
-  overflow: hidden;
-  border: ${(props) => (props.selected ? '2px solid #FFC75F' : '1px solid #ccc')};
-  background-color: ${(props) => (props.selected ? '#FFF9EC' : '#fff')};
-=======
-const CharacterWrapper = styled.div`
->>>>>>> Stashed changes
-  display: flex;
-  align-items: center;
-<<<<<<< Updated upstream
-=======
-`;
-
 const CharacterCircle = styled.div`
   width: 55px;
   height: 64px;
@@ -119,7 +103,6 @@ const CharacterCircle = styled.div`
   background-color: ${(props) => (props.selected ? '#FFF9EC' : '#fff')};
   display: flex;
   align-items: center;
->>>>>>> Stashed changes
   justify-content: center;
   position: relative;
   border-radius: 1.5rem 1.5rem 0 0;
@@ -127,15 +110,9 @@ const CharacterCircle = styled.div`
 
 const CharacterImg = styled.img`
   width: auto;
-<<<<<<< Updated upstream
   height: 180px; /* 원보다 훨씬 큼 */
   object-fit: cover;
   transform: translateY(60px); /* 위로 올려서 얼굴만 보이게 */
-=======
-  height: 180px;
-  object-fit: cover;
-  transform: translateY(60px);
->>>>>>> Stashed changes
 `;
 
 const CharacterLabel = styled.span`
@@ -143,11 +120,7 @@ const CharacterLabel = styled.span`
   color: ${(props) => (props.selected ? '#1A202B' : '#888')};
   font-weight: ${(props) => (props.selected ? '600' : '400')};
   margin-top: 0.3rem;
-<<<<<<< Updated upstream
   width: 100%
-=======
-  width: 100%;
->>>>>>> Stashed changes
   text-align: center;
   display: flex;
   align-items: center;
@@ -255,7 +228,6 @@ export default function Bookshelf() {
       <DIV>캐릭터 카테고리</DIV>
       <CharacterCategoryWrapper>
         <CharacterCategoryContainer>
-<<<<<<< Updated upstream
           <CharacterCircle onClick={() => setSelectedCharacter(null)} selected={selectedCharacter === null}>
             <CharacterLabel selected={selectedCharacter === null}>ALL</CharacterLabel>
           </CharacterCircle>
@@ -269,28 +241,6 @@ export default function Bookshelf() {
               <CharacterImg src={char.img} alt={char.name} />
             </CharacterCircle>
           ))}
-=======
-          <CharacterWrapper>
-            <CharacterCircle onClick={() => setSelectedCharacter(null)} selected={selectedCharacter === null}>
-              <CharacterLabel selected={selectedCharacter === null}>ALL</CharacterLabel>
-            </CharacterCircle>
-          </CharacterWrapper>
-
-          {characterList.map((char) => (
-  <CharacterWrapper key={char.charId}>
-    <CharacterCircle
-      onClick={() => setSelectedCharacter(char.charName)}
-      selected={selectedCharacter === char.charName}
-    >
-      <CharacterImg src={char.charImg} alt={char.charName} />
-    </CharacterCircle>
-    <CharacterLabel selected={selectedCharacter === char.charName}>
-      {char.charName}
-    </CharacterLabel>
-  </CharacterWrapper>
-))}
-
->>>>>>> Stashed changes
         </CharacterCategoryContainer>
       </CharacterCategoryWrapper>
 
@@ -313,7 +263,6 @@ export default function Bookshelf() {
           {filteredStoryList.length > 0 ? (
             filteredStoryList.map((story) => (
               <Block
-<<<<<<< Updated upstream
                 key={story.id}
                 blockImg={story.img?.[0] || story.cover?.testImg}
                 blockName={story.title}
@@ -323,17 +272,6 @@ export default function Bookshelf() {
                 onClick={() => handleBlockClick(story)}
                 withShadow={false}
               />
-=======
-              key={story.storyId}
-              blockImg={story.coverImg || story.img?.[0]}
-              blockName={story.title}
-              creationDate={formatDate(story.creationDate)}
-              storyId={story.storyId}
-              showFavorite={true}
-              onClick={() => handleBlockClick(story)}
-              withShadow={false}
-            />
->>>>>>> Stashed changes
             ))
           ) : (
             <div style={{ width: '100%', backgroundColor: '#fff', flexGrow: 1 }}>
@@ -351,13 +289,8 @@ export default function Bookshelf() {
       {selectedStory && (
         <Overlay onClick={handleClosePopup}>
           <PopCard
-<<<<<<< Updated upstream
             imageSrc={selectedStory.img?.[0] || selectedStory.cover?.testImg}
             imageSize="150px" 
-=======
-            imageSrc={selectedStory.coverImg || selectedStory.img?.[0]}
-            imageSize="150px"
->>>>>>> Stashed changes
             cardTitle={selectedStory.title}
             subTitle={selectedStory.creationDate}
             description={selectedStory.summary}

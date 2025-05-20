@@ -6,10 +6,6 @@ import 민지 from '../assets/images/민지.png';
 import 코코 from '../assets/images/코코.png';
 import 코코1 from '../assets/images/코코1.png';
 import 코코2 from '../assets/images/코코2.png';
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
 
 
 export const characterInfoState = atom({
@@ -40,20 +36,14 @@ export const characterInfoState = atom({
       userImg: '',
     },
     {
-<<<<<<< Updated upstream
       id: '2',
       name: '유원이',
-=======
-      id: '3',
-      name: '코코',
->>>>>>> Stashed changes
       age: '5',
       gender: '여자',
       job: '수의사',
       speciality: '동물과 소통이 가능해',
       ability:'소통능력',
       note: '사라지는 동물들을 찾으러 떠난 소녀',
-<<<<<<< Updated upstream
       img: 민지,
       userImg: '',
     },
@@ -66,8 +56,6 @@ export const characterInfoState = atom({
       speciality: '동물과 소통이 가능해',
       ability:'소통능력',
       note: '사라지는 동물들을 찾으러 떠난 소녀',
-=======
->>>>>>> Stashed changes
       img: 코코,
       userImg: '',
     },
