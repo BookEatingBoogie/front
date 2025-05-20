@@ -27,27 +27,6 @@ const OverlayImage = styled.img`
   height: auto;
   border-radius: 40px;
 `;
-import styled from 'styled-components';
-import dokkaebiJumping from '../assets/images/dokkaebi_jumping.gif';
-
-const Overlay = styled.div`
-  position: fixed;
-  z-index: 9999;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.6); /* 썬팅 느낌 */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-const OverlayImage = styled.img`
-  width: 25rem;
-  height: auto;
-  border-radius: 40px;
-`;
 
 export default function CharacterQuestionScreen() {
   const navigate = useNavigate();
