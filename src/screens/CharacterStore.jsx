@@ -79,9 +79,8 @@ export default function CharacterStore() {
               onClick={() => handleBlockClick(char)}
               hideDate={true}
               hideFavorite={true}
-              customSize={true} 
+              customSize={true}
               withShadow={true}
-              
             />
           ))
         ) : (
