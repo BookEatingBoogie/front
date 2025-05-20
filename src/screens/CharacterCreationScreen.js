@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import BaseScreenLayout from '../components/BaseScreenLayout';
 import GallerySelectButton from '../components/GallerySelectButton';
 import AWS from 'aws-sdk';
-import AWS from 'aws-sdk';
 
 const REGION = 'ap-northeast-2';
 const BUCKET = 'bookeating';
