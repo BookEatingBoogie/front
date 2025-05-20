@@ -216,25 +216,40 @@ export default function ReadingScreen() {
 
   // ✅ JSON 불러오기
   useEffect(() => {
-    if (!fileUrl) return;
-
+    console.log('🔍 location.search:', location.search);
+    console.log('📦 fileUrl:', fileUrl);
+  
+    if (!fileUrl) {
+      console.log('❗ file 파라미터 없음 → fetch 중단됨');
+      return;
+    }
+  
     const fetchData = async () => {
+      console.log('📥 fetch 실행');
       try {
         const res = await fetch(fileUrl);
-        if (!res.ok) throw new Error(`❌ 응답 실패: ${res.status}`);
         const data = await res.json();
-
-        setTitle(data.title || '제목 없음');
-        const content = data.content || [];
-        setTexts(content.map(item => item.story));
-        setImages(content.map(item => item.illustUrl));
+        console.log('✅ fetch 결과:', data);
+    
+        const content = Array.isArray(data) ? data : data.content || [];
+        const textList = content.map(item => item.story);
+        const imageList = content.map(item => item.illustUrl);
+    
+        console.log('📝 텍스트 리스트:', textList);
+        console.log('🖼️ 이미지 리스트:', imageList);
+    
+        setTexts(textList);
+        setImages(imageList);
       } catch (e) {
-        console.error('❌ 데이터 불러오기 실패:', e);
+        console.error('❌ fetch 실패:', e);
       }
     };
-
+    
+  
     fetchData();
   }, [fileUrl]);
+  
+  
 
   const stopSpeaking = () => {
     if (audioRef.current) {
@@ -310,10 +325,24 @@ export default function ReadingScreen() {
   }, [texts, currentPage]);
 
   useEffect(() => {
+    console.log('📍 현재 페이지:', currentPage);
+    console.log('🗣️ 읽는 중:', isSpeaking, '| 자동재생:', autoPlay);
+    console.log('🖼️ 현재 이미지:', images[currentPage]);
+    console.log('📝 현재 텍스트:', texts[currentPage]);
+  
+    if (!autoStarted.current && texts[currentPage]) {
+      speakText(texts[currentPage]);
+      autoStarted.current = true;
+    }
+  }, [texts, currentPage]);
+  
+  useEffect(() => {
     if (autoPlay && !isSpeaking && texts[currentPage]) {
+      console.log('▶ 자동 읽기 시작');
       speakText(texts[currentPage]);
     }
   }, [autoPlay, isSpeaking, currentPage, texts]);
+  
 
   if (!texts.length || !images.length) return <div style={{ padding: '2rem' }}>불러오는 중...</div>;
 
@@ -338,7 +367,12 @@ export default function ReadingScreen() {
       </OverlayTop>
 
       <ImageWrapper>
-        <StyledImage src={images[currentPage]} alt={`페이지 ${currentPage + 1}`} />
+      <StyledImage
+  src={images[currentPage]}
+  alt={`페이지 ${currentPage + 1}`}
+  onError={() => console.warn('❌ 이미지 로딩 실패:', images[currentPage])}
+/>
+
       </ImageWrapper>
 
       <TextWrapper>{texts[currentPage]}</TextWrapper>

@@ -7,6 +7,7 @@ import Empty from '../components/Empty';
 import PopCard from '../components/PopCard';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
+import defaultImg from '../assets/images/testImg.png';
 
 const BookshelfContainer = styled.div`
   display: flex;
@@ -234,13 +235,15 @@ export default function Bookshelf() {
 
           {characterList.map((char) => (
             <CharacterCircle
-              key={char.id}
-              onClick={() => setSelectedCharacter(char.name)}
-              selected={selectedCharacter === char.name}
+              key={char.charId}
+              onClick={() => setSelectedCharacter(char.charName)}
+              selected={selectedCharacter === char.charName}
             >
-              <CharacterImg src={char.img} alt={char.name} />
+              <CharacterImg src={char.charImg || defaultImg} alt={char.charName} />
+              <CharacterLabel selected={selectedCharacter === char.charName}>{char.charName}</CharacterLabel>
             </CharacterCircle>
           ))}
+
         </CharacterCategoryContainer>
       </CharacterCategoryWrapper>
 
@@ -263,15 +266,16 @@ export default function Bookshelf() {
           {filteredStoryList.length > 0 ? (
             filteredStoryList.map((story) => (
               <Block
-                key={story.id}
-                blockImg={story.img?.[0] || story.cover?.testImg}
+                key={story.storyId}
+                blockImg={story.coverImg} // ✅ 여기 주의!!
                 blockName={story.title}
-                creationDate={story.date}
-                storyId={story.id}
+                creationDate={story.creationDate}
+                storyId={story.storyId}
                 showFavorite={true}
                 onClick={() => handleBlockClick(story)}
                 withShadow={false}
               />
+
             ))
           ) : (
             <div style={{ width: '100%', backgroundColor: '#fff', flexGrow: 1 }}>
@@ -298,7 +302,8 @@ export default function Bookshelf() {
             negativeBtnText="닫기"
             onPositiveClick={() => {
               handleClosePopup();
-              navigate("/reading");
+              navigate(`/reading?file=${selectedStory.content}`);
+
             }}
             onNegativeClick={handleClosePopup}
             titleFontSize="1.1rem"
