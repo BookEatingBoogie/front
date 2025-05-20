@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import { useRecoilValue } from 'recoil';
-import { storyInfoState, characterInfoState } from '../recoil/atoms';
-import Header from '../components/Header'
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import Header from '../components/Header';
 import BottomNav from '../components/BottomNav';
 import Block from '../components/Block';
 import Empty from '../components/Empty';
 import PopCard from '../components/PopCard';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
+import defaultImg from '../assets/images/testImg.png';
 
 const BookshelfContainer = styled.div`
   display: flex;
@@ -31,7 +31,6 @@ const HeaderTitle = styled.div`
   color: white;
   font-size: 1.2rem;
   font-weight: bold;
-
   @media (max-width: 480px) {
     font-size: 1rem;
   }
@@ -45,7 +44,6 @@ const DIV = styled.div`
   font-size: 1rem;
   font-weight: 700;
   margin-top: 0.5rem;
-
   @media (max-width: 480px) {
     font-size: 0.9rem;
   }
@@ -63,7 +61,6 @@ const EditButton = styled.button`
   border: 1px solid rgba(57, 61, 64, 0.5);
   background: rgba(243, 243, 243, 0.58);
   color: #1A202B;
-  text-align: center;
   font-family: Pretendard;
   font-size: 1rem;
   font-weight: 300;
@@ -71,7 +68,6 @@ const EditButton = styled.button`
   padding: 0.25rem 1rem;
   align-items: center;
   gap: 0.25rem;
-
   @media (max-width: 480px) {
     font-size: 0.9rem;
     padding: 0.2rem 0.75rem;
@@ -85,15 +81,11 @@ const Separator = styled.hr`
   margin: 0.25rem 0;
 `;
 
-const WrapperBetweenCategoryAndTitle = styled.div`
-  width: 100%;
-`;
 const CharacterCategoryWrapper = styled.div`
   width: 100%;
   overflow-x: auto;
   background-color: #fff;
-  margin-left: rem;
-  margin-top: 1rem; 
+  margin-top: 1rem;
 `;
 
 const CharacterCategoryContainer = styled.div`
@@ -141,14 +133,12 @@ const CharacterLabel = styled.span`
 
 const CharacterSectionTitle = styled.div`
   width: 100%;
-  padding: 0.75rem 1rem 0.5rem -1rem;
+  padding: 1rem 1rem 0.5rem 1rem;
   font-weight: 600;
   font-size: 0.95rem;
   color: #1A202B;
   text-align: center;
   background-color: ${(props) => (props.$hasContent ? '#FFF9EC' : '#fff')};
-  margin-top: -0.25rem;
-  padding-top: 1rem;
   @media (max-width: 480px) {
     font-size: 0.85rem;
   }
@@ -185,22 +175,47 @@ const Overlay = styled.div`
 `;
 
 export default function Bookshelf() {
-  const storyList = useRecoilValue(storyInfoState);
-  const characterList = useRecoilValue(characterInfoState);
+  const [storyList, setStoryList] = useState([]);
+  const [characterList, setCharacterList] = useState([]);
   const [selectedCharacter, setSelectedCharacter] = useState(null);
   const [selectedStory, setSelectedStory] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const handleBlockClick = (story) => {
-    setSelectedStory(story);
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/mypage/story`);
+        setCharacterList(res.data.characters || []);
+        setStoryList(res.data.stories || []);
+        console.log('✅ 캐릭터 불러오기 성공:', res.data.characters);
+        console.log('✅ 동화 불러오기 성공:', res.data.stories);
+      } catch (err) {
+        console.error('❌ 데이터 불러오기 실패:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchData();
+  }, []);
+  
 
-  const handleClosePopup = () => {
-    setSelectedStory(null);
+  const handleBlockClick = (story) => setSelectedStory(story);
+  const handleClosePopup = () => setSelectedStory(null);
+  
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
-
   const filteredStoryList = selectedCharacter
-    ? storyList.filter((story) => story.characters?.includes(selectedCharacter))
+    ? storyList.filter((story) =>
+        story.characters?.some((char) => char.charName === selectedCharacter)
+      )
     : storyList;
 
   const isActiveBg = selectedCharacter !== null && filteredStoryList.length > 0;
@@ -220,46 +235,47 @@ export default function Bookshelf() {
 
           {characterList.map((char) => (
             <CharacterCircle
-              key={char.id}
-              onClick={() => setSelectedCharacter(char.name)}
-              selected={selectedCharacter === char.name}
+              key={char.charId}
+              onClick={() => setSelectedCharacter(char.charName)}
+              selected={selectedCharacter === char.charName}
             >
-              <CharacterImg src={char.img} alt={char.name} />
+              <CharacterImg src={char.charImg || defaultImg} alt={char.charName} />
+              <CharacterLabel selected={selectedCharacter === char.charName}>{char.charName}</CharacterLabel>
             </CharacterCircle>
           ))}
+
         </CharacterCategoryContainer>
       </CharacterCategoryWrapper>
 
       <Separator />
 
-      <WrapperBetweenCategoryAndTitle>
-        {selectedCharacter === null && (
-          <EditButtonWrapper>
-            <EditButton onClick={() => navigate('/edit-bookshelf')}>편집하기</EditButton>
-          </EditButtonWrapper>
-        )}
+      {selectedCharacter === null && (
+        <EditButtonWrapper>
+          <EditButton onClick={() => navigate('/edit-bookshelf')}>편집하기</EditButton>
+        </EditButtonWrapper>
+      )}
 
-        {selectedCharacter && filteredStoryList.length > 0 && (
-          <CharacterSectionTitle $hasContent={true}>
-            {selectedCharacter}가 나오는 동화들
-          </CharacterSectionTitle>
-        )}
-      </WrapperBetweenCategoryAndTitle>
+      {selectedCharacter && filteredStoryList.length > 0 && (
+        <CharacterSectionTitle $hasContent={true}>
+          {selectedCharacter}가 나오는 동화들
+        </CharacterSectionTitle>
+      )}
 
       <HighlightedWrapper active={isActiveBg}>
         <ContentContainer>
           {filteredStoryList.length > 0 ? (
             filteredStoryList.map((story) => (
               <Block
-                key={story.id}
-                blockImg={story.img?.[0] || story.cover?.testImg}
+                key={story.storyId}
+                blockImg={story.coverImg} // ✅ 여기 주의!!
                 blockName={story.title}
-                creationDate={story.date}
-                storyId={story.id}
+                creationDate={story.creationDate}
+                storyId={story.storyId}
                 showFavorite={true}
                 onClick={() => handleBlockClick(story)}
                 withShadow={false}
               />
+
             ))
           ) : (
             <div style={{ width: '100%', backgroundColor: '#fff', flexGrow: 1 }}>
@@ -280,13 +296,14 @@ export default function Bookshelf() {
             imageSrc={selectedStory.img?.[0] || selectedStory.cover?.testImg}
             imageSize="150px" 
             cardTitle={selectedStory.title}
-            subTitle={selectedStory.date}
+            subTitle={selectedStory.creationDate}
             description={selectedStory.summary}
             positiveBtnText="열기"
             negativeBtnText="닫기"
             onPositiveClick={() => {
               handleClosePopup();
-              navigate("/reading");
+              navigate(`/reading?file=${selectedStory.content}`);
+
             }}
             onNegativeClick={handleClosePopup}
             titleFontSize="1.1rem"

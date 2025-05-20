@@ -8,7 +8,7 @@ import squirrelImg from '../assets/images/서영이와 다람쥐.webp';
 import { postStoryNext } from '../api/story';
 import { toast } from 'react-toastify';
 
-// 1) 전역 스타일: --angle 커스텀 프로퍼티 정의
+// 전역 스타일 정의
 const GlobalStyles = createGlobalStyle`
   @property --angle {
     syntax: "<angle>";
@@ -17,7 +17,6 @@ const GlobalStyles = createGlobalStyle`
   }
 `;
 
-// 2) spin keyframes: --angle 값을 0deg → 360deg로 변경
 const spin = keyframes`
   from { --angle: 0deg; }
   to   { --angle: 360deg; }
@@ -32,7 +31,6 @@ const Content = styled.div`
   padding-bottom: 2rem;
 `;
 
-// 4) 스토리 이미지 래퍼
 const ImageWrapper = styled.div`
   width: 100%;
   margin: 2rem auto 0;
@@ -71,7 +69,6 @@ const ChoicesOverlay = styled.div`
   gap: 0.75rem;
 `;
 
-// 6) 기본 투명 버튼 스타일
 const TransparentButton = styled.button`
   width: 100%;
   padding: 0.75rem 1rem;
@@ -91,7 +88,6 @@ const TransparentButton = styled.button`
   }
 `;
 
-// 7) 선택 시 반짝이는 빛나는 테두리 버튼 스타일
 const GlowButton = styled(TransparentButton)`
   &::before, &::after {
     content: '';
@@ -110,7 +106,6 @@ const GlowButton = styled(TransparentButton)`
   }
 `;
 
-// 8) 선택 애니메이션 유지 시간
 const GLOW_DURATION = 1000;
 
 export default function InteractiveStoryScreen() {
@@ -226,6 +221,9 @@ export default function InteractiveStoryScreen() {
             step:    newStep,
           };
         });
+        if (step >= 5) {
+          navigate('/making-cover');
+        }
         if (step >= 5) {
           navigate('/making-cover');
         }

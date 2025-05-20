@@ -6,6 +6,12 @@ import 민지 from '../assets/images/민지.png';
 import 코코 from '../assets/images/코코.png';
 import 코코1 from '../assets/images/코코1.png';
 import 코코2 from '../assets/images/코코2.png';
+import 서영이 from '../assets/images/testImg.png'
+import 유원이 from '../assets/images/유원이.png';
+import 민지 from '../assets/images/민지.png';
+import 코코 from '../assets/images/코코.png';
+import 코코1 from '../assets/images/코코1.png';
+import 코코2 from '../assets/images/코코2.png';
 
 
 export const characterInfoState = atom({
@@ -25,6 +31,7 @@ export const characterInfoState = atom({
       userImg: 'https://bookeating.s3.ap-northeast-2.amazonaws.com/character/img2.jpg"',
     },
     {
+      id: '2',
       id: '2',
       name: '유원이',
       age: '5',
