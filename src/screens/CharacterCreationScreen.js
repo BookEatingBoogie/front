@@ -1,5 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useRecoilState } from 'recoil';
+import React, { useState, useRef } from 'react';
+import { useRecoilState } from 'recoil';
 import { characterInfoState } from '../recoil/atoms';
 import { useNavigate } from 'react-router-dom';
 import BaseScreenLayout from '../components/BaseScreenLayout';
