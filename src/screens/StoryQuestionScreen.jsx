@@ -4,10 +4,26 @@ import { useRecoilState } from 'recoil';
 import { storyCreationState, characterInfoState } from '../recoil/atoms';
 import BaseScreenLayout from '../components/BaseScreenLayout';
 import styled from 'styled-components';
-import { postStoryIntro } from '../api/story';
 import cloudMkGif from '../assets/images/cloudmk4.gif';
 import Lottie from 'react-lottie-player';
 import thinkAnimation from '../assets/thinkAnimation.json';
+
+const displayToBackendMap = {
+  // 장르 (genre)
+  '일상': 'life',
+  '마법': 'magic',
+  '영웅': 'hero',
+  '액션': 'action',
+  '모험': 'adventure',
+
+  // 장소 (place)
+  '우주': 'space',
+  '왕국': 'kingdom',
+  '산': 'mountain',
+  '바다': 'sea',
+  '학교': 'school',
+  '집': 'home',
+};
 
 const storyQuestions = [
   { key: 'genre', question: '장르를 선택해 주세요.', options: ['일상', '마법', '영웅', '액션', '모험'] },
@@ -57,8 +73,7 @@ export default function StoryQuestionScreen() {
 
   const current = storyQuestions[questionIndex];
   const optionsCount = current.options.length;
-  const firstGroupSize = 3; // 앞에서 3개
-  const secondGroupSize = optionsCount - firstGroupSize; // 뒤에서 2개
+  const firstGroupSize = 3;
 
   // 옵션 위치 계산 (기존 로직 그대로)
   useEffect(() => {
@@ -127,12 +142,13 @@ export default function StoryQuestionScreen() {
 
   const handleSelect = async (option) => {
     const key = current.key;
-    const charID = parseInt(characterInfo[0].id, 10);
+    const charID = parseInt(characterInfo[0].charId, 10);
+    const backendOption = displayToBackendMap[option];
     setStoryData(prev => ({
       ...prev,
       charId: charID,
-      ...(key === 'genre' && { genre: option }),
-      ...(key === 'place' && { place: option }),
+      ...(key === 'genre' && { genre: backendOption }),
+      ...(key === 'place' && { place: backendOption }),
     }));
 
     if (questionIndex < storyQuestions.length - 1) {
@@ -143,8 +159,8 @@ export default function StoryQuestionScreen() {
     try {
       const payload = {
         charId: charID,
-        genre: key === 'genre' ? option : storyData.genre,
-        place: key === 'place' ? option : storyData.place,
+        genre: key === 'genre' ? backendOption : storyData.genre,
+        place: key === 'place' ? backendOption : storyData.place,
       };
 
       console.log('보내는 payload:', payload);
@@ -159,12 +175,26 @@ export default function StoryQuestionScreen() {
 
       console.log('응답 코드:', res.status);
 
-      const resText = await res.text();  // JSON이 아닐 수 있으니 먼저 텍스트로
-      console.log('응답 본문:', resText);
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error('❌ 스토리 생성 실패:', errorText);
+        throw new Error('초기 스토리 생성 실패');
+      }
 
-      if (!res.ok) throw new Error('초기 스토리 생성 실패');
+      const contentType = res.headers.get('Content-Type');
+      let data;
 
-      const data = JSON.parse(resText);  // 이제 안전하게 파싱
+      if (contentType && contentType.includes('application/json')) {
+        data = await res.json();
+      } else {
+        const resText = await res.text();
+        console.warn('⚠️ 예상 외의 텍스트 응답:', resText);
+        try {
+          data = JSON.parse(resText);
+        } catch (err) {
+          throw new Error('응답 파싱 실패: JSON 형식이 아님');
+        }
+      }
 
       setStoryData(prev => ({
         ...prev,
