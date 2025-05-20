@@ -1,8 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useRecoilValue } from 'recoil';
-import { storyInfoState } from '../recoil/atoms';
 import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { BsChevronLeft, BsVolumeUpFill } from 'react-icons/bs';
 import PopCard from '../components/PopCard';
 import finishImg from '../assets/images/finish.png';
@@ -197,54 +195,76 @@ const PlayButton = styled.button`
 
 export default function ReadingScreen() {
   const navigate = useNavigate();
-  const stories = useRecoilValue(storyInfoState);
-  const story = Array.isArray(stories) ? stories[0] : stories;
+  const location = useLocation();
+  const fileUrl = new URLSearchParams(location.search).get('file'); // ✅ JSON 경로 파라미터
 
+  const [title, setTitle] = useState('');
+  const [texts, setTexts] = useState([]);
+  const [images, setImages] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [autoPlay, setAutoPlay] = useState(true);
   const [showUI, setShowUI] = useState(true);
   const [showFinishPopup, setShowFinishPopup] = useState(false);
+
   const touchStartX = useRef(null);
   const autoStarted = useRef(false);
   const audioRef = useRef(null);
 
-  const totalPages = story?.img?.length || 0;
+  const totalPages = texts.length;
   const progress = ((currentPage + 1) / totalPages) * 100;
-  const texts = story.text || Array(totalPages).fill(story.summary);
+
+  // ✅ JSON 불러오기
+  useEffect(() => {
+    if (!fileUrl) return;
+
+    const fetchData = async () => {
+      try {
+        const res = await fetch(fileUrl);
+        if (!res.ok) throw new Error(`❌ 응답 실패: ${res.status}`);
+        const data = await res.json();
+
+        setTitle(data.title || '제목 없음');
+        const content = data.content || [];
+        setTexts(content.map(item => item.story));
+        setImages(content.map(item => item.illustUrl));
+      } catch (e) {
+        console.error('❌ 데이터 불러오기 실패:', e);
+      }
+    };
+
+    fetchData();
+  }, [fileUrl]);
 
   const stopSpeaking = () => {
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
-      audioRef.current.src = '';
-      audioRef.current.removeAttribute('src'); 
+      audioRef.current.removeAttribute('src');
       audioRef.current.load();
       audioRef.current.oncanplaythrough = null;
       audioRef.current.onended = null;
     }
     setIsSpeaking(false);
   };
-  
 
   const speakText = async (text) => {
     try {
-      stopSpeaking(); // 이전 재생 중단
-  
+      stopSpeaking();
       const res = await fetch("http://localhost:5001/tts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text }),
       });
-  
+
       if (!res.ok) throw new Error("TTS 요청 실패");
-  
+
       const blob = await res.blob();
       const audioUrl = URL.createObjectURL(blob);
-  
+
       if (audioRef.current) {
         audioRef.current.src = audioUrl;
-  
+
         audioRef.current.onended = () => {
           setIsSpeaking(false);
           if (autoPlay && currentPage < totalPages - 1) {
@@ -253,8 +273,8 @@ export default function ReadingScreen() {
             setShowFinishPopup(true);
           }
         };
-  
-        await audioRef.current.play(); // 💡 바로 실행
+
+        await audioRef.current.play();
         setIsSpeaking(true);
       }
     } catch (err) {
@@ -262,17 +282,15 @@ export default function ReadingScreen() {
       setIsSpeaking(false);
     }
   };
-  
 
   const toggleTTS = () => {
     if (isSpeaking) {
-      stopSpeaking(); // ⏸ 누르면 완전 정지
+      stopSpeaking();
     } else {
       setAutoPlay(true);
-      speakText(texts[currentPage]); // ▶ 다시 읽기
+      speakText(texts[currentPage]);
     }
   };
-  
 
   const handleNext = () => {
     stopSpeaking();
@@ -289,15 +307,15 @@ export default function ReadingScreen() {
       speakText(texts[currentPage]);
       autoStarted.current = true;
     }
-  }, [currentPage]);
+  }, [texts, currentPage]);
 
   useEffect(() => {
     if (autoPlay && !isSpeaking && texts[currentPage]) {
       speakText(texts[currentPage]);
     }
-  }, [currentPage, autoPlay, isSpeaking]);
+  }, [autoPlay, isSpeaking, currentPage, texts]);
 
-  if (!story) return <div>불러오는 중...</div>;
+  if (!texts.length || !images.length) return <div style={{ padding: '2rem' }}>불러오는 중...</div>;
 
   return (
     <Container
@@ -312,7 +330,7 @@ export default function ReadingScreen() {
       <OverlayTop $visible={showUI}>
         <BackGroup>
           <BackIcon onClick={() => navigate(-1)} />
-          <TopTitle>{story.title}</TopTitle>
+          <TopTitle>{title}</TopTitle>
         </BackGroup>
         <SoundButtonWrapper onClick={(e) => { e.stopPropagation(); toggleTTS(); }}>
           <SoundIcon />
@@ -320,7 +338,7 @@ export default function ReadingScreen() {
       </OverlayTop>
 
       <ImageWrapper>
-        <StyledImage src={story.img[currentPage]} alt={`페이지 ${currentPage + 1}`} />
+        <StyledImage src={images[currentPage]} alt={`페이지 ${currentPage + 1}`} />
       </ImageWrapper>
 
       <TextWrapper>{texts[currentPage]}</TextWrapper>
@@ -357,7 +375,7 @@ export default function ReadingScreen() {
             imageSrc={finishImg}
             imageSize="150px"
             cardTitle="이야기 끝!"
-            subTitle={`[${story.title}] 이야기를`}
+            subTitle={`[${title}] 이야기를`}
             description="끝까지 다 읽었어요!"
             positiveBtnText="다시 읽기"
             negativeBtnText="그만 읽기"
