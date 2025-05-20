@@ -1,12 +1,113 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useRecoilValue } from 'recoil';
+import { userInfoState, storyInfoState } from '../recoil/atoms';
+import { useNavigate } from 'react-router-dom';
+import BaseScreenLayout from '../components/BaseScreenLayout';
+import RoundedButton from '../components/RoundedButton';
+import styled from 'styled-components';
 
-function SettingsScreen() {
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  text-align: left;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+`;
+
+const Block = styled.div`
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 1rem;
+  border-radius: 10px;
+  color: #fff;
+  cursor: ${props => (props.clickable ? 'pointer' : 'default')};
+`;
+
+const BlockTitle = styled.h3`
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+`;
+
+const BlockItem = styled.div`
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+`;
+
+export default function SettingScreen() {
+  const navigate = useNavigate();
+  const userInfo = useRecoilValue(userInfoState);
+  const storyInfo = useRecoilValue(storyInfoState);
+  const currentUser = userInfo[0] || { id: '', nickname: '', pNumber: '' };
+
+  const handleLogout = () => {
+    console.log('로그아웃');
+  };
+
+  const handleDeleteAccount = () => {
+    console.log('회원탈퇴');
+  };
+
+  const handleGoToMoreLogs = () => {
+    navigate('/creation-log');
+  };
+
+  const handleGoToReportPage = () => {
+    navigate('/parent-report');
+  };
+
   return (
-    <div style={{ padding: 20 }}>
-      <h2>설정 화면</h2>
-      <p>여러 설정 옵션 등을 표시할 수 있습니다.</p>
-    </div>
+    <BaseScreenLayout
+      title="설정"
+      subTitle="계정 정보와 생성 기록, 부모 리포트를 확인하세요."
+    >
+      <Container>
+        {/* 로그인 정보 */}
+        <Block>
+          <BlockTitle>로그인 정보</BlockTitle>
+          <BlockItem>닉네임: {currentUser.nickname}</BlockItem>
+          <BlockItem>아이디(이메일): {currentUser.id}</BlockItem>
+          <BlockItem>연락처: {currentUser.pNumber}</BlockItem>
+        </Block>
+
+        {/* 생성 정보 */}
+        <Block>
+          <BlockTitle>생성 정보</BlockTitle>
+          {storyInfo.slice(0, 2).map((story, idx) => (
+            <BlockItem key={idx}>
+              {story.title} - {story.date}
+            </BlockItem>
+          ))}
+          <RoundedButton onClick={handleGoToMoreLogs}>
+            더보기
+          </RoundedButton>
+        </Block>
+
+        {/* 부모 리포트 */}
+        <Block clickable onClick={handleGoToReportPage}>
+          <BlockTitle>부모 리포트</BlockTitle>
+          <BlockItem>▶ 클릭하여 카테고리별 통계 보기</BlockItem>
+        </Block>
+
+        {/* 로그아웃 / 회원탈퇴 */}
+        <ButtonContainer>
+          <RoundedButton onClick={handleLogout}>로그아웃</RoundedButton>
+          <RoundedButton
+            onClick={handleDeleteAccount}
+            bgColor="#ff4d4d"
+            borderColor="#ff4d4d"
+          >
+            회원탈퇴
+          </RoundedButton>
+        </ButtonContainer>
+      </Container>
+    </BaseScreenLayout>
   );
 }
-
-export default SettingsScreen;

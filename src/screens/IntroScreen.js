@@ -1,11 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import { useRecoilState } from 'recoil';
-import { currentStepState } from '../recoil/atoms';
-
-// 도깨비 전/후
-import mainCharacter from '../assets/images/mainCharactor.png';
-import mainCharacterBefore from '../assets/images/mainCharactor_before.png';
+import { useNavigate } from 'react-router-dom';
+import Lottie from 'react-lottie-player';
+import introAnimation from '../assets/introAnimation1.json';
 
 const Container = styled.div`
   position: relative;
@@ -16,10 +13,10 @@ const Container = styled.div`
 
 const Title = styled.h1`
   position: absolute;
-  top: 60px;
+  top: 3.75rem;          /* 60px → 3.75rem */
   left: 50%;
   transform: translateX(-50%);
-  font-size: 24px;
+  font-size: 1.5rem;     /* 24px → 1.5rem */
   color: #fff;
   margin: 0;
   text-align: center;
@@ -28,33 +25,25 @@ const Title = styled.h1`
 
 const SubTitle = styled.p`
   position: relative;
-  top: 130px; /* Title보다 40px 아래 */
+  top: 8.125rem;         /* 130px → 8.125rem */
   left: 50%;
   transform: translateX(-50%);
-  font-size: 14px;
+  font-size: 0.875rem;   /* 14px → 0.875rem */
   color: #fff;
   margin: 0;
   text-align: center;
   line-height: 1.4;
-  width: 80%; /* 폭 제한 */
-  max-width: 400px;
+  width: 80%;
+  max-width: 25rem;      /* 400px → 25rem */
 `;
 
 const DokkaebiWrapper = styled.div`
   position: absolute;
-  bottom: 100px;
-  width: 360px; /* 원하는 최대 크기 */
-  max-width: 80%; /* 화면 작으면 축소 */
-  margin: 0 auto;
+  bottom: 6.25rem;       /* 100px → 6.25rem */
+  width: 22.5rem;        /* 360px → 22.5rem */
+  max-width: 80%;
   left: 50%;
   transform: translateX(-50%);
-`;
-
-const DokkaebiImage = styled.img`
-  width: 100%;
-  height: auto;
-  display: block;
-  transition: opacity 1s ease;
 `;
 
 const HammerHotspot = styled.div`
@@ -63,32 +52,50 @@ const HammerHotspot = styled.div`
   top: 50%;
   width: 22%;
   height: 40%;
-  background-color: relative;
   cursor: pointer;
 `;
 
-const IntroScreen = () => {
-  const [currentStep, setCurrentStep] = useRecoilState(currentStepState);
-  const [isHammered, setIsHammered] = useState(false);
+export default function IntroScreen() {
+  const navigate = useNavigate();
+  const lottieRef = useRef(null);
+  const [play, setPlay] = useState(false);
 
-  const handleHammerClick = () => {
-    setIsHammered(true);
-    setCurrentStep(currentStep + 1);
-  };
+  // 마운트 시 첫 프레임(0)으로 정지
+  useEffect(() => {
+    if (lottieRef.current) {
+      lottieRef.current.pause();
+      lottieRef.current.goToAndStop(0, true);
+    }
+  }, []);
+
+  // play가 true로 바뀌면 애니메이션 재생 후 페이지 이동
+  useEffect(() => {
+    if (play && lottieRef.current) {
+      lottieRef.current.play();
+      const timer = setTimeout(() => {
+        navigate('character-select');
+      }, 800); // JSON 애니메이션 길이에 맞춰 조정
+      return () => clearTimeout(timer);
+    }
+  }, [play, navigate]);
 
   return (
+    <>
     <Container>
       <Title>{"직접 이야기를\n만들어 봐요!"}</Title>
       <SubTitle>이야기를 만들려면 도깨비의 방망이를 두드려 보세요!</SubTitle>
+
       <DokkaebiWrapper>
-        <DokkaebiImage
-          src={isHammered ? mainCharacter : mainCharacterBefore}
-          alt="도깨비"
+        <Lottie
+          ref={lottieRef}
+          animationData={introAnimation}
+          loop={false}
+          play={play}
+          style={{ width: '100%', height: 'auto' }}
         />
-        <HammerHotspot onClick={handleHammerClick} />
+        <HammerHotspot onClick={() => !play && setPlay(true)} />
       </DokkaebiWrapper>
     </Container>
+    </>
   );
-};
-
-export default IntroScreen;
+}

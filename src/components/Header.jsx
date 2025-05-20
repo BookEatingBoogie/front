@@ -1,21 +1,18 @@
-import react from "react";
 import styled from 'styled-components';
 
-const HeaderContainer = styled.header`
-    display: flex;
-    flexed-direction: column;
-    height: 412px
-    display: flex;
-    padding: 1.5rem;
-    align-items: center;
-    gap: 2rem;
-    align-self: stretch;
-    border-bottom: 0.2px solid rgba(0, 0, 0, 0.50);
-background: #000;
+const HeaderContainer = styled.div`
+   display: flex;
+padding: 1.5rem;
+align-items: center;
+gap: 2rem;
+align-self: stretch;
+border-bottom: 0.2px solid rgba(0, 0, 0, 0.50);
+background: #1A202B;
+height:3rem;
 `
 const Title = styled.div`
-    color: #FFF;
-    text-align: center;
+    color: #FDFCFA;
+    text-align: left;
     font-family: Pretendard;
     font-size: 1.5rem;
     font-style: normal;
