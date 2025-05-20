@@ -48,7 +48,8 @@ export default function CharacterStore() {
   useEffect(() => {
     const fetchCharacters = async () => {
       try {
-        const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/mypage/character`);
+        // const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/mypage/character`);
+        const res = await axios.get('http://3.38.213.207:8080///mypage/character');
         setCharacterList(res.data); 
       } catch (error) {
         console.error('캐릭터 불러오기 실패:', error);
