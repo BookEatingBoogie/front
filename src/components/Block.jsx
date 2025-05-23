@@ -12,17 +12,23 @@ const BlockContainer = styled.div`
    overflow: hidden; 
 `;
 
+const Shadow = styled.div`
+  margin-top: -1rem;  /* 이미지와의 간격 조절 */
+  width: 60%;
+  height: 10px;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.7), transparent 70%);
+  border-radius: 50%;
+  align-self: center;
+  pointer-events: none;
+`;
+
+
 const ImageWrapper = styled.div`
   position: relative;
   width: 100%;
   aspect-ratio: 2 / 3;
   max-width: 180px;
-  border-radius: 25px;
-  border: 0.5px solid #1A202B;
-   overflow: hidden; 
-  ${(props) =>
-    props.withShadow &&
-    `box-shadow: 15px 15px 15px -15px rgba(26, 32, 43, 1);`}
+  overflow: hidden;
 `;
 
 
@@ -32,7 +38,6 @@ const IMG = styled.img`
   height: auto;
   object-fit: cover;
   border-radius: 0.3125rem;
-  // background-color: rgba(251, 246, 229, 0.7);
 `;
 
 const Title = styled.div`
@@ -42,6 +47,7 @@ const Title = styled.div`
   font-size: 0.625rem;
   font-weight: 400;
   margin-bottom: 0.3rem;
+  margin-top:1rem;
 `;
 
 const Date = styled.div`
@@ -59,6 +65,7 @@ const Checkbox = styled.input`
   transform: scale(1.2);
 `;
 
+
 export default function Block({
   blockImg,
   blockName,
@@ -71,22 +78,18 @@ export default function Block({
   hideDate = false,
   hideFavorite = false,
   onClick,
-  customSize = false,
-  withShadow = false
-  
+  withShadow = false,
 }) {
   return (
     <BlockContainer onClick={onClick}>
-      <ImageWrapper withShadow={withShadow}>
-        <IMG
-          src={blockImg}
-          alt={blockName || "story image"}
-          customSize={customSize}
-        />
-        {!hideFavorite && showFavorite && storyId && !isEditing && (
-          <FavoriteButton storyId={storyId} />
-        )}
-      </ImageWrapper>
+      <ImageWrapper>
+      <IMG src={blockImg} alt={blockName || "story image"} />
+      {!hideFavorite && showFavorite && storyId && !isEditing && (
+        <FavoriteButton storyId={storyId} />
+      )}
+    </ImageWrapper>
+    {withShadow && <Shadow />}
+
       <Title>{blockName}</Title>
       {!hideDate && <Date>{creationDate}</Date>}
     </BlockContainer>

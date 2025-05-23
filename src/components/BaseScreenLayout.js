@@ -88,6 +88,18 @@ const ContentWrapper = styled.div`
   width: 100%;
   flex: 1;
   z-index: 2;
+  @media (min-width: ${breakpoints.md}) {
+    top: 13rem;
+    max-width: 40rem;
+  }
+  @media (min-width: ${breakpoints.lg}) {
+    top: 14rem;
+    max-width: 60rem;
+  }
+  @media (min-width: ${breakpoints.xl}) {
+    top: 15rem;
+    max-width: 80rem;
+  }
   max-width: 40rem;
 `;
 
