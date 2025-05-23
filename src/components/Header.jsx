@@ -7,7 +7,7 @@ align-items: center;
 gap: 2rem;
 align-self: stretch;
 border-bottom: 0.2px solid rgba(0, 0, 0, 0.50);
-background: #1A202B;
+background: #001840;
 height:3rem;
 `
 const Title = styled.div`

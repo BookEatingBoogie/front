@@ -229,6 +229,9 @@ export default function InteractiveStoryScreen() {
         if (step >= 5) {
           navigate('/making-cover');
         }
+        if (step >= 5) {
+          navigate('/making-cover');
+        }
       } else {
         // 👉 실제 요청 로직
         const req = postStoryNext({ choice: opt });

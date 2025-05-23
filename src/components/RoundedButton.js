@@ -10,7 +10,8 @@ const RoundedButton = styled.button`
   color: ${({ fontColor }) => fontColor || 'black'};
   font-weight: bold;
   cursor: pointer;
-  margin-bottom: 0.625rem;           /* 10px → 0.625rem */
+  max-width: 35rem;
+  margin: 0  auto 0.625rem;
 
   &:hover {
     opacity: 0.9;

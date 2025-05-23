@@ -27,15 +27,6 @@ const TopHeaderRow = styled.div`
   background-color: #1A202B;
 `;
 
-const HeaderTitle = styled.div`
-  color: white;
-  font-size: 1.2rem;
-  font-weight: bold;
-  @media (max-width: 480px) {
-    font-size: 1rem;
-  }
-`;
-
 const DIV = styled.div`
   padding: 0.5rem 1.5rem 0rem 1.5rem;
   color: #1A202B;
@@ -210,7 +201,7 @@ export default function Bookshelf() {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    return `${year}년 ${month}월 ${day}일`;    
   };
   const filteredStoryList = selectedCharacter
     ? storyList.filter((story) =>
@@ -222,15 +213,12 @@ export default function Bookshelf() {
 
   return (
     <BookshelfContainer>
-      <TopHeaderRow>
-        <HeaderTitle>내 책장</HeaderTitle>
-      </TopHeaderRow>
+      <Header pageName={"내 책장"} />
 
-      <DIV>캐릭터 카테고리</DIV>
       <CharacterCategoryWrapper>
         <CharacterCategoryContainer>
           <CharacterCircle onClick={() => setSelectedCharacter(null)} selected={selectedCharacter === null}>
-            <CharacterLabel selected={selectedCharacter === null}>ALL</CharacterLabel>
+            <CharacterLabel selected={selectedCharacter === null}>전체</CharacterLabel>
           </CharacterCircle>
 
           {characterList.map((char) => (
@@ -267,9 +255,9 @@ export default function Bookshelf() {
             filteredStoryList.map((story) => (
               <Block
                 key={story.storyId}
-                blockImg={story.coverImg} // ✅ 여기 주의!!
+                blockImg={story.coverImg}
                 blockName={story.title}
-                creationDate={story.creationDate}
+                creationDate={formatDate(story.creationDate)}
                 storyId={story.storyId}
                 showFavorite={true}
                 onClick={() => handleBlockClick(story)}
@@ -296,7 +284,7 @@ export default function Bookshelf() {
             imageSrc={selectedStory.img?.[0] || selectedStory.cover?.testImg}
             imageSize="150px" 
             cardTitle={selectedStory.title}
-            subTitle={selectedStory.creationDate}
+            subTitle={formatDate(selectedStory.creationDate)}
             description={selectedStory.summary}
             positiveBtnText="열기"
             negativeBtnText="닫기"

@@ -88,8 +88,6 @@ const CharacterCreationScreen = () => {
       }
       imageSrc={null}
     > 
-
-
       <GallerySelectButton
       onClick={handleSelectImage}
       isFinished={isFinished}

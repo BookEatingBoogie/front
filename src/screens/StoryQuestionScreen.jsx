@@ -59,6 +59,7 @@ const CloudButton = styled.div`
   transform: scale(${props => (props.active ? 1.3 : 1.15)});
   &:hover {
     transform: scale(${props => (props.active ? 1.6 : 1.6)});
+    transform: scale(${props => (props.active ? 1.6 : 1.6)});
   }
 `;
 

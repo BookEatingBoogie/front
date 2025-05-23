@@ -108,6 +108,18 @@ const ContentWrapper = styled.div`
   max-width: 25rem;      /* 400px → 25rem */
   text-align: center;
   z-index: 2;
+  @media (min-width: ${breakpoints.md}) {
+    top: 13rem;
+    max-width: 40rem;
+  }
+  @media (min-width: ${breakpoints.lg}) {
+    top: 14rem;
+    max-width: 60rem;
+  }
+  @media (min-width: ${breakpoints.xl}) {
+    top: 15rem;
+    max-width: 80rem;
+  }
 `;
 
 const LayoutImage = styled.img`

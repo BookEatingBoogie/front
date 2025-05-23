@@ -25,6 +25,7 @@ const ContentContainer = styled.div`
   padding: 0.875rem 1rem 1.5rem 0.875rem;
   gap: 1rem;
   width: 100%;
+  
 `;
 
 const Overlay = styled.div`
@@ -69,7 +70,7 @@ export default function CharacterStore() {
   return (
     <CharacterContainer>
       <Header pageName={"내 캐릭터"} />
-      <ContentContainer>x
+      <ContentContainer>
         {characterList.length > 0 ? (
           characterList.map((char) => (
             <Block
@@ -99,7 +100,7 @@ export default function CharacterStore() {
             imageSrc={selectedCharacter.charImg || defaultImg}
             imageSize="150px"
             cardTitle={selectedCharacter.charName}
-            subTitle={`유저ID: ${selectedCharacter.userId} | 캐릭터ID: ${selectedCharacter.charId}`}
+            subTitle={`이름: ${selectedCharacter.charName}`}
             description={selectedCharacter.charNote}
             positiveBtnText="닫기"
             onPositiveClick={handleClosePopup}
