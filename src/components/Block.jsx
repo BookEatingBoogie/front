@@ -16,7 +16,7 @@ const Shadow = styled.div`
   margin-top: -1rem;  /* 이미지와의 간격 조절 */
   width: 60%;
   height: 10px;
-  background: radial-gradient(ellipse at center, rgba(255, 217, 129, 1), transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.7), transparent 70%);
   border-radius: 50%;
   align-self: center;
   pointer-events: none;
@@ -38,7 +38,6 @@ const IMG = styled.img`
   height: auto;
   object-fit: cover;
   border-radius: 0.3125rem;
-  // background-color: rgba(251, 246, 229, 0.7);
 `;
 
 const Title = styled.div`
@@ -79,7 +78,6 @@ export default function Block({
   hideDate = false,
   hideFavorite = false,
   onClick,
-  customSize = false,
   withShadow = false,
 }) {
   return (
@@ -89,7 +87,6 @@ export default function Block({
       {!hideFavorite && showFavorite && storyId && !isEditing && (
         <FavoriteButton storyId={storyId} />
       )}
-     
     </ImageWrapper>
     {withShadow && <Shadow />}
 

@@ -7,7 +7,7 @@ import styled from 'styled-components';
 import PopCard from '../components/PopCard';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import defaultImg from '../assets/images/testImg.png'; // 실제 존재하는 경로와 확장자 확인
+import defaultImg from '../assets/images/testImg.png';
 
 const CharacterContainer = styled.div`
   display: flex;
@@ -69,7 +69,7 @@ export default function CharacterStore() {
 
   return (
     <CharacterContainer>
-      <Header pageName={"내 캐릭터"} />
+      {characterList.length > 0 && <Header pageName={"내 캐릭터"} />}
       <ContentContainer>
         {characterList.length > 0 ? (
           characterList.map((char) => (

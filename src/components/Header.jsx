@@ -1,15 +1,15 @@
 import styled from 'styled-components';
 
 const HeaderContainer = styled.div`
-   display: flex;
-padding: 1.5rem;
-align-items: center;
-gap: 2rem;
-align-self: stretch;
-border-bottom: 0.2px solid rgba(0, 0, 0, 0.50);
-background: #001840;
-height:3rem;
-`
+    display: flex;
+    padding: 1.5rem;
+    align-items: center;
+    gap: 2rem;
+    align-self: stretch;
+    border-bottom: 0.2px solid rgba(0, 0, 0, 0.50);
+    background: #001840;
+    height:3rem;
+    `
 const Title = styled.div`
     color: #FDFCFA;
     text-align: left;

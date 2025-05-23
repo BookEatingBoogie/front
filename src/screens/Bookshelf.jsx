@@ -18,28 +18,6 @@ const BookshelfContainer = styled.div`
   position: relative;
 `;
 
-const TopHeaderRow = styled.div`
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  background-color: #1A202B;
-`;
-
-const DIV = styled.div`
-  padding: 0.5rem 1.5rem 0rem 1.5rem;
-  color: #1A202B;
-  text-align: center;
-  font-family: Pretendard;
-  font-size: 1rem;
-  font-weight: 700;
-  margin-top: 0.5rem;
-  @media (max-width: 480px) {
-    font-size: 0.9rem;
-  }
-`;
-
 const EditButtonWrapper = styled.div`
   width: 100%;
   display: flex;
@@ -102,9 +80,9 @@ const CharacterCircle = styled.div`
 
 const CharacterImg = styled.img`
   width: auto;
-  height: 180px; /* 원보다 훨씬 큼 */
+  height: 180px;
   object-fit: cover;
-  transform: translateY(60px); /* 위로 올려서 얼굴만 보이게 */
+  transform: translateY(60px);
 `;
 
 const CharacterLabel = styled.span`
@@ -179,10 +157,10 @@ export default function Bookshelf() {
         const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/mypage/story`);
         setCharacterList(res.data.characters || []);
         setStoryList(res.data.stories || []);
-        console.log('✅ 캐릭터 불러오기 성공:', res.data.characters);
-        console.log('✅ 동화 불러오기 성공:', res.data.stories);
+        console.log('캐릭터 불러오기 성공', res.data.characters);
+        console.log('동화 불러오기 성공', res.data.stories);
       } catch (err) {
-        console.error('❌ 데이터 불러오기 실패:', err);
+        console.error('데이터 불러오기 실패', err);
       } finally {
         setLoading(false);
       }
@@ -213,7 +191,9 @@ export default function Bookshelf() {
 
   return (
     <BookshelfContainer>
+        {!loading && storyList.length > 0 && (
       <Header pageName={"내 책장"} />
+    )}
 
       <CharacterCategoryWrapper>
         <CharacterCategoryContainer>
