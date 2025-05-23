@@ -12,12 +12,13 @@ const RoundedButton = styled.button`
   cursor: pointer;
   max-width: 35rem;
   margin: 0  auto 0.625rem;
-
+  transition: all 0.1s ease-in-out;
   &:hover {
     opacity: 0.9;
   }
 
   &:active {
+    transform: translateY(4px);
     opacity: 0.8;
   }
 `;

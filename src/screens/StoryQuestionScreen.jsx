@@ -44,8 +44,6 @@ const OptionItem = styled.div`
 
 /* active 여부에 따라 크게(1.2) 혹은 작게(0.8) 스케일, transition 0.6s */
 const CloudButton = styled.div`
-  width: 6.5rem;
-  height: 6.5rem;
   background: url(${props => props.gif}) no-repeat center/contain;
   display: flex;
   align-items: center;
@@ -53,13 +51,72 @@ const CloudButton = styled.div`
   font-size: 0.875rem;
   font-weight: bold;
   color: #333;
-  cursor: pointer;
+  cursor: default; /* pointer 아닌 기본 커서 */
   user-select: none;
   transition: transform 0.6s ease;
   transform: scale(${props => (props.active ? 1.3 : 1.15)});
   &:hover {
     transform: scale(${props => (props.active ? 1.6 : 1.6)});
-    transform: scale(${props => (props.active ? 1.6 : 1.6)});
+    transform: scale(1.6);
+  }
+  pointer-events: none; /* 이 컨테이너는 클릭 못함 */
+  position: relative;
+  @media (min-width: 360px) {
+    width: 4.5rem;
+    height: 4.5rem;
+  }
+  @media (min-width: 720px) {
+    width: 5.5rem;
+    height: 5.5rem;
+  }
+  @media (min-width: 1080px) {
+    width: 6.5rem;
+    height: 6.5rem;
+  }
+  @media (min-width: 1440px) {
+    width: 6.5rem;
+    height: 6.5rem;
+  }
+`;
+
+const ClickableText = styled.div`
+  pointer-events: all;  /* 클릭 가능 */
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.001); /* 클릭 안정성용 투명 배경 */
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+  z-index: 2;
+  font-weight: bold;
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+`;
+
+const ResponsiveLottie = styled(Lottie)`
+  position: fixed;
+  left: 50%;
+  bottom: 0.7rem;
+  transform: translateX(-50%);
+  height: 26rem;
+  min-width: 40rem;
+  z-index: 1;
+
+  @media (min-height: 700px) {
+    height: 32rem;
+  }
+
+  @media (min-height: 800px) {
+    height: 36rem;
+  }
+
+  @media (min-height: 900px) {
+    height: 40rem;
+  }
+
+  @media (min-height: 1000px) {
+    height: 44rem;
   }
 `;
 
@@ -91,8 +148,8 @@ export default function StoryQuestionScreen() {
     }
     const shuffled = cells.sort(() => Math.random() - 0.5).slice(0, count);
     const newPos = shuffled.map(([r, c]) => {
-      const padX = cellW * 0.25;
-      const padY = cellH * 0.25;
+      const padX = cellW * 0.42;
+      const padY = cellH * 0.42;
       const left = c * cellW + padX + Math.random() * (cellW - 2 * padX);
       const top = r * cellH + padY + Math.random() * (cellH - 2 * padY);
       return { left: `${left}%`, top: `${top}%` };
@@ -228,32 +285,20 @@ export default function StoryQuestionScreen() {
           const isActive = showThree ? idx < firstGroupSize : idx >= firstGroupSize;
           return (
             <OptionItem key={opt} style={positions[idx]}>
-              <CloudButton
-                gif={cloudMkGif}
-                active={isActive}
-                onClick={() => handleSelect(opt)}
-              >
-                {opt}
+              <CloudButton gif={cloudMkGif} active={isActive}>
+                <ClickableText onClick={() => handleSelect(opt)}>
+                  {opt}
+                </ClickableText>
               </CloudButton>
             </OptionItem>
           );
         })}
       </OptionsContainer>
 
-      <Lottie
+      <ResponsiveLottie
         loop
         animationData={thinkAnimation}
         play
-        style={{
-          position: 'absolute',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '22.5rem',
-          maxWidth: '100%',
-          height: 'auto',
-          bottom: '-22rem',
-          zIndex: 1
-        }}
       />
     </BaseScreenLayout>
   );

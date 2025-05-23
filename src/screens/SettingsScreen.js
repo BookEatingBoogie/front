@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useRecoilValue } from 'recoil';
-import { userInfoState, storyInfoState } from '../recoil/atoms';
-import { useNavigate } from 'react-router-dom';
+import { userInfoState } from '../recoil/atoms';
 import BaseScreenLayout from '../components/BaseScreenLayout';
 import RoundedButton from '../components/RoundedButton';
 import styled from 'styled-components';
@@ -42,9 +41,7 @@ const ButtonContainer = styled.div`
 `;
 
 export default function SettingScreen() {
-  const navigate = useNavigate();
   const userInfo = useRecoilValue(userInfoState);
-  const storyInfo = useRecoilValue(storyInfoState);
   const currentUser = userInfo[0] || { id: '', nickname: '', pNumber: '' };
 
   const handleLogout = () => {
@@ -55,18 +52,10 @@ export default function SettingScreen() {
     console.log('회원탈퇴');
   };
 
-  const handleGoToMoreLogs = () => {
-    navigate('/creation-log');
-  };
-
-  const handleGoToReportPage = () => {
-    navigate('/parent-report');
-  };
-
   return (
     <BaseScreenLayout
       title="설정"
-      subTitle="계정 정보와 생성 기록, 부모 리포트를 확인하세요."
+      subTitle="계정 정보를 확인하세요."
     >
       <Container>
         {/* 로그인 정보 */}
@@ -75,25 +64,6 @@ export default function SettingScreen() {
           <BlockItem>닉네임: {currentUser.nickname}</BlockItem>
           <BlockItem>아이디(이메일): {currentUser.id}</BlockItem>
           <BlockItem>연락처: {currentUser.pNumber}</BlockItem>
-        </Block>
-
-        {/* 생성 정보 */}
-        <Block>
-          <BlockTitle>생성 정보</BlockTitle>
-          {storyInfo.slice(0, 2).map((story, idx) => (
-            <BlockItem key={idx}>
-              {story.title} - {story.date}
-            </BlockItem>
-          ))}
-          <RoundedButton onClick={handleGoToMoreLogs}>
-            더보기
-          </RoundedButton>
-        </Block>
-
-        {/* 부모 리포트 */}
-        <Block clickable onClick={handleGoToReportPage}>
-          <BlockTitle>부모 리포트</BlockTitle>
-          <BlockItem>▶ 클릭하여 카테고리별 통계 보기</BlockItem>
         </Block>
 
         {/* 로그아웃 / 회원탈퇴 */}
