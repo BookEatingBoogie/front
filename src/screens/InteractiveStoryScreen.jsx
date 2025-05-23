@@ -35,7 +35,7 @@ const Content = styled.div`
 // 4) 스토리 이미지 래퍼
 const ImageWrapper = styled.div`
   width: 100%;
-  margin: 2rem auto 0;
+  max-width: 22rem;
   position: relative;
   border-radius: 1rem;
   overflow: hidden;
@@ -43,10 +43,25 @@ const ImageWrapper = styled.div`
   background-image: ${props => `url("${props.image || squirrelImg}")`};
   background-size: cover;
   background-position: center;
-  &::before {
-    content: "";
-    display: block;
-    padding-top: 100%;
+  aspect-ratio: 1 / 1; /* 정사각형 */
+  
+  @media (max-height: 599px) {
+    max-width: 15rem;
+  }  
+  @media (min-height: 600px) {
+    max-width: 20rem;
+  }  
+  @media (min-height: 700px) {
+    max-width: 25rem; /* 220px */
+  }
+  @media (min-height: 800px) {
+    max-width: 28rem; /* 220px */
+  }
+  @media (min-height: 900px) {
+    max-width: 32rem; /* 220px */
+  }
+  @media (min-height: 1000px) {
+    max-width: 33rem;  /* 280px */
   }
   @media (min-width: 360px) {
     max-width: 26rem;    /* 160px */
@@ -226,6 +241,9 @@ export default function InteractiveStoryScreen() {
             step:    newStep,
           };
         });
+        if (step >= 5) {
+          navigate('/making-cover');
+        }
         if (step >= 5) {
           navigate('/making-cover');
         }

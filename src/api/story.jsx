@@ -11,6 +11,14 @@ export async function postStoryNext({ choice }) {
     });
 
     console.log('📥 서버 응답 status:', res.status);
+
+    if (res.status === 201) {
+      return {
+        status: res.status,
+        data: null, // body 없음
+      };
+    }
+
     const data = await res.json();
     console.log('📥 서버 응답 내용:', data);
     return {
