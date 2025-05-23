@@ -110,6 +110,7 @@ export default function CharacterQuestionScreen() {
       title={`주인공의 이름이\n무엇인가요?`}
       subTitle="이름을 입력하고 다음으로 넘어가세요."
       imageSrc={silhouetteImg}
+      imageBottom={50}
     >
       <input
         type="text"
