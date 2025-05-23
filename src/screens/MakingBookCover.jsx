@@ -3,6 +3,39 @@ import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import Draggable from 'react-draggable';
 import html2canvas from 'html2canvas';
+import axios from 'axios'; 
+import { RgbaColorPicker } from 'react-colorful';
+import tinycolor from 'tinycolor2';
+import AWS from 'aws-sdk';
+
+const REGION = 'ap-northeast-2';
+const BUCKET = 'bookeating';
+const S3_BASE_URL = `https://${BUCKET}.s3.${REGION}.amazonaws.com/`;
+
+AWS.config.update({
+  accessKeyId: process.env.REACT_APP_AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.REACT_APP_AWS_SECRET_ACCESS_KEY,
+  region: REGION,
+});
+
+const s3 = new AWS.S3();
+
+const uploadToS3 = async (file) => {
+  const key = `cover/${file.name}`;
+  const uploadParams = {
+    Bucket: BUCKET,
+    Key: key,
+    Body: file,
+    ContentType: file.type,
+  };
+
+  return new Promise((resolve, reject) => {
+    s3.upload(uploadParams, (err, data) => {
+      if (err) reject(err);
+      else resolve(`${S3_BASE_URL}${key}`);
+    });
+  });
+};
 
 const CoverContainer = styled.div`
   display: flex;
@@ -258,6 +291,7 @@ const InputWithColorWrapper = styled.div`
   display: flex;
   align-items: center;
   position: relative;
+  gap: 0.5rem;
 `;
 
 const ColorButton = styled.button`
@@ -277,7 +311,8 @@ const ColorButton = styled.button`
 const ColorPopover = styled.div`
   position: absolute;
   top: 2.5rem;
-  right: 0;
+  left: 100%;
+  margin-left: 0.5rem;
   z-index: 100;
 `;
 
@@ -288,8 +323,8 @@ export default function MakingBookCover() {
   const [stickers, setStickers] = useState([]);
   const [resizingId, setResizingId] = useState(null);
   const [selectedStickerId, setSelectedStickerId] = useState(null);
-  const [titleColor, setTitleColor] = useState('#1A202B');
-const [authorColor, setAuthorColor] = useState('#1A202B');
+  const [titleColor, setTitleColor] = useState({ r: 26, g: 32, b: 43, a: 1 });
+const [authorColor, setAuthorColor] = useState({ r: 26, g: 32, b: 43, a: 1 });
 const [showTitleColorPicker, setShowTitleColorPicker] = useState(false);
 const [showAuthorColorPicker, setShowAuthorColorPicker] = useState(false);
 
@@ -300,7 +335,9 @@ const [showAuthorColorPicker, setShowAuthorColorPicker] = useState(false);
   const [textPos, setTextPos] = useState({ x: 0, y: 0 });
   const [authorPos, setAuthorPos] = useState({ x: 0, y: 0 });
   const canvasRef = useRef(null);
+  const [stickerOptions, setStickerOptions] = useState([]); 
 
+  
   const handleAddSticker = (src) => {
     setStickers([...stickers, { src, id: Date.now(), scale: 1, x: 0, y: 0 }]);
   };
@@ -337,12 +374,45 @@ const [showAuthorColorPicker, setShowAuthorColorPicker] = useState(false);
     };
   }, [resizingId]);
 
-  const handleSave = () => {
-    setStep(2);
-   if(step ==2){
-    navigate('/bookshelf');
-   }
+  useEffect(() => {
+    axios
+      .get(`${process.env.REACT_APP_API_BASE_URL}/sticker/list`)
+      .then((res) => {
+        setStickers((prev) => prev.length ? prev : []);
+        setStickerOptions(res.data);
+      })
+      .catch((err) => {
+        console.error('스티커 리스트 불러오기 실패:', err);
+      });
+  }, []);
+  useEffect(() => {
+    const c = tinycolor('#1A202B').toRgb(); 
+    setTitleColor({ r: c.r, g: c.g, b: c.b, a: 1 });
+  }, []);
+  const handleSave = async () => {
+    if (step === 1) {
+      setStep(2); // 스티커에서 텍스트 입력단계로
+      return;
+    }
+  
+    if (canvasRef.current) {
+      try {
+        const canvasElement = canvasRef.current;
+        const canvasImage = await html2canvas(canvasElement);
+        const blob = await new Promise(resolve => canvasImage.toBlob(resolve, 'image/png'));
+        const file = new File([blob], `cover_${Date.now()}.png`, { type: 'image/png' });
+  
+        const s3Url = await uploadToS3(file);
+        console.log('S3 업로드 성공:', s3Url);
+        alert('표지 저장 완료');
+        navigate('/bookshelf');
+      } catch (err) {
+        console.error('캡처 또는 업로드 실패:', err);
+        alert('저장에 실패');
+      }
+    }
   };
+  
 
   return (
     <CoverContainer>
@@ -364,11 +434,16 @@ const [showAuthorColorPicker, setShowAuthorColorPicker] = useState(false);
                 }
               >
                 <StickerWrapper>
-                  <Sticker
-                    src={s.src}
-                    scale={s.scale}
-                    onMouseDown={() => handleMouseDown(s.id)}
-                  />
+                <Sticker
+                  src={s.src}
+                  scale={s.scale}
+                  onMouseDown={() => handleMouseDown(s.id)}
+                  style={{
+                    border: resizingId === s.id ? '2px dashed #ff9900' : 'none',
+                    boxSizing: 'border-box'
+                  }}
+                />
+
                   <DeleteButton onClick={() => removeSticker(s.id)}>×</DeleteButton>
                   <ResizeHandle onMouseDown={() => setResizingId(s.id)} />
                 </StickerWrapper>
@@ -392,7 +467,10 @@ const [showAuthorColorPicker, setShowAuthorColorPicker] = useState(false);
                 defaultPosition={textPos}
                 onStop={(e, data) => setTextPos({ x: data.x, y: data.y })}
               >
-                <CanvasText style={{ color: titleColor }}>{title}</CanvasText>
+                <CanvasText 
+                style={{ color: `rgba(${titleColor.r}, ${titleColor.g}, ${titleColor.b}, ${titleColor.a})` }}>{title}
+              </CanvasText>
+
               </Draggable>
   
               <Draggable
@@ -400,7 +478,8 @@ const [showAuthorColorPicker, setShowAuthorColorPicker] = useState(false);
                 defaultPosition={authorPos}
                 onStop={(e, data) => setAuthorPos({ x: data.x, y: data.y })}
               >
-                <CanvasAuthor style={{ color: authorColor }}>
+                <CanvasAuthor
+                style={{ color: `rgba(${authorColor.r}, ${authorColor.g}, ${authorColor.b}, ${authorColor.a})` }}>
                   지은이: {author}
                 </CanvasAuthor>
               </Draggable>
@@ -409,61 +488,62 @@ const [showAuthorColorPicker, setShowAuthorColorPicker] = useState(false);
         </Canvas>
   
         {step === 2 && (
-  <InputArea>
-    <InputWithColorWrapper>
-      <Input
-        type="text"
-        maxLength={10}
-        placeholder="제목 (10자 이내)"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
-      <ColorButton onClick={() => setShowTitleColorPicker((prev) => !prev)}>
-        색상
-      </ColorButton>
-      {showTitleColorPicker && (
-        <ColorPopover>
-          <input
-            type="color"
-            value={titleColor}
-            onChange={(e) => setTitleColor(e.target.value)}
-          />
-        </ColorPopover>
-      )}
-    </InputWithColorWrapper>
-
-    {/* 지은이 입력 + 색상 선택 */}
-    <InputWithColorWrapper>
-      <Input
-        type="text"
-        maxLength={5}
-        placeholder="만든 사람 이름"
-        value={author}
-        onChange={(e) => setAuthor(e.target.value)}
-      />
-      <ColorButton onClick={() => setShowAuthorColorPicker((prev) => !prev)}>
-        색상
-      </ColorButton>
-      {showAuthorColorPicker && (
-        <ColorPopover>
-          <input
-            type="color"
-            value={authorColor}
-            onChange={(e) => setAuthorColor(e.target.value)}
-          />
-        </ColorPopover>
-      )}
-    </InputWithColorWrapper>
-  </InputArea>
+          <InputArea>
+            <InputWithColorWrapper>
+              <Input
+                type="text"
+                maxLength={10}
+                placeholder="제목 (10자 이내)"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+              <ColorButton onClick={() => setShowTitleColorPicker((prev) => !prev)}>
+                색상
+              </ColorButton>
+              {showTitleColorPicker && (
+  <ColorPopover>
+    <RgbaColorPicker
+      color={titleColor}
+      onChange={(newColor) => {
+        setTitleColor(newColor);
+      }}
+    />
+  </ColorPopover>
 )}
 
+
+            </InputWithColorWrapper>
+  
+            <InputWithColorWrapper>
+              <Input
+                type="text"
+                maxLength={5}
+                placeholder="만든 사람 이름"
+                value={author}
+                onChange={(e) => setAuthor(e.target.value)}
+              />
+              <ColorButton onClick={() => setShowAuthorColorPicker((prev) => !prev)}>
+                색상
+              </ColorButton>
+              {showAuthorColorPicker && (
+              <ColorPopover>
+                <RgbaColorPicker
+                  color={authorColor}
+                  onChange={(newColor) => setAuthorColor(newColor)}
+                />
+              </ColorPopover>
+            )}
+
+            </InputWithColorWrapper>
+          </InputArea>
+        )}
       </CanvasSection>
   
       {step === 1 && (
         <Sidebar>
           <SidebarTitle>스티커 사용하기</SidebarTitle>
           <StickerList>
-            {['/sticker_tokki.png', '/sticker_gold.png', '/sticker_magic.jpeg'].map((src, i) => (
+            {stickerOptions.map((src, i) => (
               <StickerOption key={i} src={src} onClick={() => handleAddSticker(src)} />
             ))}
           </StickerList>

@@ -7,7 +7,7 @@ import styled from 'styled-components';
 import PopCard from '../components/PopCard';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import defaultImg from '../assets/images/testImg.png'; // 실제 존재하는 경로와 확장자 확인
+import defaultImg from '../assets/images/testImg.png';
 
 const CharacterContainer = styled.div`
   display: flex;
@@ -25,6 +25,7 @@ const ContentContainer = styled.div`
   padding: 0.875rem 1rem 1.5rem 0.875rem;
   gap: 1rem;
   width: 100%;
+  
 `;
 
 const Overlay = styled.div`
@@ -68,8 +69,8 @@ export default function CharacterStore() {
 
   return (
     <CharacterContainer>
-      <Header pageName={"내 캐릭터"} />
-      <ContentContainer>x
+      {characterList.length > 0 && <Header pageName={"내 캐릭터"} />}
+      <ContentContainer>
         {characterList.length > 0 ? (
           characterList.map((char) => (
             <Block
@@ -99,7 +100,7 @@ export default function CharacterStore() {
             imageSrc={selectedCharacter.charImg || defaultImg}
             imageSize="150px"
             cardTitle={selectedCharacter.charName}
-            subTitle={`유저ID: ${selectedCharacter.userId} | 캐릭터ID: ${selectedCharacter.charId}`}
+            subTitle={`이름: ${selectedCharacter.charName}`}
             description={selectedCharacter.charNote}
             positiveBtnText="닫기"
             onPositiveClick={handleClosePopup}

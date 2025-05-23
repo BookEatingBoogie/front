@@ -56,6 +56,7 @@ const CloudButton = styled.div`
   transition: transform 0.6s ease;
   transform: scale(${props => (props.active ? 1.3 : 1.15)});
   &:hover {
+    transform: scale(${props => (props.active ? 1.6 : 1.6)});
     transform: scale(1.6);
   }
   pointer-events: none; /* 이 컨테이너는 클릭 못함 */

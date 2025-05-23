@@ -234,13 +234,24 @@ export default function PopCard({
   titleFontSize,
   subFontSize,
   descriptionFontSize,
-  positiveBtnStyle = {},
-  negativeBtnStyle = {},
+  positivePadding,
+  positiveBorder,
+  positiveBackground,
+  positiveColor,
+  negativePadding,
+  negativeBorder,
+  negativeBackground,
+  negativeColor,
+  useWarningIcon = false,
 }) {
   return (
     <CardContainer>
       <IMG
-      src={imageSrc}
+      src= {imageSrc ? (
+        <IMG src={imageSrc} imageWidth={imageSize} cornerRadius={cornerRadius} />
+      ) : useWarningIcon ? (
+        <BsExclamationTriangleFill size={50} color="#EE5555" />
+      ) : null}
       imageWidth={imageSize}
       cornerRadius={cornerRadius}/>
 
@@ -250,16 +261,22 @@ export default function PopCard({
       <ButtonContainer>
         {positiveBtnText && (
           <PositiveButton
+            padding={positivePadding}
+            border={positiveBorder}
+            background={positiveBackground}
+            color={positiveColor}
             onClick={onPositiveClick}
-            {...positiveBtnStyle}
           >
             {positiveBtnText}
           </PositiveButton>
         )}
         {negativeBtnText && (
           <NegativeButton
+            padding={negativePadding}
+            border={negativeBorder}
+            background={negativeBackground}
+            color={negativeColor}
             onClick={onNegativeClick}
-            {...negativeBtnStyle}
           >
             {negativeBtnText}
           </NegativeButton>
