@@ -11,6 +11,7 @@ const Container = styled.div`
   gap: 1rem;
   text-align: center;
   width: 100%;
+  height: 90vh;
   min-height: 300px; // 높이 부족으로 줄어들 때 대비
 `;
 

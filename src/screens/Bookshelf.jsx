@@ -270,7 +270,7 @@ export default function Bookshelf() {
             negativeBtnText="닫기"
             onPositiveClick={() => {
               handleClosePopup();
-              navigate(`/reading?file=${selectedStory.content}`);
+              navigate(`/reading?file=${encodeURIComponent(selectedStory.content)}`);
 
             }}
             onNegativeClick={handleClosePopup}

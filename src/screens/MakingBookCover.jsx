@@ -40,7 +40,7 @@ const uploadToS3 = async (file) => {
 const CoverContainer = styled.div`
   display: flex;
   margin: 5rem auto 0; // 상단의 여백 후 가운데 정렬 
-  width: 50vw;
+  width: 80vw;
   padding: 2rem;
   background-color: #f2f2f2;
   border-radius: 1rem;
@@ -76,7 +76,7 @@ const Title = styled.div`
 
 const Canvas = styled.div`
   aspect-ratio: 2 / 3;                    
-  width: 100%;                          
+  width: 20vw;                          
   background-image: url('/back.png');  
   background-size: 100% 100%;          
   background-position: center;
