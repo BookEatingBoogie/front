@@ -12,7 +12,7 @@ app = Flask(__name__)
 CORS(app)
 
 API_KEY = os.getenv("ELEVENLABS_API_KEY")
-
+#VOICE_ID = "Mmepzv6cBqMI22R2YaXy"
 VOICE_ID = "AW5wrnG1jVizOYY7R1Oo"
 
 @app.route("/tts", methods=["POST"])
@@ -45,9 +45,9 @@ def generate_tts():
             "text": text,
             "model_id": "eleven_multilingual_v2",
             "voice_settings": {
-                "speed": 1.23,
+                "speed":1.03,
                 "stability": 0.79,
-                "similarity_boost": 0.93
+                "similarity": 0.93
             }
         }
 

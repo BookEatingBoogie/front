@@ -6,25 +6,42 @@ import BaseScreenLayout from '../components/BaseScreenLayout';
 import RoundedButton from '../components/RoundedButton';
 import styled from 'styled-components';
 
+const FixedButtonWrapper = styled.div`
+  position: fixed;
+  bottom: 2rem;           // 하단 여백 (조정 가능)
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 200rem;
+  padding: 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  z-index: 10;
+`;
+
 // 반응형 이미지 컴포넌트
 const CharacterImage = styled.img`
-  width: 80%;
-  max-width: 10rem;      /* 기본 최대 160px */
-  height: auto;
+  display: block;
+  width: auto;
+  height: 18rem;
   border-radius: 50%;
-  margin-bottom: 1.25rem;
+  margin: 0 auto 1.25rem;
 
-  @media (min-width: 360px) {
-    max-width: 14rem;    /* 160px */
+  @media (min-height: 700px) {
+    height: 22rem;
   }
-  @media (min-width: 720px) {
-    max-width: 14.2rem; /* 220px */
+
+  @media (min-height: 800px) {
+    height: 28rem;
   }
-  @media (min-width: 1080px) {
-    max-width: 14.4rem;  /* 280px */
+
+  @media (min-height: 900px) {
+    height: 34rem;
   }
-  @media (min-width: 1440px) {
-    max-width: 14.6rem;  /* 360px */
+
+  @media (min-height: 1000px) {
+    height: 38rem;
   }
 `;
 
@@ -58,13 +75,15 @@ export default function ConfirmCharacterScreen() {
         />
       )}
 
-      <RoundedButton onClick={handleMakeStory}>
-        이야기를 만들래요!
-      </RoundedButton>
+      <FixedButtonWrapper>
+        <RoundedButton onClick={handleMakeStory}>
+          이야기를 만들래요!
+        </RoundedButton>
 
-      <RoundedButton onClick={handleChangeCharacter}>
-        다른 인물로 바꿀래요.
-      </RoundedButton>
+        <RoundedButton onClick={handleChangeCharacter}>
+          다른 인물로 바꿀래요.
+        </RoundedButton>
+      </FixedButtonWrapper>
     </BaseScreenLayout>
   );
 }

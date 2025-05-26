@@ -76,7 +76,7 @@ export default function Favorite() {
 
   return (
     <FavoriteContainer>
-      <Header pageName="즐겨찾기" />
+      {favoriteStories.length > 0 && <Header pageName="즐겨찾기" />}
       <ContentContainer>
         {favoriteStories.length > 0 ? (
           favoriteStories.map((story) => (

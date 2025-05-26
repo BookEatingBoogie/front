@@ -7,7 +7,6 @@ import 코코 from '../assets/images/코코.png';
 import 코코1 from '../assets/images/코코1.png';
 import 코코2 from '../assets/images/코코2.png';
 
-
 export const characterInfoState = atom({
   key: 'characterInfo',
   default: [
@@ -20,10 +19,12 @@ export const characterInfoState = atom({
       speciality: '돈을 잘 벌어',
       ability:'슈퍼맨',
       note: '사람으로 변했다.',
+      charId: 4,
       img: 서영이,
-      userImg: 'https://bookeating.s3.ap-northeast-2.amazonaws.com/character/img4.jpg',
+      userImg: 'https://bookeating.s3.ap-northeast-2.amazonaws.com/character/img2.jpg"',
     },
     {
+      id: '2',
       id: '2',
       name: '유원이',
       age: '5',
@@ -34,18 +35,7 @@ export const characterInfoState = atom({
       note: '사라지는 동물들을 찾으러 떠난 소녀',
       img: 민지,
       userImg: '',
-    },
-    {
-      id: '2',
-      name: '유원이',
-      age: '5',
-      gender: '여자',
-      job: '수의사',
-      speciality: '동물과 소통이 가능해',
-      ability:'소통능력',
-      note: '사라지는 동물들을 찾으러 떠난 소녀',
-      img: 민지,
-      userImg: '',
+      charId: 8,
     },
     {
       id: '3',
@@ -65,7 +55,7 @@ export const characterInfoState = atom({
 export const storyCreationState = atom({
   key: 'storyCreationState',
   default: {
-    charID: 1,                     // 예시 캐릭터 ID
+    charId: 1,                     // 예시 캐릭터 ID
     genre: '모험',                 // 예시 장르
     place: '산',                  // 예시 장소
     history: [
@@ -73,7 +63,9 @@ export const storyCreationState = atom({
     ],                            // 예시 히스토리 배열
     story: '깊은 숲속에 꼬마 토끼 토비는 매일같이 새롭고 신나는 것을 찾으러 다녔어요.', // 최신 스토리
     question: '토비는 처음에 어디로 갔을까요?',
-    image: 유원이, // 예시 배경 이미지 URL
+    story: '깊은 숲속에 꼬마 토끼 토비는 매일같이 새롭고 신나는 것을 찾으러 다녔어요.깊은 숲속에 꼬마 토끼 토비는 매일같이 새롭고 신나는 것을 찾으러 다녔어요.깊은 숲속에 꼬마 토끼 토비는 매일같이 새롭고 신나는 것을 찾으러 다녔어요.', // 최신 스토리
+    question: '토비는 처음에 어디로 갔을까요?토비는 처음에 어디로 갔을까요?',
+    image: testImg, // 예시 배경 이미지 URL
     choices: ['산 아래로', '가만히', '정상으로'], // 예시 선택지
     step: 1,                       // 현재 진행 단계
     selectedChoice: '',           // 마지막 선택 값

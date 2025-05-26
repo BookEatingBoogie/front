@@ -9,37 +9,33 @@ const breakpoints = {
 };
 
 const Container = styled.div`
-  position: relative;
   width: 100%;
-  height: 100vh;
+  height: calc(var(--vh, 1vh) * 100); /* 모바일 대응 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   overflow: hidden;
+  padding: 1.25rem; /* 기본 여백 */
 `;
 
 const ProgressContainer = styled.div`
-  position: absolute;
-  top: 1.25rem;          /* 20px → 20/16 = 1.25rem */
-  left: 1.25rem;         /* 20px → 1.25rem */
-  right: 1.25rem;        /* 20px → 1.25rem */
-  display: flex;
-  flex-direction: column;
+  width: 100%;
+  max-width: 80rem;
   color: #fff;
-  gap: 0;                /* 0 stays the same */
-  font-size: 0.875rem;   /* 14px → 14/16 = 0.875rem */
-  z-index: 3;
+  font-size: 0.875rem;
 `;
 
 const ProgressText = styled.div`
-  color: #fff;
-  font-size: 0.875rem;   /* 14px → 0.875rem */
   white-space: nowrap;
 `;
 
 const ProgressBarBackground = styled.div`
   width: 100%;
-  height: 0.5rem;        /* 8px → 8/16 = 0.5rem */
+  height: 0.5rem;
   background: rgba(255, 255, 255, 0.3);
-  border-radius: 0.25rem;/* 4px → 4/16 = 0.25rem */
+  border-radius: 0.25rem;
   overflow: hidden;
+  margin-top: 0.25rem;
 `;
 
 const ProgressBarFill = styled.div`
@@ -49,65 +45,62 @@ const ProgressBarFill = styled.div`
   transition: width 0.3s ease;
 `;
 
-const Title = styled.h1`
-  position: absolute;
-  top: 3.75rem;          /* 60px → 60/16 = 3.75rem */
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 1.5rem;     /* 24px → 24/16 = 1.5rem */
-  color: #fff;
-  margin: 0;
+const TextSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 1rem 0;
   text-align: center;
+`;
+
+const Title = styled.h1`
+  font-size: 1.5rem;
+  color: #fff;
+  margin-bottom: 1rem;
   white-space: pre-line;
   @media (min-width: ${breakpoints.md}) {
     font-size: 1.6rem;
+    white-space: normal;
   }
   @media (min-width: ${breakpoints.lg}) {
     font-size: 1.8rem;
   }
   @media (min-width: ${breakpoints.xl}) {
     font-size: 2rem;
-  }  
+  }
 `;
 
 const SubTitle = styled.p`
-  position: absolute;
-  top: 8.125rem;         /* 130px → 130/16 = 8.125rem */
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.875rem;   /* 14px → 0.875rem */
+  font-size: 0.875rem;
   color: #fff;
-  margin: 0;
-  text-align: center;
   line-height: 1.4;
-  width: 80%;
-  max-width: 25rem;      /* 400px → 400/16 = 25rem */
+  max-width: 40rem;
   white-space: pre-line;
   @media (min-width: ${breakpoints.md}) {
-    max-width: 40rem;
     font-size: 1rem;
   }
   @media (min-width: ${breakpoints.lg}) {
-    top: 9rem;
-    max-width: 60rem;
     font-size: 1.125rem;
-  }
-  @media (min-width: ${breakpoints.xl}) {
-    top: 10rem;
-    max-width: 80rem;
-    font-size: 1.14rem;
   }
 `;
 
 const ContentWrapper = styled.div`
-  position: absolute;
-  top: 12.5rem;          /* 200px → 200/16 = 12.5rem */
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80%;
-  max-width: 25rem;      /* 400px → 25rem */
-  text-align: center;
+  width: 100%;
+  flex: 1;
   z-index: 2;
+  @media (min-width: ${breakpoints.md}) {
+    top: 13rem;
+    max-width: 40rem;
+  }
+  @media (min-width: ${breakpoints.lg}) {
+    top: 14rem;
+    max-width: 60rem;
+  }
+  @media (min-width: ${breakpoints.xl}) {
+    top: 15rem;
+    max-width: 80rem;
+  }
+  max-width: 40rem;
 `;
 
 const LayoutImage = styled.img`
@@ -116,20 +109,24 @@ const LayoutImage = styled.img`
   transform: translateX(-50%);
   height: auto;
   z-index: 1;
+  bottom: ${({ imageBottom }) => imageBottom || '6.25rem'};
+  width: 22.5rem;
+
+  @media (min-height: ${breakpoints.md}) {
+    width: 28rem;
+  }
+
+  @media (min-height: 900px) {
+    width: 32rem;
+  }
+
+  @media (min-height: 1000px) {
+    width: 36rem;
+  }
 `;
 
 /**
  * BaseScreenLayout
- * @param {string}  progressText
- * @param {number}  progressCurrent
- * @param {number}  progressTotal
- * @param {string}  title
- * @param {string}  subTitle
- * @param {ReactNode} children
- * @param {string}  imageSrc
- * @param {string}  imageAlt
- * @param {number}  imageWidth   // px value
- * @param {number}  imageBottom  // px value
  */
 const BaseScreenLayout = ({
   progressText,
@@ -140,8 +137,8 @@ const BaseScreenLayout = ({
   children,
   imageSrc,
   imageAlt = "",
-  imageWidth = 360,    // px
-  imageBottom = 100,   // px
+  imageWidth = 360,
+  imageBottom = 100,
 }) => {
   let fillPercent = 0;
   if (
@@ -164,8 +161,11 @@ const BaseScreenLayout = ({
           )}
         </ProgressContainer>
       )}
-      {title && <Title>{title}</Title>}
-      {subTitle && <SubTitle>{subTitle}</SubTitle>}
+
+      <TextSection>
+        {title && <Title>{title}</Title>}
+        {subTitle && <SubTitle>{subTitle}</SubTitle>}
+      </TextSection>
 
       <ContentWrapper>{children}</ContentWrapper>
 
@@ -173,10 +173,7 @@ const BaseScreenLayout = ({
         <LayoutImage
           src={imageSrc}
           alt={imageAlt}
-          style={{
-            width: `${imageWidth / 16}rem`,    /* px → rem */
-            bottom: `${imageBottom / 16}rem`,  /* px → rem */
-          }}
+          imageBottom={`${imageBottom / 16}rem`}
         />
       )}
     </Container>

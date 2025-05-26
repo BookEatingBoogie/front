@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useRecoilState } from 'recoil';
-import { storyInfoState } from '../recoil/atoms';
+import { useEffect } from 'react';
+import axios from 'axios';
 import Block from '../components/Block';
 import PopCard from '../components/PopCard';
 import styled from 'styled-components';
@@ -78,23 +78,46 @@ const IconWrapper = styled.div`
 
 export default function EditBookshelf() {
   const navigate = useNavigate();
-  const [storyList, setStoryList] = useRecoilState(storyInfoState);
   const [selectedIds, setSelectedIds] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
+  const [storyList, setStoryList] = useState([]);
 
+  useEffect(() => {
+    const fetchStories = async () => {
+      const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/mypage/story`);
+      setStoryList(res.data.stories);
+    };
+    fetchStories();
+  }, []);
   const toggleSelect = (id) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
     );
   };
 
-  const handleDeleteConfirm = () => {
-    const updatedList = storyList.filter(story => !selectedIds.includes(story.id));
-    setStoryList(updatedList);
-    setShowPopup(false);
-    navigate('/bookshelf');
+  const handleDeleteConfirm = async () => {
+    try {
+      await deleteStories(selectedIds); // 서버에 삭제 요청
+      const updatedList = storyList.filter(story => !selectedIds.includes(story.storyId));
+      setStoryList(updatedList);
+      setShowPopup(false);
+      navigate('/bookshelf');
+    } catch (err) {
+      alert('삭제 중 오류가 발생했습니다.');
+    }
   };
-
+  
+  const deleteStories = async (ids) => {
+    try {
+      await axios.delete(`${process.env.REACT_APP_API_BASE_URL}/mypage/story`, {
+        data: { storyIds: ids }
+      });
+      console.log('✅ 삭제 요청 성공');
+    } catch (error) {
+      console.error('❌ 삭제 요청 실패:', error);
+    }
+  };
+  
   return (
     <Container>
       <Header pageName="내 책장 편집하기" />
@@ -105,18 +128,18 @@ export default function EditBookshelf() {
 
       <Grid>
         {storyList.map((story) => (
-          <StoryWrapper key={story.id} onClick={() => toggleSelect(story.id)}>
+          <StoryWrapper key={story.storyId} onClick={() => toggleSelect(story.storyId)}>
             <Block
               blockImg={story.img?.[0] || story.cover?.testImg}
               blockName={story.title}
               creationDate={story.date}
-              storyId={story.id}
+              storyId={story.storyId}
               hideDate={true}
               hideFavorite={true}
               isEditing={false}
             />
             <IconWrapper>
-              {selectedIds.includes(story.id) ? <BsCheckCircleFill /> : <BsCheckCircle />}
+              {selectedIds.includes(story.storyId) ? <BsCheckCircleFill /> : <BsCheckCircle />}
             </IconWrapper>
           </StoryWrapper>
         ))}
@@ -130,23 +153,19 @@ export default function EditBookshelf() {
             buttonDirection="column"
             cardTitle={`총 ${selectedIds.length}개의 동화를 삭제할까요?`}
             description="한 번 삭제되면 복구할 수 없어요."
-            positiveBtnText="네, 이야기를 삭제할래요."
-            negativeBtnText="아니요, 삭제하지 않을래요"
+            positiveBtnText="네! 삭제할래요."
+            negativeBtnText="아니요!"
             onPositiveClick={handleDeleteConfirm}
             onNegativeClick={() => setShowPopup(false)}
-            positiveBtnStyle={{
-              padding: '0.5rem 1rem',
-              border: '1px solid rgba(238, 85, 85, 0.50)',
-              background: 'rgba(238, 85, 85, 0.20)',
-              color: '#fff',
-            }}
-            negativeBtnStyle={{
-              padding: '0.5rem 1rem',
-              border: '1px solid rgba(253, 252, 250, 0.50)',
-              background: 'rgba(253, 252, 250, 0.20)',
-              color: '#fff',
-            }}
-          />
+            positivePadding="0.5rem 1rem"
+            positiveBorder="1px solid rgba(238, 85, 85, 0.50)"
+            positiveBackground="rgba(238, 85, 85, 0.20)"
+            positiveColor="#fff"
+            negativePadding="0.5rem 1rem"
+            negativeBorder="1px solid rgba(253, 252, 250, 0.50)"
+            negativeBackground="rgba(253, 252, 250, 0.20)"
+            negativeColor="#fff"
+                      />
         </Overlay>
       )}
     </Container>
