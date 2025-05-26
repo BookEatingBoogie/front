@@ -62,19 +62,6 @@ const ImageWrapper = styled.div`
   }
   @media (min-height: 1000px) {
     max-width: 33rem;  /* 280px */
-  }
-  @media (min-width: 360px) {
-    max-width: 26rem;    /* 160px */
-  }
-  @media (min-width: 720px) {
-    max-width: 27rem; /* 220px */
-  }
-  @media (min-width: 1080px) {
-    max-width: 28rem;  /* 280px */
-  }
-  @media (min-width: 1440px) {
-    max-width: 29rem;  /* 360px */
-  }
 `;
 
 // 5) 선택지 오버레이: 이미지 아래, 가로로 버튼 나열
