@@ -36,9 +36,30 @@ const EditButton = styled.button`
   padding: 0.25rem 1rem;
   align-items: center;
   gap: 0.25rem;
-  @media (max-width: 480px) {
+
+  @media (max-width: 360px) {
+    font-size: 0.85rem;
+    padding: 0.2rem 0.75rem;
+  }
+
+  @media (min-width: 361px) and (max-width: 719px) {
     font-size: 0.9rem;
     padding: 0.2rem 0.75rem;
+  }
+
+  @media (min-width: 720px) and (max-width: 1079px) {
+    font-size: 0.95rem;
+    padding: 0.22rem 0.9rem;
+  }
+
+  @media (min-width: 1080px) and (max-width: 1439px) {
+    font-size: 1rem;
+    padding: 0.25rem 1rem;
+  }
+
+  @media (min-width: 1440px) {
+    font-size: 1.05rem;
+    padding: 0.3rem 1.2rem;
   }
 `;
 
@@ -62,26 +83,35 @@ const CharacterCategoryContainer = styled.div`
   gap: 0.75rem;
   padding: 0;
   width: max-content;
+  margin-left: 0.5rem;
 `;
 
 const CharacterCircle = styled.div`
-  width: 55px;
-  height: 64px;
+  width: 5rem;       // 80px
+  height: 7.5rem;    // 120px
   overflow: hidden;
-  border: ${(props) => (props.selected ? '2px solid #FFC75F' : '1px solid #ccc')};
+  border: ${(props) => (props.selected ? '0.125rem solid #FFC75F' : '0.0625rem solid #ccc')}; // 2px / 1px
   background-color: ${(props) => (props.selected ? '#FFF9EC' : '#fff')};
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  border-radius: 1.5rem 1.5rem 0 0;
+  border-radius: 2rem 2rem 0 0;
+  flex-shrink: 0;
 `;
 
 const CharacterImg = styled.img`
   width: auto;
-  height: 180px;
+  height: 12.5rem;  // 200px
   object-fit: cover;
-  transform: translateY(60px);
+  transform: translateY(5rem); // 80px
+`;
+
+const CharacterLabelWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 5rem;
 `;
 
 const CharacterLabel = styled.span`
@@ -89,11 +119,8 @@ const CharacterLabel = styled.span`
   color: ${(props) => (props.selected ? '#1A202B' : '#888')};
   font-weight: ${(props) => (props.selected ? '600' : '400')};
   margin-top: 0.3rem;
-  width: 100%;
   text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+
   @media (max-width: 480px) {
     font-size: 0.7rem;
   }
@@ -107,8 +134,25 @@ const CharacterSectionTitle = styled.div`
   color: #1A202B;
   text-align: center;
   background-color: ${(props) => (props.$hasContent ? '#FFF9EC' : '#fff')};
-  @media (max-width: 480px) {
+
+  @media (max-width: 360px) {
+    font-size: 0.75rem;
+  }
+
+  @media (min-width: 361px) and (max-width: 719px) {
     font-size: 0.85rem;
+  }
+
+  @media (min-width: 720px) and (max-width: 1079px) {
+    font-size: 0.9rem;
+  }
+
+  @media (min-width: 1080px) and (max-width: 1439px) {
+    font-size: 0.95rem;
+  }
+
+  @media (min-width: 1440px) {
+    font-size: 1rem;
   }
 `;
 
@@ -145,7 +189,8 @@ const Overlay = styled.div`
 export default function Bookshelf() {
   const [storyList, setStoryList] = useState([]);
   const [characterList, setCharacterList] = useState([]);
-  const [selectedCharacter, setSelectedCharacter] = useState(null);
+  const [selectedCharacterId, setSelectedCharacterId] = useState(null);
+  const [selectedCharacterName, setSelectedCharacterName] = useState(null);
   const [selectedStory, setSelectedStory] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -164,13 +209,13 @@ export default function Bookshelf() {
         setLoading(false);
       }
     };
-  
+
     fetchData();
   }, []);
 
   const handleBlockClick = (story) => setSelectedStory(story);
   const handleClosePopup = () => setSelectedStory(null);
-  
+
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
     const date = new Date(dateStr);
@@ -180,52 +225,55 @@ export default function Bookshelf() {
     return `${year}년 ${month}월 ${day}일`;
   };
 
-  // 선택한 캐릭터에 따라 동화 목록 필터링, 단,
-  // 캐릭터가 한 개도 없으면 storyList는 무시
-  const filteredStoryList = selectedCharacter
+  const filteredStoryList = selectedCharacterId
     ? storyList.filter((story) =>
-        story.characters?.some((char) => char.charName === selectedCharacter)
+        story.characters?.some((char) => char.charId === selectedCharacterId)
       )
     : storyList;
 
-  // 캐릭터가 선택된 상태이면서 필터된 동화가 존재하는 경우만 활성화 처리
-  const isActiveBg = selectedCharacter !== null && filteredStoryList.length > 0;
+  const isActiveBg = selectedCharacterId !== null && filteredStoryList.length > 0;
 
   return (
     <BookshelfContainer>
-      {!loading && storyList.length > 0 && (
-        <Header pageName={"내 책장"} />
+      {!loading && storyList.length > 0 && <Header pageName={"내 책장"} />}
+
+      {characterList.length > 0 && (
+        <CharacterCategoryWrapper>
+          <CharacterCategoryContainer>
+            <CharacterCircle 
+              onClick={() => {
+                setSelectedCharacterId(null);
+                setSelectedCharacterName(null);
+              }}
+              selected={selectedCharacterId === null}
+            >
+              <CharacterLabel selected={selectedCharacterId === null}>전체</CharacterLabel>
+            </CharacterCircle>
+
+            {characterList.map((char) => (
+              <CharacterCircle
+                key={char.charId}
+                onClick={() => {
+                  setSelectedCharacterId(char.charId);
+                  setSelectedCharacterName(char.charName);
+                }}
+                selected={selectedCharacterId === char.charId}
+              >
+                <CharacterImg src={char.charImg || defaultImg} alt={char.charName} />
+                <CharacterLabel selected={selectedCharacterId === char.charId}>
+                  {char.charName}
+                </CharacterLabel>
+              </CharacterCircle>
+            ))}
+          </CharacterCategoryContainer>
+        </CharacterCategoryWrapper>
       )}
 
-{characterList.length > 0 && (
-  <CharacterCategoryWrapper>
-    <CharacterCategoryContainer>
-      <CharacterCircle
-        onClick={() => setSelectedCharacter(null)}
-        selected={selectedCharacter === null}
-      >
-        <CharacterLabel selected={selectedCharacter === null}>전체</CharacterLabel>
-      </CharacterCircle>
-
-      {characterList.map((char) => (
-        <CharacterCircle
-          key={char.charId}
-          onClick={() => setSelectedCharacter(char.charName)}
-          selected={selectedCharacter === char.charName}
-        >
-          <CharacterImg src={char.charImg || defaultImg} alt={char.charName} />
-          <CharacterLabel selected={selectedCharacter === char.charName}>
-            {char.charName}
-          </CharacterLabel>
-        </CharacterCircle>
-      ))}
-    </CharacterCategoryContainer>
-  </CharacterCategoryWrapper>
-)}
       <Separator />
+
       {characterList.length > 0 ? (
         <>
-          {selectedCharacter === null && (
+          {selectedCharacterId === null && (
             <EditButtonWrapper>
               <EditButton onClick={() => navigate('/edit-bookshelf')}>
                 편집하기
@@ -233,9 +281,9 @@ export default function Bookshelf() {
             </EditButtonWrapper>
           )}
 
-          {selectedCharacter && filteredStoryList.length > 0 && (
+          {selectedCharacterId !== null && filteredStoryList.length > 0 && (
             <CharacterSectionTitle $hasContent={true}>
-              {selectedCharacter}가 나오는 동화들
+              {selectedCharacterName}가 나오는 동화들
             </CharacterSectionTitle>
           )}
 
@@ -260,7 +308,10 @@ export default function Bookshelf() {
                     title="선택한 캐릭터의 동화가 없어요."
                     description="다른 캐릭터를 선택해보세요!"
                     buttonText="전체 보기"
-                    onButtonClick={() => setSelectedCharacter(null)}
+                    onButtonClick={() => {
+                      setSelectedCharacterId(null);
+                      setSelectedCharacterName(null);
+                    }}
                   />
                 </div>
               )}
@@ -268,7 +319,6 @@ export default function Bookshelf() {
           </HighlightedWrapper>
         </>
       ) : (
-        // 캐릭터 자체가 없는 경우
         <ContentContainer>
           <Empty
             title="등록된 캐릭터가 없습니다."
