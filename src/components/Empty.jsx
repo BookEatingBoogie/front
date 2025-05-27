@@ -25,7 +25,6 @@ const Image = styled.img`
 const Title = styled.h2`
   color: #1A202B;
   text-align: center;
-  font-family: Pretendard;
   font-size: 2.5rem;
   font-style: normal;
   font-weight: 700;
@@ -36,7 +35,6 @@ const Title = styled.h2`
 const Description = styled.p`
   color: #1A202B;
   text-align: center;
-  font-family: Pretendard;
   font-size: 1rem;
   font-style: normal;
   font-weight: 400;

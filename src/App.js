@@ -49,9 +49,9 @@ function App() {
     location.pathname === '/character-storage';
   
   return (
+    <>
+    <GlobalStyle/>
     <RecoilRoot>
-      <GlobalStyle />
-
       <ToastContainer
       position="top-center"
       autoClose={3000}
@@ -92,6 +92,7 @@ function App() {
       {/* 모든 페이지에서 하단 고정 바 표시 */}
       {showNav && <BottomNav />}
     </RecoilRoot>
+    </>
   );
 }
 

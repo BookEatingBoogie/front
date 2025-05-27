@@ -30,7 +30,6 @@ const EditButton = styled.button`
   border: 1px solid rgba(57, 61, 64, 0.5);
   background: rgba(243, 243, 243, 0.58);
   color: #1A202B;
-  font-family: Pretendard;
   font-size: 1rem;
   font-weight: 300;
   display: flex;

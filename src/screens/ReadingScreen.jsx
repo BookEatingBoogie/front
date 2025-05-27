@@ -233,10 +233,10 @@ const progress = ((currentPage + 1) / totalPages) * 100;
     if (fileUrl) fetchData();
   }, [fileUrl]);
 
-  function useWindowSize() {
+  function useWindowSize() { // 동화책 크기 조절용 함수 
     const [size, setSize] = useState({ width: 960, height: 640 });
   
-    useEffect(() => {
+    useEffect(() => { 
       const updateSize = () => {
         const vw = window.innerWidth;
         const vh = window.innerHeight;
