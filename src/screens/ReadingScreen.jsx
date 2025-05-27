@@ -16,13 +16,20 @@ const Container = styled.div`
 `;
 
 const BookWrapper = styled.div`
-flex: 1;
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
 `;
-
+const StyledFlipBook = styled(HTMLFlipBook)`
+  width: 1000px;
+  height: 800px;
+  max-width: 1000px;
+  max-height: 1536px;
+  min-width: 315px;
+  min-height: 400px;
+`;
 const Page = styled.div`
   width: 100%;
   height: 100%;
@@ -44,8 +51,8 @@ const PageContent = styled.div`
 `;
 
 const PageImage = styled.img`
-  max-width: 40%;
-  max-height: 80%;
+  width: 90%;
+  height: 90%
   object-fit: contain;
 `;
 
@@ -56,6 +63,7 @@ const PageText = styled.div`
   color: #333;
   line-height: 1.6;
   white-space: pre-wrap;
+  font-size: 2rem;
 `;
 
 const OverlayTop = styled.div`
@@ -200,11 +208,13 @@ export default function ReadingScreen() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [showFinishPopup, setShowFinishPopup] = useState(false);
 
+  const { width, height } = useWindowSize(); //flipbook 사이즈 조절용 
   const audioRef = useRef(null);
   const bookRef = useRef(null);
 
-  const totalPages = texts.length;
-  const progress = ((currentPage + 1) / totalPages) * 100;
+  const totalPages = texts.length * 2;
+const progress = ((currentPage + 1) / totalPages) * 100;
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -223,6 +233,27 @@ export default function ReadingScreen() {
     if (fileUrl) fetchData();
   }, [fileUrl]);
 
+  function useWindowSize() {
+    const [size, setSize] = useState({ width: 960, height: 640 });
+  
+    useEffect(() => {
+      const updateSize = () => {
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+  
+        // 기준 비율 유지 (예: 3:2 비율), 최소/최대 지정 가능
+        const width = Math.max(315, Math.min(vw * 0.9, 1000));
+        const height = Math.max(400, Math.min(vh * 0.8, 800));
+        setSize({ width, height });
+      };
+  
+      updateSize(); // 초기 실행
+      window.addEventListener('resize', updateSize);
+      return () => window.removeEventListener('resize', updateSize);
+    }, []);
+  
+    return size;
+  }
   const stopAudio = () => {
     if (audioRef.current) {
       audioRef.current.pause();
@@ -267,15 +298,21 @@ export default function ReadingScreen() {
   const handleFlip = (e) => {
     const newPage = e.data;
     setCurrentPage(newPage);
-    if (texts[newPage]) speakText(texts[newPage]);
+  
+    // 텍스트 페이지는 짝수 페이지 기준으로 오른쪽에 위치
+    const textIndex = Math.floor(newPage / 2);
+    if (newPage % 2 === 1 && texts[textIndex]) {
+      speakText(texts[textIndex]);
+    }
   };
+  
 
   const toggleTTS = () => {
     if (isSpeaking) stopAudio();
     else speakText(texts[currentPage]);
   };
 
-  if (!texts.length || !images.length) return <div style={{ padding: '2rem' }}>불러오는 중...</div>;
+  if (!texts.length || !images.length) return <div style={{ padding: '2rem' }}>불러오는 중</div>;
 
   return (
     <Container>
@@ -288,59 +325,62 @@ export default function ReadingScreen() {
           <SoundIcon />
         </SoundButtonWrapper>
       </OverlayTop>
-<BookWrapper>
-<HTMLFlipBook
-        width={800}
-        height={600}
-        size="fixed"
-        minWidth={315}
-        maxWidth={1000}
-        minHeight={400}
-        maxHeight={1536}
-        maxShadowOpacity={0.5}
-        showCover={false}
-        mobileScrollSupport={false}
-        useMouseEvents={true}
-        drawShadow={true}
-        flippingTime={1000}
-        usePortrait={false}
-        direction="rtl"
-        ref={bookRef}
-        onFlip={handleFlip}
-      >
-        {texts.map((text, idx) => (
-          <Page key={idx}>
-            <PageContent>
-              <PageImage src={images[idx]} alt={`img-${idx}`} />
-              <PageText>{text}</PageText>
-            </PageContent>
-          </Page>
-        ))}
-      </HTMLFlipBook>
-</BookWrapper>
-      
+      <BookWrapper>
+      <HTMLFlipBook
+  width={Math.floor(width)}
+  height={Math.floor(height)}
+  size="fixed"
+  maxShadowOpacity={0.5}
+  showCover={false}
+  mobileScrollSupport={false}
+  useMouseEvents={true}
+  drawShadow={true}
+  flippingTime={1000}
+  usePortrait={false}
+  direction="rtl"
+  ref={bookRef}
+  onFlip={handleFlip}
+>
+          {texts.flatMap((text, idx) => [
+            <Page key={`img-${idx}`}>
+              <PageContent>
+                <PageImage src={images[idx]} alt={`img-${idx}`} />
+              </PageContent>
+            </Page>,
 
-<OverlayBottom $visible={true}>
-  <ProgressInfo>
-    <ProgressText>{currentPage + 1}/{totalPages}</ProgressText>
-    <ProgressBarContainer>
-      <Progress $progress={progress} />
-    </ProgressBarContainer>
-  </ProgressInfo>
-  <NavButtons>
-    <NavButton onClick={(e) => { e.stopPropagation(); bookRef.current?.pageFlip().flipPrev(); }}>
-      ◀ 이전 장으로
-    </NavButton>
-    <PlayButton onClick={(e) => { e.stopPropagation(); toggleTTS(); }}>
-      {isSpeaking ? '⏸' : '▶'}
-    </PlayButton>
-    <NavButton onClick={(e) => { e.stopPropagation(); bookRef.current?.pageFlip().flipNext(); }}>
-      다음 장으로 ▶
-    </NavButton>
-  </NavButtons>
-</OverlayBottom>
+            <Page key={`text-${idx}`}>
+              <PageContent>
+                <PageText>{text}</PageText>
+              </PageContent>
+            </Page>
+          ])}
+        </HTMLFlipBook>
+      </BookWrapper>
 
 
+
+
+
+
+      <OverlayBottom $visible={true}>
+        <ProgressInfo>
+          <ProgressText>{currentPage + 1}/{totalPages}</ProgressText>
+          <ProgressBarContainer>
+            <Progress $progress={progress} />
+          </ProgressBarContainer>
+        </ProgressInfo>
+        <NavButtons>
+          <NavButton onClick={(e) => { e.stopPropagation(); bookRef.current?.pageFlip().flipPrev(); }}>
+            ◀ 이전 장으로
+          </NavButton>
+          <PlayButton onClick={(e) => { e.stopPropagation(); toggleTTS(); }}>
+            {isSpeaking ? '⏸' : '▶'}
+          </PlayButton>
+          <NavButton onClick={(e) => { e.stopPropagation(); bookRef.current?.pageFlip().flipNext(); }}>
+            다음 장으로 ▶
+          </NavButton>
+        </NavButtons>
+      </OverlayBottom>
       {showFinishPopup && (
         <div style={{
           position: 'absolute',
@@ -373,7 +413,6 @@ export default function ReadingScreen() {
           />
         </div>
       )}
-
       <audio ref={audioRef} hidden />
     </Container>
   );

@@ -90,7 +90,7 @@ const CharacterLabel = styled.span`
   color: ${(props) => (props.selected ? '#1A202B' : '#888')};
   font-weight: ${(props) => (props.selected ? '600' : '400')};
   margin-top: 0.3rem;
-  width: 100%
+  width: 100%;
   text-align: center;
   display: flex;
   align-items: center;
@@ -168,7 +168,6 @@ export default function Bookshelf() {
   
     fetchData();
   }, []);
-  
 
   const handleBlockClick = (story) => setSelectedStory(story);
   const handleClosePopup = () => setSelectedStory(null);
@@ -179,90 +178,113 @@ export default function Bookshelf() {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
-    return `${year}년 ${month}월 ${day}일`;    
+    return `${year}년 ${month}월 ${day}일`;
   };
+
+  // 선택한 캐릭터에 따라 동화 목록 필터링, 단,
+  // 캐릭터가 한 개도 없으면 storyList는 무시
   const filteredStoryList = selectedCharacter
     ? storyList.filter((story) =>
         story.characters?.some((char) => char.charName === selectedCharacter)
       )
     : storyList;
 
+  // 캐릭터가 선택된 상태이면서 필터된 동화가 존재하는 경우만 활성화 처리
   const isActiveBg = selectedCharacter !== null && filteredStoryList.length > 0;
 
   return (
     <BookshelfContainer>
-        {!loading && storyList.length > 0 && (
-      <Header pageName={"내 책장"} />
-    )}
+      {!loading && storyList.length > 0 && (
+        <Header pageName={"내 책장"} />
+      )}
 
-      <CharacterCategoryWrapper>
-        <CharacterCategoryContainer>
-          <CharacterCircle onClick={() => setSelectedCharacter(null)} selected={selectedCharacter === null}>
-            <CharacterLabel selected={selectedCharacter === null}>전체</CharacterLabel>
-          </CharacterCircle>
+{characterList.length > 0 && (
+  <CharacterCategoryWrapper>
+    <CharacterCategoryContainer>
+      <CharacterCircle
+        onClick={() => setSelectedCharacter(null)}
+        selected={selectedCharacter === null}
+      >
+        <CharacterLabel selected={selectedCharacter === null}>전체</CharacterLabel>
+      </CharacterCircle>
 
-          {characterList.map((char) => (
-            <CharacterCircle
-              key={char.charId}
-              onClick={() => setSelectedCharacter(char.charName)}
-              selected={selectedCharacter === char.charName}
-            >
-              <CharacterImg src={char.charImg || defaultImg} alt={char.charName} />
-              <CharacterLabel selected={selectedCharacter === char.charName}>{char.charName}</CharacterLabel>
-            </CharacterCircle>
-          ))}
-
-        </CharacterCategoryContainer>
-      </CharacterCategoryWrapper>
-
+      {characterList.map((char) => (
+        <CharacterCircle
+          key={char.charId}
+          onClick={() => setSelectedCharacter(char.charName)}
+          selected={selectedCharacter === char.charName}
+        >
+          <CharacterImg src={char.charImg || defaultImg} alt={char.charName} />
+          <CharacterLabel selected={selectedCharacter === char.charName}>
+            {char.charName}
+          </CharacterLabel>
+        </CharacterCircle>
+      ))}
+    </CharacterCategoryContainer>
+  </CharacterCategoryWrapper>
+)}
       <Separator />
-
-      {selectedCharacter === null && (
-        <EditButtonWrapper>
-          <EditButton onClick={() => navigate('/edit-bookshelf')}>편집하기</EditButton>
-        </EditButtonWrapper>
-      )}
-
-      {selectedCharacter && filteredStoryList.length > 0 && (
-        <CharacterSectionTitle $hasContent={true}>
-          {selectedCharacter}가 나오는 동화들
-        </CharacterSectionTitle>
-      )}
-
-      <HighlightedWrapper active={isActiveBg}>
-        <ContentContainer>
-          {filteredStoryList.length > 0 ? (
-            filteredStoryList.map((story) => (
-              <Block
-                key={story.storyId}
-                blockImg={story.coverImg}
-                blockName={story.title}
-                creationDate={formatDate(story.creationDate)}
-                storyId={story.storyId}
-                showFavorite={true}
-                onClick={() => handleBlockClick(story)}
-                withShadow={false}
-              />
-
-            ))
-          ) : (
-            <div style={{ width: '100%', backgroundColor: '#fff', flexGrow: 1 }}>
-              <Empty
-                title="선택한 캐릭터의 동화가 없어요."
-                description="다른 캐릭터를 선택해보세요!"
-                buttonText="전체 보기"
-                onButtonClick={() => setSelectedCharacter(null)}
-              />
-            </div>
+      {characterList.length > 0 ? (
+        <>
+          {selectedCharacter === null && (
+            <EditButtonWrapper>
+              <EditButton onClick={() => navigate('/edit-bookshelf')}>
+                편집하기
+              </EditButton>
+            </EditButtonWrapper>
           )}
+
+          {selectedCharacter && filteredStoryList.length > 0 && (
+            <CharacterSectionTitle $hasContent={true}>
+              {selectedCharacter}가 나오는 동화들
+            </CharacterSectionTitle>
+          )}
+
+          <HighlightedWrapper active={isActiveBg}>
+            <ContentContainer>
+              {filteredStoryList.length > 0 ? (
+                filteredStoryList.map((story) => (
+                  <Block
+                    key={story.storyId}
+                    blockImg={story.coverImg}
+                    blockName={story.title}
+                    creationDate={formatDate(story.creationDate)}
+                    storyId={story.storyId}
+                    showFavorite={true}
+                    onClick={() => handleBlockClick(story)}
+                    withShadow={false}
+                  />
+                ))
+              ) : (
+                <div style={{ width: '100%', backgroundColor: '#fff', flexGrow: 1 }}>
+                  <Empty
+                    title="선택한 캐릭터의 동화가 없어요."
+                    description="다른 캐릭터를 선택해보세요!"
+                    buttonText="전체 보기"
+                    onButtonClick={() => setSelectedCharacter(null)}
+                  />
+                </div>
+              )}
+            </ContentContainer>
+          </HighlightedWrapper>
+        </>
+      ) : (
+        // 캐릭터 자체가 없는 경우
+        <ContentContainer>
+          <Empty
+            title="등록된 캐릭터가 없습니다."
+            description="캐릭터를 등록해주세요!"
+            buttonText="캐릭터 등록"
+            onButtonClick={() => navigate('/create-character')}
+          />
         </ContentContainer>
-      </HighlightedWrapper>
+      )}
 
       {selectedStory && (
         <Overlay onClick={handleClosePopup}>
           <PopCard
             imageSrc={selectedStory.img?.[0] || selectedStory.cover?.testImg}
-            imageSize="150px" 
+            imageSize="150px"
             cardTitle={selectedStory.title}
             subTitle={formatDate(selectedStory.creationDate)}
             description={selectedStory.summary}
@@ -271,14 +293,12 @@ export default function Bookshelf() {
             onPositiveClick={() => {
               handleClosePopup();
               navigate(`/reading?file=${encodeURIComponent(selectedStory.content)}`);
-
             }}
             onNegativeClick={handleClosePopup}
             titleFontSize="1.1rem"
             subFontSize="0.9rem"
             descriptionFontSize="0.8rem"
           />
-
         </Overlay>
       )}
 
