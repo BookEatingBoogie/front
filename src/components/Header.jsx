@@ -13,7 +13,6 @@ const HeaderContainer = styled.div`
 const Title = styled.div`
     color: #FDFCFA;
     text-align: left;
-    font-family: Pretendard;
     font-size: 1.5rem;
     font-style: normal;
     font-weight: 700;

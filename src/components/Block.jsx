@@ -43,7 +43,6 @@ const IMG = styled.img`
 const Title = styled.div`
   color: #000;
   text-align: center;
-  font-family: Roboto;
   font-size: 0.625rem;
   font-weight: 400;
   margin-bottom: 0.3rem;
@@ -53,7 +52,6 @@ const Title = styled.div`
 const Date = styled.div`
   color: #000;
   text-align: center;
-  font-family: Roboto;
   font-size: 0.625rem;
   font-weight: 400;
 `;

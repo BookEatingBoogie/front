@@ -40,7 +40,7 @@ const uploadToS3 = async (file) => {
 const CoverContainer = styled.div`
   display: flex;
   margin: 5rem auto 0; // 상단의 여백 후 가운데 정렬 
-  width: 50vw;
+  width: 80vw;
   padding: 2rem;
   background-color: #f2f2f2;
   border-radius: 1rem;
@@ -76,7 +76,7 @@ const Title = styled.div`
 
 const Canvas = styled.div`
   aspect-ratio: 2 / 3;                    
-  width: 100%;                          
+  width: 20vw;                          
   background-image: url('/back.png');  
   background-size: 100% 100%;          
   background-position: center;
@@ -394,6 +394,11 @@ const [showAuthorColorPicker, setShowAuthorColorPicker] = useState(false);
       setStep(2); // 스티커에서 텍스트 입력단계로
       return;
     }
+    if (!title || !author) {
+      alert("제목과 만든 사람 이름을 입력해주세요.");
+      return;
+    }
+  
   
     if (canvasRef.current) {
       try {
@@ -404,11 +409,17 @@ const [showAuthorColorPicker, setShowAuthorColorPicker] = useState(false);
   
         const s3Url = await uploadToS3(file);
         console.log('S3 업로드 성공:', s3Url);
+
+        await axios.post(`${process.env.REACT_APP_API_BASE_URL}/story/cover`, {
+          title,
+          coverImg: s3Url,
+        });
+
         alert('표지 저장 완료');
         navigate('/bookshelf');
       } catch (err) {
-        console.error('캡처 또는 업로드 실패:', err);
-        alert('저장에 실패');
+        console.error('표지저장 실패:', err);
+        alert('표지 저장 실패');
       }
     }
   };
