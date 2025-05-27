@@ -49,7 +49,7 @@ const ImageWrapper = styled.div`
     max-width: 15rem;
   }  
   @media (min-height: 600px) {
-    max-width: 20rem;
+    max-width: 16rem;
   }  
   @media (min-height: 700px) {
     max-width: 25rem; /* 220px */
@@ -62,45 +62,54 @@ const ImageWrapper = styled.div`
   }
   @media (min-height: 1000px) {
     max-width: 33rem;  /* 280px */
-  }
-  @media (min-width: 360px) {
-    max-width: 26rem;    /* 160px */
-  }
-  @media (min-width: 720px) {
-    max-width: 27rem; /* 220px */
-  }
-  @media (min-width: 1080px) {
-    max-width: 28rem;  /* 280px */
-  }
-  @media (min-width: 1440px) {
-    max-width: 29rem;  /* 360px */
-  }
 `;
 
 // 5) 선택지 오버레이: 이미지 아래, 가로로 버튼 나열
 const ChoicesOverlay = styled.div`
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: 1fr;
+  display: flex;
+  width: 100%;
+  max-width: 33rem;
   justify-content: center;
   gap: 0.75rem;
+
+  @media (max-height: 599px) {
+    max-width: 18.5rem;
+  }  
+  @media (min-height: 600px) {
+    max-width: 20rem;
+  }  
+  @media (min-height: 700px) {
+    max-width: 25rem;
+  }
+  @media (min-height: 800px) {
+    max-width: 28rem;
+  }
+  @media (min-height: 900px) {
+    max-width: 32rem;
+  }
+  @media (min-height: 1000px) {
+    max-width: 33rem;
+  }
 `;
 
 // 6) 기본 투명 버튼 스타일
 const TransparentButton = styled.button`
+  flex: 1;
+  min-width: 0;
   width: 100%;
   padding: 0.75rem 1rem;
   background: rgba(255, 255, 255, 0.75);
   color: #000;
   border: 1px solid rgba(255,255,255, 1);
   border-radius: 0.5rem;
-  font-family: Pretendard;
-  font-size: 1rem;
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  font-family: inherit;
   font-weight: 700;
   text-align: center;
   cursor: pointer;
   position: relative;
   z-index: 0;
+  white-space: nowrap;
   &:hover {
     background: rgba(255, 255, 255, 0.9);
   }
@@ -129,15 +138,16 @@ const GlowButton = styled(TransparentButton)`
 const GLOW_DURATION = 1000;
 
 export default function InteractiveStoryScreen() {
-  useEffect(() => {
-    toast.info('컴포넌트 마운트 테스트 알림');
-  }, []);
   const navigate = useNavigate();
   const [storyData, setStoryData] = useRecoilState(storyCreationState);
   const { choices = [], step, question, story, image } = storyData;
   const [animatingIndex, setAnimatingIndex] = useState(null);
   const audioRef = useRef(null);
   const useDummy = false; // 백 연결시 false로 변경
+
+  useEffect(() => {
+    setAnimatingIndex(null);
+  }, [step]);
 
   useEffect(() => {
   if (!question && !story) return;
@@ -201,14 +211,15 @@ export default function InteractiveStoryScreen() {
   };
 
   (async () => {
-    const qChunks = splitText(question);
     const sChunks = splitText(story);
+    const qChunks = splitText(question);
+    
 
-    if (qChunks.length) {
-      await playChunks(qChunks);
-    }
-    if (!isCancelled && sChunks.length) {
+    if (sChunks.length) {
       await playChunks(sChunks);
+    }
+    if (!isCancelled && qChunks.length) {
+      await playChunks(qChunks);
     }
   })();
 
@@ -223,9 +234,6 @@ export default function InteractiveStoryScreen() {
   const handleOptionClick = (opt, idx) => {
     console.log('👉 선택된 옵션:', opt);
     setAnimatingIndex(idx);
-    setTimeout(() => {
-      setAnimatingIndex(null);
-
       if (useDummy) {
         // 👉 더미 로직
         console.log('🧪 useDummy=true, 더미 데이터 사용 중');
@@ -282,7 +290,6 @@ export default function InteractiveStoryScreen() {
           toast.error('다음 스토리 생성에 실패했습니다.');
         });
       }
-    }, GLOW_DURATION);  
   };
 
   return (

@@ -246,42 +246,40 @@ export default function PopCard({
 }) {
   return (
     <CardContainer>
-      <IMG
-      src= {imageSrc ? (
-        <IMG src={imageSrc} imageWidth={imageSize} cornerRadius={cornerRadius} />
-      ) : useWarningIcon ? (
-        <BsExclamationTriangleFill size={50} color="#EE5555" />
-      ) : null}
-      imageWidth={imageSize}
-      cornerRadius={cornerRadius}/>
-
-      <Title fontSize={titleFontSize}>{cardTitle}</Title>
-      <SubTitle fontSize={subFontSize}>{subTitle}</SubTitle>
-      <DIV fontSize={descriptionFontSize}>{description}</DIV>
-      <ButtonContainer>
-        {positiveBtnText && (
-          <PositiveButton
-            padding={positivePadding}
-            border={positiveBorder}
-            background={positiveBackground}
-            color={positiveColor}
-            onClick={onPositiveClick}
-          >
-            {positiveBtnText}
-          </PositiveButton>
-        )}
-        {negativeBtnText && (
-          <NegativeButton
-            padding={negativePadding}
-            border={negativeBorder}
-            background={negativeBackground}
-            color={negativeColor}
-            onClick={onNegativeClick}
-          >
-            {negativeBtnText}
-          </NegativeButton>
-        )}
-      </ButtonContainer>
-    </CardContainer>
+    {imageSrc ? (
+      <IMG src={imageSrc} imageWidth={imageSize} cornerRadius={cornerRadius} />
+    ) : useWarningIcon ? (
+      <BsExclamationTriangleFill size={50} color="#EE5555" />
+    ) : null}
+  
+    <Title fontSize={titleFontSize}>{cardTitle}</Title>
+    <SubTitle fontSize={subFontSize}>{subTitle}</SubTitle>
+    <DIV fontSize={descriptionFontSize}>{description}</DIV>
+    <ButtonContainer>
+      {positiveBtnText && (
+        <PositiveButton
+          padding={positivePadding}
+          border={positiveBorder}
+          background={positiveBackground}
+          color={positiveColor}
+          onClick={onPositiveClick}
+        >
+          {positiveBtnText}
+        </PositiveButton>
+      )}
+      {negativeBtnText && (
+        <NegativeButton
+          padding={negativePadding}
+          border={negativeBorder}
+          background={negativeBackground}
+          color={negativeColor}
+          onClick={onNegativeClick}
+        >
+          {negativeBtnText}
+        </NegativeButton>
+      )}
+    </ButtonContainer>
+  </CardContainer>
+  
   );
 }

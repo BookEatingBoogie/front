@@ -22,7 +22,7 @@ const ProgressContainer = styled.div`
   width: 100%;
   max-width: 80rem;
   color: #fff;
-  font-size: 0.875rem;
+  font-size: 1.3rem;
 `;
 
 const ProgressText = styled.div`
@@ -54,33 +54,33 @@ const TextSection = styled.div`
 `;
 
 const Title = styled.h1`
-  font-size: 1.5rem;
+  font-size: 1.7rem;
   color: #fff;
   margin-bottom: 1rem;
   white-space: pre-line;
   @media (min-width: ${breakpoints.md}) {
-    font-size: 1.6rem;
+    font-size: 1.8rem;
     white-space: normal;
   }
   @media (min-width: ${breakpoints.lg}) {
-    font-size: 1.8rem;
+    font-size: 2.0rem;
   }
   @media (min-width: ${breakpoints.xl}) {
-    font-size: 2rem;
+    font-size: 2.2rem;
   }
 `;
 
 const SubTitle = styled.p`
-  font-size: 0.875rem;
+  font-size: 1rem;
   color: #fff;
   line-height: 1.4;
   max-width: 40rem;
   white-space: pre-line;
   @media (min-width: ${breakpoints.md}) {
-    font-size: 1rem;
+    font-size: 1.125rem;
   }
   @media (min-width: ${breakpoints.lg}) {
-    font-size: 1.125rem;
+    font-size: 1.3rem;
   }
 `;
 

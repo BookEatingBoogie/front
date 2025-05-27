@@ -20,19 +20,6 @@ const Container = styled.div`
 
 const Emphasized = styled.span`
   color: #D5A955;
-  font-size: 1.4rem; /* 기본 크기 */
-
-  @media (min-width: ${breakpoints.md}) {
-    font-size: 1.8rem;
-  }
-
-  @media (min-width: ${breakpoints.lg}) {
-    font-size: 2rem;
-  }
-
-  @media (min-width: ${breakpoints.xl}) {
-    font-size: 2.2rem;
-  }
 `;
 
 const Title = styled.h1`
@@ -40,20 +27,20 @@ const Title = styled.h1`
   top: 3.75rem;          /* 60px → 3.75rem */
   left: 50%;
   transform: translateX(-50%);
-  font-size: 1.5rem;     /* 24px → 1.5rem */
+  font-size: 1.7rem;     /* 24px → 1.5rem */
   color: #fff;
   margin: 0;
   text-align: center;
   white-space: pre-line;
   @media (min-width: ${breakpoints.md}) {
-    font-size: 1.6rem;
+    font-size: 1.8rem;
     white-space: normal;
   }
   @media (min-width: ${breakpoints.lg}) {
-    font-size: 1.8rem;
+    font-size: 2rem;
   }
   @media (min-width: ${breakpoints.xl}) {
-    font-size: 2rem;
+    font-size: 2.2rem;
   }
 `;
 
@@ -62,7 +49,7 @@ const SubTitle = styled.p`
   top: 8.125rem;         /* 130px → 8.125rem */
   left: 50%;
   transform: translateX(-50%);
-  font-size: 0.875rem;   /* 14px → 0.875rem */
+  font-size: 1rem;   /* 14px → 0.875rem */
   color: #fff;
   margin: 0;
   margin-top: 3rem;
@@ -71,11 +58,11 @@ const SubTitle = styled.p`
   width: 80%;
   white-space: pre-line;
   @media (min-width: ${breakpoints.md}) {
-    font-size: 1rem;
+    font-size: 1.1rem;
     white-space: normal
   }
   @media (min-width: ${breakpoints.lg}) {
-    font-size: 1.125rem;
+    font-size: 1.325rem;
   }
 `;
 

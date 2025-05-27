@@ -7,6 +7,30 @@ import styled from 'styled-components';
 import cloudMkGif from '../assets/images/cloudmk4.gif';
 import Lottie from 'react-lottie-player';
 import thinkAnimation from '../assets/thinkAnimation.json';
+import dokkaebiJumping from '../assets/images/dokkaebi_jumping.gif';
+
+const Highlight = styled.span`
+  color: #ffae00;
+`;
+
+const Overlay = styled.div`
+  position: fixed;
+  z-index: 9999;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const OverlayImage = styled.img`
+  width: 25rem;
+  height: auto;
+  border-radius: 40px;
+`;
 
 const displayToBackendMap = {
   // 장르 (genre)
@@ -48,7 +72,7 @@ const CloudButton = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.875rem;
+  font-size: 1.1rem;
   font-weight: bold;
   color: #333;
   cursor: default; /* pointer 아닌 기본 커서 */
@@ -128,6 +152,14 @@ export default function StoryQuestionScreen() {
   const [positions, setPositions] = useState([]);
   const [showThree, setShowThree] = useState(true); // true → 3개, false → 2개
   const audioRef = useRef(null);
+  const [loading, setLoading] = useState(false);
+  const backendToDisplayMap = React.useMemo(() => {
+    return Object.entries(displayToBackendMap)
+      .reduce((acc, [k, v]) => {
+        acc[v] = k;
+        return acc;
+      }, {});
+  }, []);
 
   const current = storyQuestions[questionIndex];
   const optionsCount = current.options.length;
@@ -213,7 +245,7 @@ export default function StoryQuestionScreen() {
       setQuestionIndex(i => i + 1);
       return;
     }
-
+    setLoading(true);
     try {
       const payload = {
         charId: charID,
@@ -268,17 +300,31 @@ export default function StoryQuestionScreen() {
     } catch (error) {
       console.error('스토리 생성 중 에러 발생:', error);
       alert('초기 스토리 생성에 실패했습니다.');
+    } finally {
+      // ← 3) API 호출 후 로딩 종료
+      setLoading(false);
     }
   };
 
   return (
+    <>
     <BaseScreenLayout
       progressText={`${questionIndex + 1} / ${storyQuestions.length}`}
       progressCurrent={questionIndex + 1}
       progressTotal={storyQuestions.length}
-      title={current.question}
+      title={
+        questionIndex === 1
+          ? (
+              <>
+                <Highlight>{backendToDisplayMap[storyData.genre]}</Highlight>을 선택했군요 !<br/>
+                {current.question}
+              </>
+            )
+          : current.question
+      }
       subTitle="이야기에 대해 말해 주세요."
     >
+
       <OptionsContainer>
         {current.options.map((opt, idx) => {
           // showThree=true면 idx<3, false면 idx>=3만 active
@@ -301,5 +347,11 @@ export default function StoryQuestionScreen() {
         play
       />
     </BaseScreenLayout>
+      {loading && (
+        <Overlay>
+          <OverlayImage src={dokkaebiJumping} alt="로딩 중..." />
+        </Overlay>
+      )}
+    </>
   );
 }
