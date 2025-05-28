@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilState } from 'recoil';
-import { storyCreationState, characterInfoState } from '../recoil/atoms';
+import { useRecoilState, useSetRecoilState } from 'recoil';
+import { storyCreationState, characterInfoState, coverImageState } from '../recoil/atoms';
 import BaseScreenLayout from '../components/BaseScreenLayout';
 import styled from 'styled-components';
 import cloudMkGif from '../assets/images/cloudmk4.gif';
@@ -215,6 +215,8 @@ export default function StoryQuestionScreen() {
     };
   }, [current.question]);
 
+  const setCoverImage = useSetRecoilState(coverImageState);  // setter 준비
+
   const handleSelect = async (option) => {
     const key = current.key;
     const charID = parseInt(characterInfo[0].charId, 10);
@@ -281,6 +283,7 @@ export default function StoryQuestionScreen() {
         question: data.question,
       }));
 
+      setCoverImage(data.imgUrl);
       navigate('/confirm-story');
     } catch (error) {
       console.error('스토리 생성 중 에러 발생:', error);

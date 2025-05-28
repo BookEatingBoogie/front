@@ -106,3 +106,13 @@ export const favoriteStoryIdsState = atom({
   key: 'favoriteStoryIdsState',
   default: [],
 });
+
+export const isStoryGeneratedState = atom({
+  key: 'isStoryGeneratedState',
+  default: false,      // 줄거리 생성 전에는 false
+});
+
+export const coverImageState = atom({
+  key: 'coverImageState',
+  default: '',
+});

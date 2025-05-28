@@ -10,9 +10,9 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   height: 100vh;
+  width: 100;
   background-color: #ffffff;
-  overflow: hidden;
-  position: relative;
+  
 `;
 
 const BookWrapper = styled.div`
@@ -20,64 +20,85 @@ const BookWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  padding: 0;
 `;
-const StyledFlipBook = styled(HTMLFlipBook)`
-  width: 1000px;
-  height: 800px;
-  max-width: 1000px;
-  max-height: 1536px;
-  min-width: 315px;
-  min-height: 400px;
-`;
+
 const Page = styled.div`
   width: 100%;
   height: 100%;
-  background: #ffffff;
+  background: #fefcf9 url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+  background-size: auto;
+  background-repeat: repeat;
+  border-radius: 8px;
+  box-shadow:
+    inset 0 0 20px rgba(0, 0, 0, 0.03),
+    0 4px 12px rgba(0, 0, 0, 0.08);
   display: flex;
   justify-content: center;
   align-items: center;
   box-sizing: border-box;
-  padding: 2rem;
+  padding: 1.2rem;
 `;
+
 
 const PageContent = styled.div`
   display: flex;
-  gap: 2rem;
+  flex-direction: column;
   width: 100%;
-  height: 100%;
-  align-items: center;
-  justify-content: center;
+  padding: 1rem;
+  overflow-y: auto;
+  flex-grow: 1;
+
+  @media (min-width: 720px) {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 2rem;
+  }
 `;
+
 
 const PageImage = styled.img`
-  width: 90%;
-  height: 90%
+  width: 100%;
+  height: auto;
   object-fit: contain;
-`;
+  border-radius: 1rem;
 
-const PageText = styled.div`
-  flex: 1;
-  font-weight: 500;
-  color: #333;
-  line-height: 1.6;
-  white-space: pre-wrap;
+  @media (min-width: 360px) {
+    max-height: 75vh;
+  }
 
-  font-size: 1.6rem;
+  @media (min-width: 720px) {
+    width: auto;
+    max-width: 48%;
+    max-height: 80vh;
+  }
 
-  @media (max-width: 360px) {
-    font-size: 1.2rem;
-  }
-  @media (min-width: 361px) and (max-width: 719px) {
-    font-size: 1.4rem;
-  }
-  @media (min-width: 720px) and (max-width: 1079px) {
-    font-size: 1.6rem;
-  }
   @media (min-width: 1080px) {
-    font-size: 1.8rem;
+    max-width: 45%;
+  }
+
+  @media (min-width: 1440px) {
+    max-width: 40%;
   }
 `;
+const PageText = styled.div`
+  width: 50%;
+  padding: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center; // 여기만 center로
+  text-align: center;
+  overflow-y: auto;
+  height: 100%;
+  max-height: 80vh;
+  color: #000;
+
+  @media (min-width: 720px) {
+    max-height: 70vh;
+  }
+`;
+
 
 const OverlayTop = styled.div`
   position: relative;
@@ -106,6 +127,25 @@ const BackIcon = styled(BsChevronLeft)`
 const TopTitle = styled.div`
   font-size: 1rem;
   font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 60vw;
+
+  @media (min-width: 720px) {
+    font-size: 1.25rem;
+    max-width: 70vw;
+  }
+
+  @media (min-width: 1080px) {
+    font-size: 1.4rem;
+    max-width: 75vw;
+  }
+
+  @media (min-width: 1440px) {
+    font-size: 1.6rem;
+    max-width: 80vw;
+  }
 `;
 
 const SoundButtonWrapper = styled.div`
@@ -256,13 +296,21 @@ const PlayButton = styled.button`
     height: 3rem;
   }
 `;
-
+function getScaledText(text) {
+  const length = text.length;
+  if (length > 600) return 0.65;
+  if (length > 500) return 0.7;
+  if (length > 400) return 0.8;
+  if (length > 300) return 0.9;
+  return 1;
+}
 export default function ReadingScreen() {
   const navigate = useNavigate();
   const location = useLocation();
   const fileUrl = new URLSearchParams(location.search).get('file')?.replace(/^"|"$/g, '');
+  const titleFromQuery = new URLSearchParams(location.search).get('title') || '';
 
-  const [title, setTitle] = useState('');
+  const [title, setTitle] = useState(titleFromQuery || '제목 없음');
   const [texts, setTexts] = useState([]);
   const [images, setImages] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
@@ -272,7 +320,9 @@ export default function ReadingScreen() {
   const { width, height } = useWindowSize(); //flipbook 사이즈 조절용 
   const audioRef = useRef(null);
   const bookRef = useRef(null);
-
+  const [uiVisible, setUiVisible] = useState(true);
+  const uiTimeoutRef = useRef(null);
+  
   const totalPages = texts.length * 2;
 const progress = ((currentPage + 1) / totalPages) * 100;
 
@@ -283,9 +333,13 @@ const progress = ((currentPage + 1) / totalPages) * 100;
         const res = await fetch(fileUrl);
         const data = await res.json();
         const content = Array.isArray(data) ? data : data.content || [];
-        setTitle(data.title || '제목 없음');
+
+        setTitle(data.title || titleFromQuery || '제목 없음');
+        
         setTexts(content.map(item => item.story));
         setImages(content.map(item => item.illustUrl));
+        console.log("titleFromQuery:", titleFromQuery);
+
       } catch (e) {
         console.error('fetch 실패:', e);
       }
@@ -294,27 +348,53 @@ const progress = ((currentPage + 1) / totalPages) * 100;
     if (fileUrl) fetchData();
   }, [fileUrl]);
 
-  function useWindowSize() { // 동화책 크기 조절용 함수 
-    const [size, setSize] = useState({ width: 960, height: 640 });
+  const resetUITimer = () => {
+    clearTimeout(uiTimeoutRef.current);
+    setUiVisible(true);
+    uiTimeoutRef.current = setTimeout(() => setUiVisible(false), 5000);
+  };
+  useEffect(() => {
+    resetUITimer(); // 처음 5초 후 자동 숨김
   
-    useEffect(() => { 
+    const handleUserInteraction = () => resetUITimer();
+  
+    window.addEventListener('click', handleUserInteraction);
+    window.addEventListener('touchstart', handleUserInteraction);
+  
+    return () => {
+      clearTimeout(uiTimeoutRef.current);
+      window.removeEventListener('click', handleUserInteraction);
+      window.removeEventListener('touchstart', handleUserInteraction);
+    };
+  }, []);
+  function useWindowSize() {
+    const [size, setSize] = useState({ width: 1200, height: 900 }); // 기본 4:3
+  
+    useEffect(() => {
       const updateSize = () => {
         const vw = window.innerWidth;
         const vh = window.innerHeight;
   
-        // 기준 비율 유지 (예: 3:2 비율), 최소/최대 지정 가능
-        const width = Math.max(315, Math.min(vw * 0.9, 1000));
-        const height = Math.max(400, Math.min(vh * 0.8, 800));
+        // 최대한 꽉 차게 만들되, 4:3 비율 유지
+        const margin = 64; // 상하단 여유
+        const maxWidth = vw * 0.98;
+        const maxHeight = vh - margin;
+  
+        const width = Math.min(maxWidth, maxHeight * (4 / 3));
+        const height = width * (3 / 4);
+  
         setSize({ width, height });
       };
   
-      updateSize(); // 초기 실행
+      updateSize();
       window.addEventListener('resize', updateSize);
       return () => window.removeEventListener('resize', updateSize);
     }, []);
   
     return size;
   }
+  
+  
   const stopAudio = () => {
     if (audioRef.current) {
       audioRef.current.pause();
@@ -322,39 +402,77 @@ const progress = ((currentPage + 1) / totalPages) * 100;
       audioRef.current.removeAttribute('src');
       audioRef.current.load();
       audioRef.current.onended = null;
+      audioRef.current = null;
     }
     setIsSpeaking(false);
   };
+// 문장 단위 분할
+const splitText = (text) =>
+  text ? text.match(/[^\.!\?]+[\.!\?]+/g)?.map(s => s.trim()) || [text] : [];
 
-  const speakText = async (text) => {
-    stopAudio();
-    try {
-      const res = await fetch("http://localhost:5001/tts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
-      });
-      const blob = await res.blob();
-      const audioUrl = URL.createObjectURL(blob);
+// TTS 요청
+const ttsFetch = (chunk) =>
+  fetch('http://localhost:5001/tts', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text: chunk }),
+  })
+    .then(res => {
+      if (!res.ok) throw new Error('TTS 요청 실패');
+      return res.blob();
+    })
+    .then(blob => URL.createObjectURL(blob));
 
-      if (audioRef.current) {
-        audioRef.current.src = audioUrl;
-        audioRef.current.onended = () => {
-          setIsSpeaking(false);
-          if (currentPage < totalPages - 1) {
-            bookRef.current?.pageFlip().flipNext();
-          } else {
-            setShowFinishPopup(true);
-          }
-        };
-        await audioRef.current.play();
-        setIsSpeaking(true);
-      }
-    } catch (err) {
-      console.error("TTS 오류:", err);
-      setIsSpeaking(false);
+// 문장별로 순차 재생 (미리 다음 문장 fetch)
+const playChunks = async (chunks) => {
+  let preFetchedUrl = null;
+
+  for (let i = 0; i < chunks.length; i++) {
+    if (!audioRef.current) break;
+
+    const url = i === 0 ? await ttsFetch(chunks[i]) : preFetchedUrl;
+
+    let nextPromise = null;
+    if (i + 1 < chunks.length) {
+      nextPromise = ttsFetch(chunks[i + 1]);
     }
-  };
+
+    const audio = new Audio(url);
+    audioRef.current = audio;
+    await new Promise(resolve => {
+      audio.addEventListener('ended', resolve);
+      audio.play();
+    });
+
+    URL.revokeObjectURL(url);
+
+    if (nextPromise) {
+      preFetchedUrl = await nextPromise;
+    }
+  }
+};
+
+const speakText = async (text) => {
+  stopAudio();
+  try {
+    const chunks = splitText(text);
+    setIsSpeaking(true);
+
+    await playChunks(chunks);
+
+    setIsSpeaking(false);
+    if (currentPage + 2 < totalPages) {
+      bookRef.current?.pageFlip().flipNext();
+    } else {
+      setShowFinishPopup(true);
+    }
+    
+  } catch (err) {
+    console.error("TTS 오류:", err);
+    setIsSpeaking(false);
+  }
+};
+
 
   const handleFlip = (e) => {
     const newPage = e.data;
@@ -362,7 +480,7 @@ const progress = ((currentPage + 1) / totalPages) * 100;
   
     // 텍스트 페이지는 짝수 페이지 기준으로 오른쪽에 위치
     const textIndex = Math.floor(newPage / 2);
-    if (newPage % 2 === 1 && texts[textIndex]) {
+    if (newPage % 2 === 0 && texts[textIndex]) {
       speakText(texts[textIndex]);
     }
   };
@@ -377,7 +495,7 @@ const progress = ((currentPage + 1) / totalPages) * 100;
 
   return (
     <Container>
-      <OverlayTop>
+      <OverlayTop style={{ opacity: uiVisible ? 1 : 0, pointerEvents: uiVisible ? 'auto' : 'none' }}>
         <BackGroup>
           <BackIcon onClick={() => navigate(-1)} />
           <TopTitle>{title}</TopTitle>
@@ -388,42 +506,82 @@ const progress = ((currentPage + 1) / totalPages) * 100;
       </OverlayTop>
       <BookWrapper>
       <HTMLFlipBook
-  width={Math.floor(width)}
-  height={Math.floor(height)}
-  size="fixed"
-  maxShadowOpacity={0.5}
-  showCover={false}
-  mobileScrollSupport={false}
-  useMouseEvents={true}
-  drawShadow={true}
-  flippingTime={1000}
-  usePortrait={false}
-  direction="rtl"
-  ref={bookRef}
-  onFlip={handleFlip}
+       width={Math.floor(width)}     // 숫자
+       height={Math.floor(height)}   // 숫자
+        size="fixed"
+        maxShadowOpacity={0.5}
+        showCover={false}
+        mobileScrollSupport={false}
+        useMouseEvents={true}
+        drawShadow={true}
+        flippingTime={1000}
+        usePortrait={false}
+        direction="rtl"
+        ref={bookRef}
+        onFlip={handleFlip}
+        style={{
+          boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+          borderRadius: '12px',
+          overflow: 'hidden'
+        }}
 >
-          {texts.flatMap((text, idx) => [
-            <Page key={`img-${idx}`}>
-              <PageContent>
-                <PageImage src={images[idx]} alt={`img-${idx}`} />
-              </PageContent>
-            </Page>,
+{
+texts.flatMap((text, idx) => {
+  const length = text.length;
+  let fontSize = '1.7rem';
+  if (length > 600) fontSize = '0.8rem';
+  else if (length > 500) fontSize = '1rem';
+  else if (length > 400) fontSize = '1.3rem';
+  else if (length > 300) fontSize = '1.5rem';
 
-            <Page key={`text-${idx}`}>
-              <PageContent>
-                <PageText>{text}</PageText>
-              </PageContent>
-            </Page>
-          ])}
+  return [
+    <Page key={`img-${idx}`}>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '100%',
+        height: '100%',
+        padding: '2rem'
+      }}>
+        <img
+          src={images[idx]}
+          alt={`img-${idx}`}
+          style={{
+            width: '100%',
+            height: '100%',
+            maxHeight: '90%',
+            maxWidth: '90%',
+            objectFit: 'contain',
+            borderRadius: '1.5rem'
+          }}
+        />
+      </div>
+    </Page>,
+
+    <Page key={`text-${idx}`}>
+      <PageText>
+        <div style={{
+          fontSize,
+          lineHeight: 1.6,
+          textAlign: 'center',
+          width: '100%',
+          padding: "0.5rem",
+          whiteSpace: 'pre-wrap',
+          wordBreak: 'keep-all'
+        }}>
+          {text}
+        </div>
+      </PageText>
+    </Page>
+  ];
+})}
+
+
         </HTMLFlipBook>
       </BookWrapper>
+      <OverlayBottom style={{ opacity: uiVisible ? 1 : 0, pointerEvents: uiVisible ? 'auto' : 'none' }}>
 
-
-
-
-
-
-      <OverlayBottom $visible={true}>
         <ProgressInfo>
           <ProgressText>{currentPage + 1}/{totalPages}</ProgressText>
           <ProgressBarContainer>

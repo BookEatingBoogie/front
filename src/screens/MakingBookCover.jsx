@@ -7,6 +7,8 @@ import axios from 'axios';
 import { RgbaColorPicker } from 'react-colorful';
 import tinycolor from 'tinycolor2';
 import AWS from 'aws-sdk';
+import { useRecoilValue } from 'recoil';
+import { coverImageState } from '../recoil/atoms';
 
 // AWS 설정
 const REGION = 'ap-northeast-2';
@@ -21,50 +23,18 @@ AWS.config.update({
 
 const s3 = new AWS.S3();
 
-const findLatestIPAdapterImage = async () => {
-  try {
-    const list = await s3.listObjectsV2({ Bucket: BUCKET, Delimiter: '/' }).promise();
-    const prefixes = list.CommonPrefixes.map(p => p.Prefix);
-
-    const folderInfos = await Promise.all(
-      prefixes.map(async (prefix) => {
-        const res = await s3.listObjectsV2({ Bucket: BUCKET, Prefix: prefix }).promise();
-        const lastMod = res.Contents.reduce((latest, obj) =>
-          !latest || obj.LastModified > latest ? obj.LastModified : latest, null);
-        return { prefix, lastModified: lastMod };
-      })
-    );
-
-    const latestFolder = folderInfos.sort((a, b) => b.lastModified - a.lastModified)[0]?.prefix;
-    if (!latestFolder) return null;
-
-    const { Contents } = await s3.listObjectsV2({ Bucket: BUCKET, Prefix: latestFolder }).promise();
-    const adapterImages = Contents.map(o => o.Key)
-      .filter(k => k.includes('IPAdapter_') && k.endsWith('.png'))
-      .sort((a, b) => {
-        const na = parseInt(a.match(/IPAdapter_(\d+)/)?.[1] || '0', 10);
-        const nb = parseInt(b.match(/IPAdapter_(\d+)/)?.[1] || '0', 10);
-        return na - nb;
-      });
-
-    return adapterImages.length > 0 ? `${S3_BASE_URL}${adapterImages[0]}` : null;
-  } catch (err) {
-    console.error('배경 이미지 가져오기 실패:', err);
-    return null;
-  }
-};
 
 const CoverContainer = styled.div`
   display: flex;
-  margin: 5rem auto 0;
-  width: 80vw;
+  margin: 2rem auto 0;
+  width: 90vw;
   padding: 2rem;
   background-color: #f2f2f2;
   border-radius: 1rem;
   justify-content: center;
   align-items: center;
   gap: 2rem;
-  padding-bottom: 5rem;
+
 
   @media (max-width: 720px) {
     flex-direction: column;
@@ -78,7 +48,6 @@ const CanvasSection = styled.div`
   flex-direction: column;
   align-items: center;
   width: 80%;
-  height: 90%;
   padding-bottom: 3rem;
 `;
 
@@ -102,28 +71,19 @@ const Title = styled.div`
 `;
 
 const Canvas = styled.div`
-  aspect-ratio: 2 / 3;
-  width: 35vw; /* 기존 20vw → 더 넓게 조정 */
-  background-image: url('/back.png');
-  background-size: 100% 100%;
+  aspect-ratio: 1;
+  width: min(60vw, 60vh); /* 뷰포트 기준 너비와 높이 중 작은 값을 적용 */
+  max-width: 500px;       /* 최대 크기 제한 */
+  max-height: 500px;
+  background-image: ${({ bg }) => `url(${bg || '/back.png'})`};
+  background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   position: relative;
   border-radius: 1rem;
   overflow: hidden;
-
-  @media (max-width: 1024px) {
-    width: 60vw;
-  }
-
-  @media (max-width: 720px) {
-    width: 75vw;
-  }
-
-  @media (max-width: 480px) {
-    width: 90vw;
-  }
 `;
+
 
 
 const CanvasText = styled.div`
@@ -177,8 +137,8 @@ const Sticker = styled.img`
 
 const DeleteButton = styled.button`
   position: absolute;
-  top: -10px;
-  right: -10px;
+  // top: -10px;
+  // right: -10px;
   background: red;
   color: white;
   border: none;
@@ -186,7 +146,6 @@ const DeleteButton = styled.button`
   width: 20px;
   height: 20px;
   font-size: 0.7rem;
-  cursor: pointer;
   display: none;
 
   ${StickerWrapper}:hover & {
@@ -223,12 +182,15 @@ const Input = styled.input`
     font-size: 0.85rem;
   }
 `;
+const SaveButtonWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 2rem;
+`;
 
 const SaveButton = styled.button`
-  position: fixed;
-  bottom: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
+  margin-top: 2rem;
   padding: 0.6rem 1.5rem;
   background-color: #ffc75f;
   color: #1A202B;
@@ -237,7 +199,6 @@ const SaveButton = styled.button`
   font-weight: 600;
   font-size: 0.95rem;
   cursor: pointer;
-  z-index: 200;
 
   &:hover {
     background-color: #ffb830;
@@ -255,8 +216,7 @@ const Sidebar = styled.div`
   background-color: #ddd;
   padding: 1rem;
   border-radius: 1rem;
-  min-width: 8.125rem;
-  max-height: 31.25rem;
+  width: 20rem;
 
   @media (max-width: 768px) {
     flex-direction: row;
@@ -268,11 +228,12 @@ const Sidebar = styled.div`
 `;
 
 const SidebarTitle = styled.div`
-  font-size: 1rem;
+  font-size: 1.5rem;
   font-weight: bold;
   color: #333;
   margin-bottom: 0.5rem;
   text-align: center;
+  justifyt-content: center;
 `;
 
 const StickerList = styled.div`
@@ -281,7 +242,7 @@ const StickerList = styled.div`
   gap: 0.75rem;
   overflow-y: auto;
   max-height: 26.25rem;
-
+  justifyt-content: center;
   @media (max-width: 768px) {
     flex-direction: row;
     max-height: none;
@@ -292,13 +253,15 @@ const StickerList = styled.div`
 `;
 
 const StickerOption = styled.img`
-  width: 80px;
-  height: 80px;
+  width: 10rem;
+  height: 10rem;
   cursor: pointer;
   background-color: #fff;
   border: 2px solid #aaa;
   border-radius: 0.5rem;
   padding: 0.25rem;
+  text-align: center;
+  justifyt-content: center;
 
   &:hover {
     border-color: #444;
@@ -343,8 +306,6 @@ const ColorPopover = styled.div`
 export default function MakingBookCover() {
   const navigate = useNavigate();
   const canvasRef = useRef(null);
-
-  const [canvasBg, setCanvasBg] = useState(null);
   const [step, setStep] = useState(1);
   const [stickers, setStickers] = useState([]);
   const [resizingId, setResizingId] = useState(null);
@@ -358,20 +319,22 @@ export default function MakingBookCover() {
   const [showTitleColorPicker, setShowTitleColorPicker] = useState(false);
   const [showAuthorColorPicker, setShowAuthorColorPicker] = useState(false);
   const [stickerOptions, setStickerOptions] = useState([]);
+  const canvasBg = useRecoilValue(coverImageState);
 
-  useEffect(() => {
-    const load = async () => {
-      const bg = await findLatestIPAdapterImage();
-      setCanvasBg(bg);
-    };
-    load();
-  }, []);
 
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_API_BASE_URL}/sticker/list`)
-      .then((res) => setStickerOptions(res.data))
+      .then((res) => {
+        console.log('스티커 리스트:', res.data);
+        const unique = res.data.filter(
+          (sticker, index, self) =>
+            index === self.findIndex(s => s === sticker || s.url === sticker.url)
+        );
+        setStickerOptions(unique);
+      })
       .catch((err) => console.error('스티커 리스트 불러오기 실패:', err));
   }, []);
+  
    useEffect(() => {
     const handleMouseMove = (e) => {
       if (resizingId !== null) {
@@ -428,7 +391,20 @@ export default function MakingBookCover() {
     <CoverContainer>
       <CanvasSection>
         <Title>동화책에 들어갈 그림을 만들어보아요!</Title>
-        <Canvas ref={canvasRef} bg={canvasBg}>
+        <Canvas ref={canvasRef}>
+  <img
+    src={canvasBg}
+    alt="배경"
+    style={{
+      position: 'absolute',
+      top: 0, left: 0,
+      width: '100%',
+      height: '100%',
+      objectFit: 'cover',
+      zIndex: -1
+    }}
+  />
+
           {stickers.map(s => (
             <Draggable key={s.id} bounds="parent" defaultPosition={{ x: s.x, y: s.y }}
               onStop={(e, data) =>
@@ -490,6 +466,12 @@ export default function MakingBookCover() {
             </InputWithColorWrapper>
           </InputArea>
         )}
+       <SaveButtonWrapper>
+  <SaveButton onClick={handleSave}>
+    {step === 1 ? '다음 단계로' : '저장하기'}
+  </SaveButton>
+</SaveButtonWrapper>
+
       </CanvasSection>
 
       {step === 1 && (
@@ -505,7 +487,7 @@ export default function MakingBookCover() {
         </Sidebar>
       )}
 
-      <SaveButton onClick={handleSave}>{step === 1 ? '다음 단계로' : '저장하기'}</SaveButton>
+      
     </CoverContainer>
   );
 }

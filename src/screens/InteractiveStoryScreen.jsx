@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilState } from 'recoil';
-import { storyCreationState } from '../recoil/atoms';
+import { useRecoilState, useSetRecoilState } from 'recoil';
+import { storyCreationState, isStoryGeneratedState } from '../recoil/atoms';
 import BaseScreenLayout from '../components/BaseScreenLayout';
 import styled, { keyframes, createGlobalStyle } from 'styled-components';
 import squirrelImg from '../assets/images/서영이와 다람쥐.webp';
@@ -141,6 +141,7 @@ export default function InteractiveStoryScreen() {
   const navigate = useNavigate();
   const [storyData, setStoryData] = useRecoilState(storyCreationState);
   const { choices = [], step, question, story, image } = storyData;
+  const setIsStoryGenerated = useSetRecoilState(isStoryGeneratedState);
   const [animatingIndex, setAnimatingIndex] = useState(null);
   const audioRef = useRef(null);
   const useDummy = false; // 백 연결시 false로 변경
@@ -268,6 +269,7 @@ export default function InteractiveStoryScreen() {
         req.then(({ status, data }) => {
           console.log('✅ 응답 status:', status);
           if (status === 201) {
+            setIsStoryGenerated(true);
             toast.success('줄거리 생성이 끝났어요! 이제 표지꾸미기를 마치면 완성된 동화책을 확인할 수 있어요!');
           } else {
             // 정상적으로 storyData 업데이트
