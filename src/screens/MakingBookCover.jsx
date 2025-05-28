@@ -390,19 +390,8 @@ export default function MakingBookCover() {
     <CoverContainer>
       <CanvasSection>
         <Title>동화책에 들어갈 그림을 만들어보아요!</Title>
-        <Canvas ref={canvasRef}>
-  <img
-    src={canvasBg}
-    alt="배경"
-    style={{
-      position: 'absolute',
-      top: 0, left: 0,
-      width: '100%',
-      height: '100%',
-      objectFit: 'cover',
-      zIndex: -1
-    }}
-  />
+        <Canvas ref={canvasRef} bg={canvasBg}>
+
 
           {stickers.map(s => (
             <Draggable key={s.id} bounds="parent" defaultPosition={{ x: s.x, y: s.y }}
