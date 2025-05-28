@@ -57,9 +57,11 @@ const storyQuestions = [
 const OptionsContainer = styled.div`
   position: relative;
   width: 100%;
+  margin: 0 auto;
   height: 13.75rem;
   margin-top: -4rem;
   z-index: 2;
+  max-width: 40rem;
 `;
 
 const OptionItem = styled.div`
@@ -86,12 +88,12 @@ const CloudButton = styled.div`
   pointer-events: none; /* 이 컨테이너는 클릭 못함 */
   position: relative;
   @media (min-width: 360px) {
-    width: 4.5rem;
-    height: 4.5rem;
+    width: 4.8rem;
+    height: 4.8rem;
   }
   @media (min-width: 720px) {
-    width: 5.5rem;
-    height: 5.5rem;
+    width: 5.8rem;
+    height: 5.8rem;
   }
   @media (min-width: 1080px) {
     width: 6.5rem;
@@ -149,7 +151,6 @@ export default function StoryQuestionScreen() {
   const [storyData, setStoryData] = useRecoilState(storyCreationState);
   const [characterInfo] = useRecoilState(characterInfoState);
   const [questionIndex, setQuestionIndex] = useState(0);
-  const [positions, setPositions] = useState([]);
   const [showThree, setShowThree] = useState(true); // true → 3개, false → 2개
   const audioRef = useRef(null);
   const [loading, setLoading] = useState(false);
@@ -161,33 +162,17 @@ export default function StoryQuestionScreen() {
       }, {});
   }, []);
 
-  const current = storyQuestions[questionIndex];
-  const optionsCount = current.options.length;
-  const firstGroupSize = 3;
+  const fixedPositions = [
+    { left: '10%', top: '20%' },
+    { left: '47%', top: '25%' },
+    { left: '77%', top: '20%' },
+    { left: '70%', top: '80%' },
+    { left: '43%', top: '75%' },
+    { left: '12%', top: '80%' },
+  ];
 
-  // 옵션 위치 계산 (기존 로직 그대로)
-  useEffect(() => {
-    const count = optionsCount;
-    const rows = Math.ceil(Math.sqrt(count));
-    const cols = Math.ceil(count / rows);
-    const cellW = 100 / cols;
-    const cellH = 100 / rows;
-    const cells = [];
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        cells.push([r, c]);
-      }
-    }
-    const shuffled = cells.sort(() => Math.random() - 0.5).slice(0, count);
-    const newPos = shuffled.map(([r, c]) => {
-      const padX = cellW * 0.42;
-      const padY = cellH * 0.42;
-      const left = c * cellW + padX + Math.random() * (cellW - 2 * padX);
-      const top = r * cellH + padY + Math.random() * (cellH - 2 * padY);
-      return { left: `${left}%`, top: `${top}%` };
-    });
-    setPositions(newPos);
-  }, [questionIndex, optionsCount]);
+  const current = storyQuestions[questionIndex];
+  const firstGroupSize = 3;
 
   // 1.5초마다 3개/2개 토글
   useEffect(() => {
@@ -329,8 +314,9 @@ export default function StoryQuestionScreen() {
         {current.options.map((opt, idx) => {
           // showThree=true면 idx<3, false면 idx>=3만 active
           const isActive = showThree ? idx < firstGroupSize : idx >= firstGroupSize;
+          const pos = fixedPositions[idx];
           return (
-            <OptionItem key={opt} style={positions[idx]}>
+            <OptionItem key={opt} style={pos}>
               <CloudButton gif={cloudMkGif} active={isActive}>
                 <ClickableText onClick={() => handleSelect(opt)}>
                   {opt}

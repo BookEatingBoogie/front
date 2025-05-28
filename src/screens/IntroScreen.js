@@ -14,7 +14,7 @@ const breakpoints = {
 const Container = styled.div`
   position: relative;
   width: 100%;
-  height: 100vh;
+  height: calc(var(--vh) * 100);
   overflow: hidden;
 `;
 

@@ -10,7 +10,7 @@ const breakpoints = {
 
 const Container = styled.div`
   width: 100%;
-  height: calc(var(--vh, 1vh) * 100); /* 모바일 대응 */
+  height: calc(var(--vh) * 100); /* 모바일 대응 */
   display: flex;
   flex-direction: column;
   align-items: center;
