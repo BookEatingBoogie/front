@@ -26,13 +26,20 @@ const BookWrapper = styled.div`
 const Page = styled.div`
   width: 100%;
   height: 100%;
-  background: #ffffff;
+  background: #fefcf9 url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+  background-size: auto;
+  background-repeat: repeat;
+  border-radius: 8px;
+  box-shadow:
+    inset 0 0 20px rgba(0, 0, 0, 0.03),
+    0 4px 12px rgba(0, 0, 0, 0.08);
   display: flex;
   justify-content: center;
   align-items: center;
   box-sizing: border-box;
-  padding: 1rem;
+  padding: 1.2rem;
 `;
+
 
 const PageContent = styled.div`
   display: flex;
@@ -55,8 +62,6 @@ const PageImage = styled.img`
   width: 100%;
   height: auto;
   object-fit: contain;
-  max-width: 50%;
-  max-height: 100%;
   border-radius: 1rem;
 
   @media (min-width: 360px) {
@@ -362,27 +367,34 @@ const progress = ((currentPage + 1) / totalPages) * 100;
       window.removeEventListener('touchstart', handleUserInteraction);
     };
   }, []);
-  function useWindowSize() { // 동화책 크기 조절용 함수 
-    const [size, setSize] = useState({ width: 640, height: 480 });
+  function useWindowSize() {
+    const [size, setSize] = useState({ width: 1200, height: 900 }); // 기본 4:3
   
-    useEffect(() => { 
+    useEffect(() => {
       const updateSize = () => {
         const vw = window.innerWidth;
         const vh = window.innerHeight;
   
-        // 기준 비율 유지 (예: 3:2 비율), 최소/최대 지정 가능
-        const width = Math.max(315, Math.min(vw * 0.9, 1000));
-        const height = Math.max(400, Math.min(vh * 0.8, 800));
+        // 최대한 꽉 차게 만들되, 4:3 비율 유지
+        const margin = 64; // 상하단 여유
+        const maxWidth = vw * 0.98;
+        const maxHeight = vh - margin;
+  
+        const width = Math.min(maxWidth, maxHeight * (4 / 3));
+        const height = width * (3 / 4);
+  
         setSize({ width, height });
       };
   
-      updateSize(); // 초기 실행
+      updateSize();
       window.addEventListener('resize', updateSize);
       return () => window.removeEventListener('resize', updateSize);
     }, []);
   
     return size;
   }
+  
+  
   const stopAudio = () => {
     if (audioRef.current) {
       audioRef.current.pause();
@@ -390,39 +402,77 @@ const progress = ((currentPage + 1) / totalPages) * 100;
       audioRef.current.removeAttribute('src');
       audioRef.current.load();
       audioRef.current.onended = null;
+      audioRef.current = null;
     }
     setIsSpeaking(false);
   };
+// 문장 단위 분할
+const splitText = (text) =>
+  text ? text.match(/[^\.!\?]+[\.!\?]+/g)?.map(s => s.trim()) || [text] : [];
 
-  const speakText = async (text) => {
-    stopAudio();
-    try {
-      const res = await fetch("http://localhost:5001/tts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
-      });
-      const blob = await res.blob();
-      const audioUrl = URL.createObjectURL(blob);
+// TTS 요청
+const ttsFetch = (chunk) =>
+  fetch('http://localhost:5001/tts', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text: chunk }),
+  })
+    .then(res => {
+      if (!res.ok) throw new Error('TTS 요청 실패');
+      return res.blob();
+    })
+    .then(blob => URL.createObjectURL(blob));
 
-      if (audioRef.current) {
-        audioRef.current.src = audioUrl;
-        audioRef.current.onended = () => {
-          setIsSpeaking(false);
-          if (currentPage < totalPages - 1) {
-            bookRef.current?.pageFlip().flipNext();
-          } else {
-            setShowFinishPopup(true);
-          }
-        };
-        await audioRef.current.play();
-        setIsSpeaking(true);
-      }
-    } catch (err) {
-      console.error("TTS 오류:", err);
-      setIsSpeaking(false);
+// 문장별로 순차 재생 (미리 다음 문장 fetch)
+const playChunks = async (chunks) => {
+  let preFetchedUrl = null;
+
+  for (let i = 0; i < chunks.length; i++) {
+    if (!audioRef.current) break;
+
+    const url = i === 0 ? await ttsFetch(chunks[i]) : preFetchedUrl;
+
+    let nextPromise = null;
+    if (i + 1 < chunks.length) {
+      nextPromise = ttsFetch(chunks[i + 1]);
     }
-  };
+
+    const audio = new Audio(url);
+    audioRef.current = audio;
+    await new Promise(resolve => {
+      audio.addEventListener('ended', resolve);
+      audio.play();
+    });
+
+    URL.revokeObjectURL(url);
+
+    if (nextPromise) {
+      preFetchedUrl = await nextPromise;
+    }
+  }
+};
+
+const speakText = async (text) => {
+  stopAudio();
+  try {
+    const chunks = splitText(text);
+    setIsSpeaking(true);
+
+    await playChunks(chunks);
+
+    setIsSpeaking(false);
+    if (currentPage + 2 < totalPages) {
+      bookRef.current?.pageFlip().flipNext();
+    } else {
+      setShowFinishPopup(true);
+    }
+    
+  } catch (err) {
+    console.error("TTS 오류:", err);
+    setIsSpeaking(false);
+  }
+};
+
 
   const handleFlip = (e) => {
     const newPage = e.data;
@@ -430,7 +480,7 @@ const progress = ((currentPage + 1) / totalPages) * 100;
   
     // 텍스트 페이지는 짝수 페이지 기준으로 오른쪽에 위치
     const textIndex = Math.floor(newPage / 2);
-    if (newPage % 2 === 1 && texts[textIndex]) {
+    if (newPage % 2 === 0 && texts[textIndex]) {
       speakText(texts[textIndex]);
     }
   };
@@ -445,7 +495,7 @@ const progress = ((currentPage + 1) / totalPages) * 100;
 
   return (
     <Container>
-      <OverlayTop style={{ display: uiVisible ? 'flex' : 'none' }}>
+      <OverlayTop style={{ opacity: uiVisible ? 1 : 0, pointerEvents: uiVisible ? 'auto' : 'none' }}>
         <BackGroup>
           <BackIcon onClick={() => navigate(-1)} />
           <TopTitle>{title}</TopTitle>
@@ -469,49 +519,69 @@ const progress = ((currentPage + 1) / totalPages) * 100;
         direction="rtl"
         ref={bookRef}
         onFlip={handleFlip}
+        style={{
+          boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+          borderRadius: '12px',
+          overflow: 'hidden'
+        }}
 >
-{texts.flatMap((text, idx) => {
-  // 글자 수 기반 폰트 크기 계산
+{
+texts.flatMap((text, idx) => {
   const length = text.length;
-  const baseSize = 1.6; // rem 단위
-  let fontSize = `${baseSize}rem`;
-
-  if (length > 600) fontSize = '0.85rem';
+  let fontSize = '1.7rem';
+  if (length > 600) fontSize = '0.8rem';
   else if (length > 500) fontSize = '1rem';
-  else if (length > 400) fontSize = '1.1rem';
-  else if (length > 300) fontSize = '1.2rem';
-  else if (length > 200) fontSize = '1.4rem';
+  else if (length > 400) fontSize = '1.3rem';
+  else if (length > 300) fontSize = '1.5rem';
 
   return [
     <Page key={`img-${idx}`}>
-      <PageContent>
-        <PageImage src={images[idx]} alt={`img-${idx}`} />
-      </PageContent>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '100%',
+        height: '100%',
+        padding: '2rem'
+      }}>
+        <img
+          src={images[idx]}
+          alt={`img-${idx}`}
+          style={{
+            width: '100%',
+            height: '100%',
+            maxHeight: '90%',
+            maxWidth: '90%',
+            objectFit: 'contain',
+            borderRadius: '1.5rem'
+          }}
+        />
+      </div>
     </Page>,
 
-<Page key={`text-${idx}`}>
-<PageText>
-  <div
-    style={{
-      fontSize,
-      lineHeight: 1.6,
-      textAlign: 'center',
-      width: '100%',
-      whiteSpace: 'pre-wrap',
-      wordBreak: 'keep-all',
-    }}
-  >
-    {text}
-  </div>
-</PageText>
-</Page>
-
+    <Page key={`text-${idx}`}>
+      <PageText>
+        <div style={{
+          fontSize,
+          lineHeight: 1.6,
+          textAlign: 'center',
+          width: '100%',
+          padding: "0.5rem",
+          whiteSpace: 'pre-wrap',
+          wordBreak: 'keep-all'
+        }}>
+          {text}
+        </div>
+      </PageText>
+    </Page>
   ];
 })}
 
+
         </HTMLFlipBook>
       </BookWrapper>
-      <OverlayBottom style={{ display: uiVisible ? 'flex' : 'none' }}>
+      <OverlayBottom style={{ opacity: uiVisible ? 1 : 0, pointerEvents: uiVisible ? 'auto' : 'none' }}>
+
         <ProgressInfo>
           <ProgressText>{currentPage + 1}/{totalPages}</ProgressText>
           <ProgressBarContainer>

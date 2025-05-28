@@ -132,3 +132,7 @@ export const favoriteStoryIdsState = atom({
   key: 'favoriteStoryIdsState',
   default: [],
 });
+export const coverImageState = atom({
+  key: 'coverImageState',
+  default: '',
+});
