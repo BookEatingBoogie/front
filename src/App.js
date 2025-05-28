@@ -1,4 +1,4 @@
-import React from 'react';
+import React ,{ useEffect }from 'react';
 import { Routes, Route, useLocation, Navigate, Outlet } from 'react-router-dom';
 import { RecoilRoot } from 'recoil';
 import GlobalStyle from './styles/GlobalStyle';
@@ -37,6 +37,19 @@ function PrivateRoute({ children }) {
 }
 
 function App() {
+
+    useEffect(() => {
+    const setVh = () => {
+      // 브라우저 innerHeight의 1% 단위 값을 계산
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    };
+
+    setVh();  // 마운트 시 한 번 실행
+    window.addEventListener('resize', setVh);  // 리사이즈 시 재계산
+    return () => window.removeEventListener('resize', setVh);
+  }, []);
+
   const location = useLocation();
 
   // 네비게이션 바 표시 여부를 결정

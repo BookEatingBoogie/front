@@ -60,7 +60,7 @@ const NavItem = styled.div`
 
 /* 아이템 라벨 (텍스트) */
 const NavLabel = styled.span`
-  font-size: 12px;
+  font-size: 14px;
   margin-top: 4px; /* 아이콘과 텍스트 사이 간격 */
 `;
 

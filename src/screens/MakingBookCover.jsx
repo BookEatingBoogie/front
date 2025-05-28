@@ -321,6 +321,8 @@ export default function MakingBookCover() {
   const [stickerOptions, setStickerOptions] = useState([]);
   const canvasBg = useRecoilValue(coverImageState);
 
+  const canvasBg = useRecoilValue(coverImageState);
+
 
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_API_BASE_URL}/sticker/list`)

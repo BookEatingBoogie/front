@@ -4,9 +4,11 @@ const GlobalStyle = createGlobalStyle`
 
   @font-face {
     font-family: 'HakgyoansimNadeuri';
-    src: url('/fonts/HakgyoansimNadeuri.ttf') format('truetype');
+    src: url('/fonts/HakgyoansimNadeuri.woff2') format('woff2'),
+          url('/fonts/HakgyoansimNadeuri.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
+    font-display: block;
   }
 
   /* 공통 리셋 */

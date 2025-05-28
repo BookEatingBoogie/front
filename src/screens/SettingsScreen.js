@@ -24,12 +24,12 @@ const Block = styled.div`
 `;
 
 const BlockTitle = styled.h3`
-  font-size: 1rem;
+  font-size: 1.2rem;
   margin-bottom: 0.5rem;
 `;
 
 const BlockItem = styled.div`
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   margin-bottom: 0.25rem;
 `;
 
