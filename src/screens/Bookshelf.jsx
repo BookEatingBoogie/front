@@ -8,6 +8,8 @@ import PopCard from '../components/PopCard';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import defaultImg from '../assets/images/testImg.png';
+import { useSetRecoilState } from 'recoil';
+import { storyInfoState,favoriteStoryIdsState } from '../recoil/atoms';
 
 const BookshelfContainer = styled.div`
   display: flex;
@@ -192,13 +194,17 @@ export default function Bookshelf() {
   const [selectedStory, setSelectedStory] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-
+  const setFavoriteStoryIds = useSetRecoilState(favoriteStoryIdsState);
+  const setStoryInfoState = useSetRecoilState(storyInfoState);
   useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/mypage/story`);
+        const stories = res.data.stories || [];
+
+        setStoryList(stories);
+        setStoryInfoState(res.data.stories || []); //즐겨찾기를 위해 리코일에 저장 
         setCharacterList(res.data.characters || []);
-        setStoryList(res.data.stories || []);
 
         // 진단 로그
       console.log('characters:', res.data.characters);
@@ -207,7 +213,8 @@ export default function Bookshelf() {
         title: s.title,
         characters: s.characters
       })));
-
+      const favoriteIds = stories.filter(s => s.favorite).map(s => s.storyId);
+      setFavoriteStoryIds(favoriteIds);
       } catch (err) {
         console.error('데이터 불러오기 실패', err);
       } finally {
@@ -357,11 +364,9 @@ export default function Bookshelf() {
       {selectedStory && (
         <Overlay onClick={handleClosePopup}>
           <PopCard
-            imageSrc={selectedStory.img?.[0] || selectedStory.cover?.testImg}
-            imageSize="150px"
+            imageSrc={selectedStory.coverImg || defaultImg}
+            imageSize="10rem"
             cardTitle={selectedStory.title}
-            subTitle={formatDate(selectedStory.creationDate)}
-            description={selectedStory.summary}
             positiveBtnText="열기"
             negativeBtnText="닫기"
             onPositiveClick={() => {
@@ -369,9 +374,6 @@ export default function Bookshelf() {
               navigate(`/reading?file=${encodeURIComponent(selectedStory.content)}`);
             }}
             onNegativeClick={handleClosePopup}
-            titleFontSize="1.1rem"
-            subFontSize="0.9rem"
-            descriptionFontSize="0.8rem"
           />
         </Overlay>
       )}

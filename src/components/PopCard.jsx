@@ -7,7 +7,7 @@ const CardContainer = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 1rem;
+  gap: 0.8rem;
   border-radius: 1.5625rem;
   background: #1C212A;
   width: 268px;
@@ -42,7 +42,7 @@ const CardContainer = styled.div`
 `;
 
 const IMG = styled.img`
-  margin-top: -4rem;
+  margin-top: -1rem;
   width: ${(props) => props.imageWidth || '100%'};
   aspect-ratio: 2 / 3;
   object-fit: contain;
@@ -66,45 +66,6 @@ const Title = styled.div`
 
   @media (min-width: 720px) and (max-width: 1079px) {
     font-size: 0.95rem;
-  }
-`;
-
-const SubTitle = styled.div`
-  color: #FFF;
-  text-align: center;
-  font-size: ${(props) => props.fontSize || '0.9rem'};
-  font-weight: 500;
-
-  @media (max-width: 360px) {
-    font-size: 0.75rem;
-  }
-
-  @media (min-width: 361px) and (max-width: 719px) {
-    font-size: 0.8rem;
-  }
-
-  @media (min-width: 720px) and (max-width: 1079px) {
-    font-size: 0.85rem;
-  }
-`;
-
-const DIV = styled.div`
-  color: #FFF;
-  text-align: center;
-  font-size: ${(props) => props.fontSize || '0.8125rem'};
-  font-weight: 400;
-  white-space: pre-line;
-
-  @media (max-width: 360px) {
-    font-size: 0.7rem;
-  }
-
-  @media (min-width: 361px) and (max-width: 719px) {
-    font-size: 0.75rem;
-  }
-
-  @media (min-width: 720px) and (max-width: 1079px) {
-    font-size: 0.8rem;
   }
 `;
 
@@ -162,15 +123,10 @@ export default function PopCard({
   imageSize,
   cornerRadius,
   cardTitle,
-  subTitle,
-  description,
   positiveBtnText,
   negativeBtnText,
   onPositiveClick,
   onNegativeClick,
-  titleFontSize,
-  subFontSize,
-  descriptionFontSize,
   positivePadding,
   positiveBorder,
   positiveBackground,
@@ -184,14 +140,18 @@ export default function PopCard({
   return (
     <CardContainer>
     {imageSrc ? (
-      <IMG src={imageSrc} imageWidth={imageSize} cornerRadius={cornerRadius} />
+     <IMG
+     src={imageSrc}
+     imageWidth={imageSize || '100%'}
+     cornerRadius={cornerRadius || '0.625rem'}
+     isCharacter={false}
+   />
+   
     ) : useWarningIcon ? (
       <BsExclamationTriangleFill size={50} color="#EE5555" />
     ) : null}
   
-    <Title fontSize={titleFontSize}>{cardTitle}</Title>
-    <SubTitle fontSize={subFontSize}>{subTitle}</SubTitle>
-    <DIV fontSize={descriptionFontSize}>{description}</DIV>
+    <Title>{cardTitle}</Title>
     <ButtonContainer>
       {positiveBtnText && (
         <PositiveButton

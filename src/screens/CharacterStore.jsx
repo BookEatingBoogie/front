@@ -126,7 +126,6 @@ export default function CharacterStore() {
             cardTitle={selectedCharacter.charName}
             positiveBtnText="닫기"
             onPositiveClick={handleClosePopup}
-            titleFontSize="1rem"
           />
         </Overlay>
       )}
