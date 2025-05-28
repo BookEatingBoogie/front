@@ -58,12 +58,25 @@ const PageImage = styled.img`
 
 const PageText = styled.div`
   flex: 1;
-  font-size: 1.1rem;
   font-weight: 500;
   color: #333;
   line-height: 1.6;
   white-space: pre-wrap;
-  font-size: 2rem;
+
+  font-size: 1.6rem;
+
+  @media (max-width: 360px) {
+    font-size: 1.2rem;
+  }
+  @media (min-width: 361px) and (max-width: 719px) {
+    font-size: 1.4rem;
+  }
+  @media (min-width: 720px) and (max-width: 1079px) {
+    font-size: 1.6rem;
+  }
+  @media (min-width: 1080px) {
+    font-size: 1.8rem;
+  }
 `;
 
 const OverlayTop = styled.div`
@@ -119,13 +132,23 @@ const OverlayBottom = styled.div`
   left: 0;
   right: 0;
   background-color: #FFF9EC;
-  padding: 0.75rem 1rem;
+  padding: 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.75rem;
   z-index: 10;
   box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.05);
+
+  @media (max-width: 360px) {
+    padding: 0.5rem;
+  }
+  @media (min-width: 361px) and (max-width: 719px) {
+    padding: 0.75rem;
+  }
+  @media (min-width: 1080px) {
+    padding: 1.25rem;
+  }
 `;
 
 const ProgressInfo = styled.div`
@@ -142,12 +165,22 @@ const ProgressText = styled.div`
 `;
 
 const ProgressBarContainer = styled.div`
- width: 90vw;
+  width: 90vw;
   height: 6px;
   background-color: #e6e6e6;
   border-radius: 3px;
   overflow: hidden;
   margin: 0 -1rem;
+
+  @media (max-width: 360px) {
+    width: 85vw;
+  }
+  @media (min-width: 361px) and (max-width: 719px) {
+    width: 88vw;
+  }
+  @media (min-width: 1440px) {
+    width: 92vw;
+  }
 `;
 
 const Progress = styled.div`
@@ -171,7 +204,7 @@ const NavButton = styled.button`
   border-radius: 50px;
   padding: 0.4rem 1.2rem;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: #333;
   cursor: pointer;
   display: flex;
@@ -180,14 +213,25 @@ const NavButton = styled.button`
   &:hover {
     background-color: #FFEAA7;
   }
+
+  @media (max-width: 360px) {
+    font-size: 0.8rem;
+  }
+  @media (min-width: 361px) and (max-width: 719px) {
+    font-size: 0.9rem;
+  }
+  @media (min-width: 720px) and (max-width: 1079px) {
+    font-size: 1rem;
+  }
+  @media (min-width: 1080px) {
+    font-size: 1.1rem;
+  }
 `;
 
 const PlayButton = styled.button`
   background-color: #000;
   color: white;
   border: none;
-  width: 40px;
-  height: 40px;
   border-radius: 50%;
   font-size: 1.2rem;
   font-weight: bold;
@@ -195,7 +239,24 @@ const PlayButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
+
+  width: 2.8rem;
+  height: 2.8rem;
+
+  @media (max-width: 360px) {
+    width: 2.2rem;
+    height: 2.2rem;
+  }
+  @media (min-width: 361px) and (max-width: 719px) {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  @media (min-width: 1080px) {
+    width: 3rem;
+    height: 3rem;
+  }
 `;
+
 export default function ReadingScreen() {
   const navigate = useNavigate();
   const location = useLocation();
