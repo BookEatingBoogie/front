@@ -23,6 +23,8 @@ const s3 = new AWS.S3();
 
 const findLatestIPAdapterImage = async () => {
   try {
+    console.log('CommonPrefixes:', list.CommonPrefixes); 
+
     const list = await s3.listObjectsV2({ Bucket: BUCKET, Delimiter: '/' }).promise();
     const prefixes = list.CommonPrefixes.map(p => p.Prefix);
 
@@ -255,8 +257,7 @@ const Sidebar = styled.div`
   background-color: #ddd;
   padding: 1rem;
   border-radius: 1rem;
-  min-width: 8.125rem;
-  max-height: 31.25rem;
+  width: 20rem;
 
   @media (max-width: 768px) {
     flex-direction: row;
@@ -268,11 +269,12 @@ const Sidebar = styled.div`
 `;
 
 const SidebarTitle = styled.div`
-  font-size: 1rem;
+  font-size: 1.5rem;
   font-weight: bold;
   color: #333;
   margin-bottom: 0.5rem;
   text-align: center;
+  justifyt-content: center;
 `;
 
 const StickerList = styled.div`
@@ -281,7 +283,7 @@ const StickerList = styled.div`
   gap: 0.75rem;
   overflow-y: auto;
   max-height: 26.25rem;
-
+  justifyt-content: center;
   @media (max-width: 768px) {
     flex-direction: row;
     max-height: none;
@@ -292,13 +294,15 @@ const StickerList = styled.div`
 `;
 
 const StickerOption = styled.img`
-  width: 80px;
-  height: 80px;
+  width: 10rem;
+  height: 10rem;
   cursor: pointer;
   background-color: #fff;
   border: 2px solid #aaa;
   border-radius: 0.5rem;
   padding: 0.25rem;
+  text-align: center;
+  justifyt-content: center;
 
   &:hover {
     border-color: #444;

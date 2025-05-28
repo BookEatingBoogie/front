@@ -309,7 +309,7 @@ export default function Bookshelf() {
 
           {selectedCharacterId !== null && filteredStoryList.length > 0 && (
             <CharacterSectionTitle $hasContent={true}>
-               <span style={{
+              <span style={{
                   fontWeight: '600',
                   fontSize: '1.5rem'
                 }}>
@@ -371,7 +371,7 @@ export default function Bookshelf() {
             negativeBtnText="닫기"
             onPositiveClick={() => {
               handleClosePopup();
-              navigate(`/reading?file=${encodeURIComponent(selectedStory.content)}`);
+              navigate(`/reading?file=${encodeURIComponent(selectedStory.content)}&title=${encodeURIComponent(selectedStory.title)}`);
             }}
             onNegativeClick={handleClosePopup}
           />
