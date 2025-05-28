@@ -87,8 +87,8 @@ const CharacterCategoryContainer = styled.div`
 `;
 
 const CharacterCircle = styled.div`
-  width: 5rem;       // 80px
-  height: 7.5rem;    // 120px
+  width: 6rem;       
+  height: 5rem;   
   overflow: hidden;
   border: ${(props) => (props.selected ? '0.125rem solid #FFC75F' : '0.0625rem solid #ccc')}; // 2px / 1px
   background-color: ${(props) => (props.selected ? '#FFF9EC' : '#fff')};
@@ -98,13 +98,20 @@ const CharacterCircle = styled.div`
   position: relative;
   border-radius: 2rem 2rem 0 0;
   flex-shrink: 0;
+
+  @media (max-width: 720px) {
+    width: 4rem;
+    height: 4rem;
+  }
+
+
 `;
 
 const CharacterImg = styled.img`
   width: auto;
-  height: 12.5rem;  // 200px
+  height: 12.5rem;
   object-fit: cover;
-  transform: translateY(5rem); // 80px
+  transform: translateY(3rem);
 `;
 
 const CharacterLabelWrapper = styled.div`
@@ -120,35 +127,26 @@ const CharacterLabel = styled.span`
   font-weight: ${(props) => (props.selected ? '600' : '400')};
   margin-top: 0.3rem;
   text-align: center;
-
-  @media (max-width: 480px) {
-    font-size: 0.7rem;
-  }
 `;
 
 const CharacterSectionTitle = styled.div`
   width: 100%;
   padding: 1rem 1rem 0.5rem 1rem;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 1.5rem;
   color: #1A202B;
   text-align: center;
   background-color: ${(props) => (props.$hasContent ? '#FFF9EC' : '#fff')};
-
-  @media (max-width: 360px) {
-    font-size: 0.75rem;
-  }
-
-  @media (min-width: 361px) and (max-width: 719px) {
-    font-size: 0.85rem;
+  @media  (max-width: 719px) {
+    font-size: 1rem;
   }
 
   @media (min-width: 720px) and (max-width: 1079px) {
-    font-size: 0.9rem;
+    font-size: 1.2rem;
   }
 
   @media (min-width: 1080px) and (max-width: 1439px) {
-    font-size: 0.95rem;
+    font-size: 2rem;
   }
 
   @media (min-width: 1440px) {
@@ -201,8 +199,15 @@ export default function Bookshelf() {
         const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/mypage/story`);
         setCharacterList(res.data.characters || []);
         setStoryList(res.data.stories || []);
-        console.log('캐릭터 불러오기 성공', res.data.characters);
-        console.log('동화 불러오기 성공', res.data.stories);
+
+        // 진단 로그
+      console.log('characters:', res.data.characters);
+      console.log('stories:', res.data.stories.map(s => ({
+        id: s.storyId,
+        title: s.title,
+        characters: s.characters
+      })));
+
       } catch (err) {
         console.error('데이터 불러오기 실패', err);
       } finally {
@@ -226,10 +231,12 @@ export default function Bookshelf() {
   };
 
   const filteredStoryList = selectedCharacterId
-    ? storyList.filter((story) =>
-        story.characters?.some((char) => char.charId === selectedCharacterId)
-      )
-    : storyList;
+  ? storyList.filter((story) =>
+      String(story.charId) === String(selectedCharacterId)
+    )
+  : storyList;
+
+
 
   const isActiveBg = selectedCharacterId !== null && filteredStoryList.length > 0;
 
@@ -238,36 +245,48 @@ export default function Bookshelf() {
       {!loading && storyList.length > 0 && <Header pageName={"내 책장"} />}
 
       {characterList.length > 0 && (
-        <CharacterCategoryWrapper>
-          <CharacterCategoryContainer>
-            <CharacterCircle 
-              onClick={() => {
-                setSelectedCharacterId(null);
-                setSelectedCharacterName(null);
-              }}
-              selected={selectedCharacterId === null}
-            >
-              <CharacterLabel selected={selectedCharacterId === null}>전체</CharacterLabel>
-            </CharacterCircle>
+  <CharacterCategoryWrapper>
+    <CharacterCategoryContainer>
+    <CharacterLabelWrapper>
+    <CharacterCircle 
+      onClick={() => {
+        setSelectedCharacterId(null);
+        setSelectedCharacterName(null);
+      }}
+      selected={selectedCharacterId === null}
+    >
+      <span style={{
+        fontWeight: '600',
+        color: '#1A202B',
+        fontSize: '1.2rem'
+      }}>
+      전체
+    </span>
+  </CharacterCircle>
+  <CharacterLabel selected={selectedCharacterId === null}>　</CharacterLabel>
+</CharacterLabelWrapper>
 
-            {characterList.map((char) => (
-              <CharacterCircle
-                key={char.charId}
-                onClick={() => {
-                  setSelectedCharacterId(char.charId);
-                  setSelectedCharacterName(char.charName);
-                }}
-                selected={selectedCharacterId === char.charId}
-              >
-                <CharacterImg src={char.charImg || defaultImg} alt={char.charName} />
-                <CharacterLabel selected={selectedCharacterId === char.charId}>
-                  {char.charName}
-                </CharacterLabel>
-              </CharacterCircle>
-            ))}
-          </CharacterCategoryContainer>
-        </CharacterCategoryWrapper>
-      )}
+
+      {characterList.map((char) => (
+        <CharacterLabelWrapper key={char.charId}>
+          <CharacterCircle
+            onClick={() => {
+              setSelectedCharacterId(char.charId);
+              setSelectedCharacterName(char.charName);
+            }}
+            selected={selectedCharacterId === char.charId}
+          >
+            <CharacterImg src={char.charImg || defaultImg} alt={char.charName} />
+          </CharacterCircle>
+          <CharacterLabel selected={selectedCharacterId === char.charId}>
+            {char.charName}
+          </CharacterLabel>
+        </CharacterLabelWrapper>
+      ))}
+    </CharacterCategoryContainer>
+  </CharacterCategoryWrapper>
+)}
+
 
       <Separator />
 
@@ -283,7 +302,13 @@ export default function Bookshelf() {
 
           {selectedCharacterId !== null && filteredStoryList.length > 0 && (
             <CharacterSectionTitle $hasContent={true}>
-              {selectedCharacterName}가 나오는 동화들
+               <span style={{
+                  fontWeight: '600',
+                  fontSize: '1.5rem'
+                }}>
+                {selectedCharacterName}
+              </span>
+              (이)가 나오는 동화들
             </CharacterSectionTitle>
           )}
 
