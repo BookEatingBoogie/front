@@ -17,6 +17,7 @@ const BookshelfContainer = styled.div`
   align-items: center;
   background: #fff;
   min-height: 100vh;
+  height: 300vh;
   position: relative;
 `;
 
