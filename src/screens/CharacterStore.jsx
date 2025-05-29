@@ -15,6 +15,7 @@ const CharacterContainer = styled.div`
   align-items: center;
   background-color: #fff;
   min-height: 100vh;
+  height: 300vh;
 `;
 
 const ContentContainer = styled.div`
