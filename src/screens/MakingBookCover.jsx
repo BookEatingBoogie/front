@@ -321,17 +321,13 @@ export default function MakingBookCover() {
   const [stickerOptions, setStickerOptions] = useState([]);
   const canvasBg = useRecoilValue(coverImageState);
 
-  const canvasBg = useRecoilValue(coverImageState);
-
 
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_API_BASE_URL}/sticker/list`)
       .then((res) => {
-        const unique = res.data.filter(
-          (sticker, index, self) =>
-            index === self.findIndex(s => s === sticker || s.url === sticker.url)
-        );
-        setStickerOptions(unique);
+        console.log("서버 응답 스티커 전체 리스트:", res.data); 
+        
+        setStickerOptions(res.data);
       })
       .catch((err) => console.error('스티커 리스트 불러오기 실패:', err));
   }, []);
@@ -368,7 +364,15 @@ export default function MakingBookCover() {
     }
 
     if (canvasRef.current) {
-      const canvasImage = await html2canvas(canvasRef.current);
+      console.log("현재 canvas 배경 이미지:", canvasBg);
+      console.log("canvasRef.current:", canvasRef.current);
+      
+      const canvasImage = await html2canvas(canvasRef.current, {
+        useCORS: true,
+        allowTaint: false,
+        logging: true, 
+        backgroundColor: null,
+      });     
       const blob = await new Promise(resolve => canvasImage.toBlob(resolve, 'image/png'));
       const file = new File([blob], `cover_${Date.now()}.png`, { type: 'image/png' });
       const s3Url = await s3.upload({
@@ -405,7 +409,11 @@ export default function MakingBookCover() {
                 )
               }>
               <StickerWrapper>
-                <Sticker src={s.src} scale={s.scale} onMouseDown={() => setSelectedStickerId(s.id)}
+                <Sticker 
+                src={s.src} 
+                scale={s.scale} 
+                crossOrigin="anonymous"
+                onMouseDown={() => setSelectedStickerId(s.id)}
                   style={{
                     border: resizingId === s.id ? '2px dashed #ff9900' : 'none',
                     boxSizing: 'border-box',

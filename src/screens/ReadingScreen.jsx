@@ -326,6 +326,7 @@ export default function ReadingScreen() {
   const totalPages = texts.length * 2;
 const progress = ((currentPage + 1) / totalPages) * 100;
 
+const [autoPlay, setAutoPlay] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -348,6 +349,19 @@ const progress = ((currentPage + 1) / totalPages) * 100;
     if (fileUrl) fetchData();
   }, [fileUrl]);
 
+  useEffect(() => {
+    if (texts.length && images.length && currentPage === 0) {
+      const textIndex = 0;
+      if (autoPlay && texts[textIndex]) {
+        console.log(currentPage)
+        console.log('[DEBUG] 초기 speakText 호출 시도');
+        speakText(texts[textIndex], textIndex);
+      }
+    }
+  }, [texts, images]);
+  
+
+  
   const resetUITimer = () => {
     clearTimeout(uiTimeoutRef.current);
     setUiVisible(true);
@@ -396,40 +410,52 @@ const progress = ((currentPage + 1) / totalPages) * 100;
   
   
   const stopAudio = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      audioRef.current.removeAttribute('src');
-      audioRef.current.load();
-      audioRef.current.onended = null;
-      audioRef.current = null;
+    const audio = audioRef.current;
+    if (audio) {
+      audio.pause();
+      audio.currentTime = 0;
+      audio.removeAttribute('src');
+      audio.onended = null;
     }
     setIsSpeaking(false);
   };
+  
 // 문장 단위 분할
 const splitText = (text) =>
   text ? text.match(/[^\.!\?]+[\.!\?]+/g)?.map(s => s.trim()) || [text] : [];
 
 // TTS 요청
-const ttsFetch = (chunk) =>
-  fetch('http://localhost:5001/tts', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text: chunk }),
-  })
-    .then(res => {
-      if (!res.ok) throw new Error('TTS 요청 실패');
-      return res.blob();
-    })
-    .then(blob => URL.createObjectURL(blob));
+const ttsFetch = async (chunk) => {
+  console.log('[TTS 요청 시작]', chunk);
+
+  try {
+    const res = await fetch('http://localhost:5001/tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: chunk }),
+    });
+
+    if (!res.ok) {
+      console.error('[TTS 요청 실패] 상태코드:', res.status);
+      throw new Error('TTS 요청 실패');
+    }
+
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    console.log('[TTS 응답 성공] Blob URL:', url);
+    return url;
+  } catch (err) {
+    console.error('[TTS 요청 에러]', err);
+    throw err;
+  }
+};
+
 
 // 문장별로 순차 재생 (미리 다음 문장 fetch)
 const playChunks = async (chunks) => {
   let preFetchedUrl = null;
 
   for (let i = 0; i < chunks.length; i++) {
-    if (!audioRef.current) break;
-
     const url = i === 0 ? await ttsFetch(chunks[i]) : preFetchedUrl;
 
     let nextPromise = null;
@@ -437,59 +463,91 @@ const playChunks = async (chunks) => {
       nextPromise = ttsFetch(chunks[i + 1]);
     }
 
-    const audio = new Audio(url);
+    const audio = new Audio(url); 
     audioRef.current = audio;
-    await new Promise(resolve => {
-      audio.addEventListener('ended', resolve);
-      audio.play();
+
+    await new Promise((resolve) => {
+      audio.onended = resolve;
+      audio.play().catch((err) => {
+        console.error('TTS 재생 실패:', err);
+        resolve();
+      });
     });
 
     URL.revokeObjectURL(url);
-
     if (nextPromise) {
       preFetchedUrl = await nextPromise;
     }
   }
 };
 
-const speakText = async (text) => {
+
+
+const speakText = async (text, pageIndex) => {
+  console.log('[speakText 호출]', { text, pageIndex });
   stopAudio();
+
+  if (!text) {
+    console.warn('[speakText] 텍스트 없음, 실행 중단');
+    return;
+  }
+
   try {
     const chunks = splitText(text);
+    console.log('[분할된 문장]', chunks);
+
     setIsSpeaking(true);
-
     await playChunks(chunks);
-
     setIsSpeaking(false);
-    if (currentPage + 2 < totalPages) {
-      bookRef.current?.pageFlip().flipNext();
-    } else {
+
+    const isLast = pageIndex >= texts.length - 1;
+    if (autoPlay && !isLast) {
+      const flipAPI = bookRef.current?.pageFlip?.();
+      flipAPI?.flip?.((pageIndex + 1) * 2);
+    } else if (autoPlay && isLast) {
       setShowFinishPopup(true);
     }
-    
   } catch (err) {
-    console.error("TTS 오류:", err);
+    console.error('[speakText 오류]', err);
     setIsSpeaking(false);
   }
 };
 
 
-  const handleFlip = (e) => {
-    const newPage = e.data;
-    setCurrentPage(newPage);
-  
-    // 텍스트 페이지는 짝수 페이지 기준으로 오른쪽에 위치
-    const textIndex = Math.floor(newPage / 2);
-    if (newPage % 2 === 0 && texts[textIndex]) {
-      speakText(texts[textIndex]);
-    }
-  };
-  
 
-  const toggleTTS = () => {
-    if (isSpeaking) stopAudio();
-    else speakText(texts[currentPage]);
-  };
+const handleFlip = (e) => {
+  const newPage = e.data;
+  setCurrentPage(newPage);
+
+  // 텍스트가 있는 페이지(짝수 번호)일 때만
+  if (autoPlay && newPage % 2 === 0) {
+    const textIndex = newPage / 2;
+
+    if (texts[textIndex]) {
+      console.log('[DEBUG] 페이지 이동 → TTS 시작: textIndex =', textIndex);
+      speakText(texts[textIndex], textIndex);
+    } else {
+      console.warn('[DEBUG] 해당 인덱스에 텍스트 없음:', textIndex);
+    }
+  }
+};
+
+
+
+
+const toggleTTS = () => {
+  if (isSpeaking) stopAudio();
+  else {
+    const textIndex = Math.floor(currentPage / 2);
+    if (texts[textIndex]) {
+      speakText(texts[textIndex], textIndex);
+    } else {
+      console.warn('[TTS] toggleTTS: 유효하지 않은 textIndex입니다:', textIndex);
+    }
+  }
+};
+
+  
 
   if (!texts.length || !images.length) return <div style={{ padding: '2rem' }}>불러오는 중</div>;
 
@@ -622,7 +680,7 @@ texts.flatMap((text, idx) => {
             onPositiveClick={() => {
               setShowFinishPopup(false);
               setCurrentPage(0);
-              bookRef.current.pageFlip().turnToPage(0);
+              bookRef.current.pageFlip().flip(0); 
               speakText(texts[0]);
             }}
             onNegativeClick={() => {
