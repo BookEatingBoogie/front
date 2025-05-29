@@ -325,7 +325,6 @@ export default function MakingBookCover() {
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_API_BASE_URL}/sticker/list`)
       .then((res) => {
-        console.log('스티커 리스트:', res.data);
         const unique = res.data.filter(
           (sticker, index, self) =>
             index === self.findIndex(s => s === sticker || s.url === sticker.url)
@@ -367,7 +366,11 @@ export default function MakingBookCover() {
     }
 
     if (canvasRef.current) {
-      const canvasImage = await html2canvas(canvasRef.current);
+      const canvasImage = await html2canvas(canvasRef.current, {
+        useCORS: true,
+        allowTaint: false,
+        logging: true,
+      });      
       const blob = await new Promise(resolve => canvasImage.toBlob(resolve, 'image/png'));
       const file = new File([blob], `cover_${Date.now()}.png`, { type: 'image/png' });
       const s3Url = await s3.upload({
@@ -391,19 +394,8 @@ export default function MakingBookCover() {
     <CoverContainer>
       <CanvasSection>
         <Title>동화책에 들어갈 그림을 만들어보아요!</Title>
-        <Canvas ref={canvasRef}>
-  <img
-    src={canvasBg}
-    alt="배경"
-    style={{
-      position: 'absolute',
-      top: 0, left: 0,
-      width: '100%',
-      height: '100%',
-      objectFit: 'cover',
-      zIndex: -1
-    }}
-  />
+        <Canvas ref={canvasRef} bg={canvasBg}>
+
 
           {stickers.map(s => (
             <Draggable key={s.id} bounds="parent" defaultPosition={{ x: s.x, y: s.y }}
@@ -415,7 +407,11 @@ export default function MakingBookCover() {
                 )
               }>
               <StickerWrapper>
-                <Sticker src={s.src} scale={s.scale} onMouseDown={() => setSelectedStickerId(s.id)}
+                <Sticker 
+                src={s.src} 
+                scale={s.scale} 
+                crossOrigin="anonymous"
+                onMouseDown={() => setSelectedStickerId(s.id)}
                   style={{
                     border: resizingId === s.id ? '2px dashed #ff9900' : 'none',
                     boxSizing: 'border-box',
