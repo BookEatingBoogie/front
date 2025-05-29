@@ -242,7 +242,7 @@ const StickerList = styled.div`
   gap: 0.75rem;
   overflow-y: auto;
   max-height: 26.25rem;
-  justifyt-content: center;
+  justify-content: center;
   @media (max-width: 768px) {
     flex-direction: row;
     max-height: none;
@@ -352,7 +352,6 @@ export default function MakingBookCover() {
       window.removeEventListener('mouseup', handleMouseUp);
     };
   }, [resizingId]);
-
   const handleSave = async () => {
     if (step === 1) {
       setStep(2);
@@ -362,41 +361,68 @@ export default function MakingBookCover() {
       alert("제목과 만든 사람 이름을 입력해주세요.");
       return;
     }
-
+  
     if (canvasRef.current) {
-      console.log("현재 canvas 배경 이미지:", canvasBg);
-      console.log("canvasRef.current:", canvasRef.current);
-      
-      const canvasImage = await html2canvas(canvasRef.current, {
-        useCORS: true,
-        allowTaint: false,
-        logging: true, 
-        backgroundColor: null,
-      });     
-      const blob = await new Promise(resolve => canvasImage.toBlob(resolve, 'image/png'));
-      const file = new File([blob], `cover_${Date.now()}.png`, { type: 'image/png' });
-      const s3Url = await s3.upload({
-        Bucket: BUCKET,
-        Key: `cover/${file.name}`,
-        Body: file,
-        ContentType: file.type,
-      }).promise();
-
-      await axios.post(`${process.env.REACT_APP_API_BASE_URL}/story/cover`, {
-        title,
-        coverImg: s3Url.Location,
-      });
-
-      alert("표지 저장 완료");
-      navigate('/bookshelf');
+      const bgImage = new Image();
+      bgImage.crossOrigin = "anonymous";
+      bgImage.src = canvasBg;
+  
+      bgImage.onload = async () => {
+        console.log("배경 이미지 로드 완료:", canvasBg);
+        console.log("canvasRef DOM:", canvasRef.current);
+  
+        const canvasImage = await html2canvas(canvasRef.current, {
+          useCORS: true,
+          allowTaint: false,
+          logging: true,
+          backgroundColor: null,
+        });
+  
+        const blob = await new Promise(resolve =>
+          canvasImage.toBlob(resolve, 'image/png')
+        );
+  
+        const file = new File([blob], `cover_${Date.now()}.png`, {
+          type: 'image/png',
+        });
+  
+        const s3Url = await s3.upload({
+          Bucket: BUCKET,
+          Key: `cover/${file.name}`,
+          Body: file,
+          ContentType: file.type,
+        }).promise();
+  
+        await axios.post(`${process.env.REACT_APP_API_BASE_URL}/story/cover`, {
+          title,
+          coverImg: s3Url.Location,
+        });
+  
+        alert("표지 저장 완료");
+        navigate('/bookshelf');
+      };
+  
+      bgImage.onerror = () => {
+        alert("배경 이미지 로드 실패");
+        console.error("❌ 배경 이미지 로드 실패:", canvasBg);
+      };
     }
   };
-
+  
   return (
     <CoverContainer>
       <CanvasSection>
         <Title>동화책에 들어갈 그림을 만들어보아요!</Title>
-        <Canvas ref={canvasRef} bg={canvasBg}>
+        <Canvas
+          ref={canvasRef}
+          style={{
+            backgroundImage: `url(${canvasBg})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          }}
+        >
+
 
 
           {stickers.map(s => (
