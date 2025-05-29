@@ -10,7 +10,7 @@ const Button = styled.div`
   right: 0.5rem;
   z-index: 2;
   padding: 0.25rem;
-  background: #fff;
+  background: transparent;
   border-radius: 50%;
   box-shadow: 0 0 4px rgba(0,0,0,0.2);
   display: flex;

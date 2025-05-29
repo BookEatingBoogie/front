@@ -11,6 +11,7 @@ const Container = styled.div`
   gap: 1rem;
   text-align: center;
   width: 100%;
+  height: 90vh;
   min-height: 300px; // 높이 부족으로 줄어들 때 대비
 `;
 
@@ -24,7 +25,6 @@ const Image = styled.img`
 const Title = styled.h2`
   color: #1A202B;
   text-align: center;
-  font-family: Pretendard;
   font-size: 2.5rem;
   font-style: normal;
   font-weight: 700;
@@ -35,7 +35,6 @@ const Title = styled.h2`
 const Description = styled.p`
   color: #1A202B;
   text-align: center;
-  font-family: Pretendard;
   font-size: 1rem;
   font-style: normal;
   font-weight: 400;

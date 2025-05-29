@@ -1,6 +1,16 @@
 import { createGlobalStyle } from 'styled-components';
 
 const GlobalStyle = createGlobalStyle`
+
+  @font-face {
+    font-family: 'HakgyoansimNadeuri';
+    src: url('/fonts/HakgyoansimNadeuri.woff2') format('woff2'),
+          url('/fonts/HakgyoansimNadeuri.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: block;
+  }
+
   /* 공통 리셋 */
   *, *::before, *::after {
     box-sizing: border-box;
@@ -9,7 +19,7 @@ const GlobalStyle = createGlobalStyle`
   }
 
   body {
-    font-family: 'Helvetica', 'Arial', sans-serif;
+    font-family: 'HakgyoansimNadeuri', sans-serif;
     font-size: 16px;
     line-height: 1.4;
     background-color:#001840;

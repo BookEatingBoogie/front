@@ -1,12 +1,36 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilState } from 'recoil';
-import { storyCreationState, characterInfoState } from '../recoil/atoms';
+import { useRecoilState, useSetRecoilState } from 'recoil';
+import { storyCreationState, characterInfoState, coverImageState } from '../recoil/atoms';
 import BaseScreenLayout from '../components/BaseScreenLayout';
 import styled from 'styled-components';
 import cloudMkGif from '../assets/images/cloudmk4.gif';
 import Lottie from 'react-lottie-player';
 import thinkAnimation from '../assets/thinkAnimation.json';
+import dokkaebiJumping from '../assets/images/dokkaebi_jumping.gif';
+
+const Highlight = styled.span`
+  color: #ffae00;
+`;
+
+const Overlay = styled.div`
+  position: fixed;
+  z-index: 9999;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const OverlayImage = styled.img`
+  width: 25rem;
+  height: auto;
+  border-radius: 40px;
+`;
 
 const displayToBackendMap = {
   // 장르 (genre)
@@ -33,9 +57,11 @@ const storyQuestions = [
 const OptionsContainer = styled.div`
   position: relative;
   width: 100%;
+  margin: 0 auto;
   height: 13.75rem;
   margin-top: -4rem;
   z-index: 2;
+  max-width: 40rem;
 `;
 
 const OptionItem = styled.div`
@@ -48,7 +74,7 @@ const CloudButton = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.875rem;
+  font-size: 1.1rem;
   font-weight: bold;
   color: #333;
   cursor: default; /* pointer 아닌 기본 커서 */
@@ -62,12 +88,12 @@ const CloudButton = styled.div`
   pointer-events: none; /* 이 컨테이너는 클릭 못함 */
   position: relative;
   @media (min-width: 360px) {
-    width: 4.5rem;
-    height: 4.5rem;
+    width: 4.8rem;
+    height: 4.8rem;
   }
   @media (min-width: 720px) {
-    width: 5.5rem;
-    height: 5.5rem;
+    width: 5.8rem;
+    height: 5.8rem;
   }
   @media (min-width: 1080px) {
     width: 6.5rem;
@@ -125,37 +151,28 @@ export default function StoryQuestionScreen() {
   const [storyData, setStoryData] = useRecoilState(storyCreationState);
   const [characterInfo] = useRecoilState(characterInfoState);
   const [questionIndex, setQuestionIndex] = useState(0);
-  const [positions, setPositions] = useState([]);
   const [showThree, setShowThree] = useState(true); // true → 3개, false → 2개
   const audioRef = useRef(null);
+  const [loading, setLoading] = useState(false);
+  const backendToDisplayMap = React.useMemo(() => {
+    return Object.entries(displayToBackendMap)
+      .reduce((acc, [k, v]) => {
+        acc[v] = k;
+        return acc;
+      }, {});
+  }, []);
+
+  const fixedPositions = [
+    { left: '10%', top: '20%' },
+    { left: '47%', top: '25%' },
+    { left: '77%', top: '20%' },
+    { left: '70%', top: '80%' },
+    { left: '43%', top: '75%' },
+    { left: '12%', top: '80%' },
+  ];
 
   const current = storyQuestions[questionIndex];
-  const optionsCount = current.options.length;
   const firstGroupSize = 3;
-
-  // 옵션 위치 계산 (기존 로직 그대로)
-  useEffect(() => {
-    const count = optionsCount;
-    const rows = Math.ceil(Math.sqrt(count));
-    const cols = Math.ceil(count / rows);
-    const cellW = 100 / cols;
-    const cellH = 100 / rows;
-    const cells = [];
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        cells.push([r, c]);
-      }
-    }
-    const shuffled = cells.sort(() => Math.random() - 0.5).slice(0, count);
-    const newPos = shuffled.map(([r, c]) => {
-      const padX = cellW * 0.42;
-      const padY = cellH * 0.42;
-      const left = c * cellW + padX + Math.random() * (cellW - 2 * padX);
-      const top = r * cellH + padY + Math.random() * (cellH - 2 * padY);
-      return { left: `${left}%`, top: `${top}%` };
-    });
-    setPositions(newPos);
-  }, [questionIndex, optionsCount]);
 
   // 1.5초마다 3개/2개 토글
   useEffect(() => {
@@ -198,6 +215,8 @@ export default function StoryQuestionScreen() {
     };
   }, [current.question]);
 
+  const setCoverImage = useSetRecoilState(coverImageState);  // setter 준비
+
   const handleSelect = async (option) => {
     const key = current.key;
     const charID = parseInt(characterInfo[0].charId, 10);
@@ -213,7 +232,7 @@ export default function StoryQuestionScreen() {
       setQuestionIndex(i => i + 1);
       return;
     }
-
+    setLoading(true);
     try {
       const payload = {
         charId: charID,
@@ -264,27 +283,43 @@ export default function StoryQuestionScreen() {
         question: data.question,
       }));
 
+      setCoverImage(data.imgUrl);
       navigate('/confirm-story');
     } catch (error) {
       console.error('스토리 생성 중 에러 발생:', error);
       alert('초기 스토리 생성에 실패했습니다.');
+    } finally {
+      // ← 3) API 호출 후 로딩 종료
+      setLoading(false);
     }
   };
 
   return (
+    <>
     <BaseScreenLayout
       progressText={`${questionIndex + 1} / ${storyQuestions.length}`}
       progressCurrent={questionIndex + 1}
       progressTotal={storyQuestions.length}
-      title={current.question}
+      title={
+        questionIndex === 1
+          ? (
+              <>
+                <Highlight>{backendToDisplayMap[storyData.genre]}</Highlight>을 선택했군요 !<br/>
+                {current.question}
+              </>
+            )
+          : current.question
+      }
       subTitle="이야기에 대해 말해 주세요."
     >
+
       <OptionsContainer>
         {current.options.map((opt, idx) => {
           // showThree=true면 idx<3, false면 idx>=3만 active
           const isActive = showThree ? idx < firstGroupSize : idx >= firstGroupSize;
+          const pos = fixedPositions[idx];
           return (
-            <OptionItem key={opt} style={positions[idx]}>
+            <OptionItem key={opt} style={pos}>
               <CloudButton gif={cloudMkGif} active={isActive}>
                 <ClickableText onClick={() => handleSelect(opt)}>
                   {opt}
@@ -301,5 +336,11 @@ export default function StoryQuestionScreen() {
         play
       />
     </BaseScreenLayout>
+      {loading && (
+        <Overlay>
+          <OverlayImage src={dokkaebiJumping} alt="로딩 중..." />
+        </Overlay>
+      )}
+    </>
   );
 }

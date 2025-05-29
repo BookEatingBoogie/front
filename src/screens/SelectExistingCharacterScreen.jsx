@@ -123,8 +123,6 @@ export default function SelectExistingCharacterScreen() {
               imageSrc={selectedCharacter.img || '/default-character.png'}
               imageSize="150px"
               cardTitle={selectedCharacter.name}
-              subTitle={`${selectedCharacter.gender} | 나이 ${selectedCharacter.age}세 | ${selectedCharacter.job}`}
-              description={`${selectedCharacter.speciality}\n${selectedCharacter.note}`}
               positiveBtnText="닫기"
               onPositiveClick={handleClosePopup}
               negativeBtnText="선택하기"

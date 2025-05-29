@@ -13,7 +13,8 @@ CORS(app)
 
 API_KEY = os.getenv("ELEVENLABS_API_KEY")
 #VOICE_ID = "Mmepzv6cBqMI22R2YaXy"
-VOICE_ID = "AW5wrnG1jVizOYY7R1Oo"
+#VOICE_ID = "AW5wrnG1jVizOYY7R1Oo" 이게 아나운서 느낌
+VOICE_ID = "uyVNoMrnUku1dZyVEXwD"
 
 @app.route("/tts", methods=["POST"])
 def generate_tts():
@@ -45,7 +46,7 @@ def generate_tts():
             "text": text,
             "model_id": "eleven_multilingual_v2",
             "voice_settings": {
-                "speed":1.03,
+                "speed":0.85,
                 "stability": 0.79,
                 "similarity": 0.93
             }

@@ -13,6 +13,8 @@ const RoundedButton = styled.button`
   max-width: 35rem;
   margin: 0  auto 0.625rem;
   transition: all 0.1s ease-in-out;
+  font-family: inherit;
+  font-size: 1.1rem;
   &:hover {
     opacity: 0.9;
   }
