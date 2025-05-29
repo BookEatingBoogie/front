@@ -325,9 +325,6 @@ export default function MakingBookCover() {
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_API_BASE_URL}/sticker/list`)
       .then((res) => {
-        console.log("서버 응답 스티커 전체 리스트:", res.data); 
-        
-        setStickerOptions(res.data);
       })
       .catch((err) => console.error('스티커 리스트 불러오기 실패:', err));
   }, []);
@@ -404,7 +401,7 @@ export default function MakingBookCover() {
   
       bgImage.onerror = () => {
         alert("배경 이미지 로드 실패");
-        console.error("❌ 배경 이미지 로드 실패:", canvasBg);
+        console.error("배경 이미지 로드 실패:", canvasBg);
       };
     }
   };

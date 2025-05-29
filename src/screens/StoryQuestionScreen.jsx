@@ -7,7 +7,7 @@ import styled from 'styled-components';
 import cloudMkGif from '../assets/images/cloudmk4.gif';
 import Lottie from 'react-lottie-player';
 import thinkAnimation from '../assets/thinkAnimation.json';
-import dokkaebiJumping from '../assets/images/dokkaebi_jumping.gif';
+import loadDok from '../assets/images/loadingDok.gif';
 
 const Highlight = styled.span`
   color: #ffae00;
@@ -338,7 +338,7 @@ export default function StoryQuestionScreen() {
     </BaseScreenLayout>
       {loading && (
         <Overlay>
-          <OverlayImage src={dokkaebiJumping} alt="로딩 중..." />
+          <OverlayImage src={loadDok} alt="로딩 중..." />
         </Overlay>
       )}
     </>

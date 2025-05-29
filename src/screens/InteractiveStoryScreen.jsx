@@ -52,7 +52,7 @@ const ImageWrapper = styled.div`
     max-width: 16rem;
   }  
   @media (min-height: 700px) {
-    max-width: 25rem; /* 220px */
+    max-width: 21rem; /* 220px */
   }
   @media (min-height: 800px) {
     max-width: 28rem; /* 220px */
